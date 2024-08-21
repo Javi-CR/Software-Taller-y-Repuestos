@@ -1,0 +1,27 @@
+﻿<div class="form-container">
+    <p class="title">Create an Account</p>
+    <form class="form">
+        <input type="text" class="input" placeholder="Username">
+        <input type="email" class="input" placeholder="Email">
+        <input type="password" class="input" placeholder="Password">
+        <input type="password" class="input" placeholder="Confirm Password">
+        <a href="@Url.Action("Dash", "Home")" class="form-btn">Sign Up</a>
+    </form>
+    <p class="sign-up-label">
+        Already have an account?<span class="sign-up-link" onclick="window.location.href='@Url.Action("Login", "Home")'">Log in</span>
+    </p>
+    <div class="buttons-container">
+        <a href="@Url.Action("Dash", "Home")" class="apple-login-button">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" class="apple-icon" viewBox="0 0 1024 1024" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                <path d="..."></path>
+            </svg>
+            <span>Sign up with Apple</span>
+        </a>
+        <a href="@Url.Action("Dash", "Home")" class="google-login-button">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" class="google-icon" viewBox="0 0 48 48" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                <path d="..."></path>
+            </svg>
+            <span>Sign up with Google</span>
+        </a>
+    </div>
+</div>
