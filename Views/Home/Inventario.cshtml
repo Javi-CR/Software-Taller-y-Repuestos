@@ -1,7 +1,72 @@
 ﻿@{
     Layout = "Layout Dash"; // O el nombre del archivo de tu layout
+
+    ViewData["Title"] = "Gestión de Inventario";
 }
 
+<div class="inventory-container">
+    <h1 class="inventory-title">Gestión de Inventario</h1>
 
-<h2>Inventario</h2>
+    <!-- Sección para agregar o actualizar productos -->
+    
+
+    <!-- Sección para importar catálogos -->
+    <div class="import-container">
+        <h2 class="form-title">Importación de Catálogos de Proveedores</h2>
+        <form enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="catalogFile">Subir Archivo</label>
+                <input type="file" id="catalogFile" name="CatalogFile" class="form-control-file input" required />
+                <small class="form-text text-muted">Formatos soportados: CSV, Excel</small>
+            </div>
+
+            <div class="buttons-container">
+                <button type="submit" class="form-btn">Importar Catálogo</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sección para listar productos por categoría -->
+    <div class="product-list-container">
+        <h2 class="form-title">Productos por Categoría</h2>
+        <form>
+            <div class="form-group">
+                <label for="filterCategory">Seleccione una Categoría</label>
+                <select id="filterCategory" name="FilterCategory" class="form-control input">
+                    <option value="Bujías">Bujías</option>
+                    <option value="Cables">Cables</option>
+                    <option value="Filtros">Filtros</option>
+                    <!-- Agregar más categorías según sea necesario -->
+                </select>
+            </div>
+            <div class="buttons-container">
+                <button type="submit" class="form-btn">Filtrar Productos</button>
+            </div>
+        </form>
+
+        <!-- Aquí se mostraría la lista de productos filtrados -->
+        <div class="product-table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Modelos Compatibles</th>
+                        <th>Precio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Ejemplo de producto -->
+                    <tr>
+                        <td>Bujía NGK</td>
+                        <td>Bujías</td>
+                        <td>Toyota Corolla, Honda Civic</td>
+                        <td>$10.00</td>
+                    </tr>
+                    <!-- Añadir más filas según los productos filtrados -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
