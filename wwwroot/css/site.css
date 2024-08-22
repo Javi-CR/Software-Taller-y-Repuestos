@@ -160,3 +160,93 @@ footer {
     padding: 10px 0;
     text-align: center;
 }
+
+.container.py-4 {
+    width: 90%; /* Aumenta el tamaño del contenedor */
+    max-width: 1800px; /* Ancho máximo para pantallas grandes */
+    padding: 20px; /* Espaciado interno del contenedor */
+    margin: 0 auto; /* Centra el contenedor horizontalmente */
+    background-color: #fff; /* Fondo blanco para el contenedor */
+    border-radius: 8px; /* Bordes redondeados para el contenedor */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil alrededor del contenedor */
+}
+
+.section2 {
+    background-color: #ffffff; /* Fondo blanco para la sección */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra ligera para la sección */
+    margin-bottom: 20px;
+}
+
+.table {
+    width: 100%; /* Ancho completo del contenedor */
+    border-collapse: collapse; /* Fusiona bordes de celdas */
+    background-color: #ffffff; /* Fondo blanco para la tabla */
+    border-radius: 8px; /* Bordes redondeados para la tabla */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra sutil alrededor de la tabla */
+    margin-bottom: 20px; /* Espacio debajo de la tabla */
+}
+
+    .table th, .table td {
+        padding: 12px 15px;
+        border: 1px solid #dee2e6; /* Borde gris claro para separar las celdas */
+        text-align: left;
+    }
+
+    .table th {
+        background-color: #007bff; /* Color de fondo de los encabezados */
+        color: #ffffff; /* Color del texto en los encabezados */
+        font-weight: bold;
+        border-bottom: 2px solid #0056b3; /* Borde inferior más oscuro para encabezados */
+    }
+
+    .table tbody tr:nth-of-type(odd) {
+        background-color: #f9f9f9; /* Color de fondo alternante para filas */
+    }
+
+    .table tbody tr:hover {
+        background-color: #e2e6ea; /* Color de fondo al pasar el ratón */
+        transition: background-color 0.3s; /* Transición suave al pasar el ratón */
+    }
+
+.btn-container2 {
+    text-align: center; /* Centra los botones */
+    margin-top: 20px; /* Espacio arriba de los botones */
+}
+
+.btn2 {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 5px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+    .btn:hover {
+        background-color: #0056b3; /* Color de fondo al pasar el ratón sobre los botones */
+    }
+
+.btn-danger {
+    background-color: #dc3545; /* Color de fondo para el botón de borrar */
+}
+
+    .btn-danger:hover {
+        background-color: #c82333; /* Color de fondo al pasar el ratón sobre el botón de borrar */
+    }
+
+.btn-warning {
+    background-color: #ffc107; /* Color de fondo para el botón de modificar */
+    color: #000; /* Color del texto en el botón de modificar */
+}
+
+    .btn-warning:hover {
+        background-color: #e0a800; /* Color de fondo al pasar el ratón sobre el botón de modificar */
+    }
+
+

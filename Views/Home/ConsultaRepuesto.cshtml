@@ -4,36 +4,62 @@
 
 
 <main class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="info-box">
-                <h2>Consulta de Repuestos</h2>
+    <div class="container-custom">
+        <h2 class="mb-4">Consulta de Repuestos</h2>
 
-                <table class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Nombre del Repuesto</th>
-                            <th>Modelo</th>
-                            <th>Zona de Uso</th>
-                            <th>Cantidad</th>
-                            <th>Precio</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Aquí se pueden agregar filas de repuestos -->
-                        <!-- Ejemplo de fila:
-                        <tr>
-                            <td>Freno de Disco</td>
-                            <td>FD123</td>
-                            <td>Delantero</td>
-                            <td>10</td>
-                            <td>$150.00</td>
-                        </tr>
-                        -->
-                    </tbody>
-                </table>
-            </div>
+        <!-- Campo de Búsqueda -->
+        <input type="text" id="searchInput" class="form-control form-control-search" placeholder="Buscar por nombre, modelo, zona de uso o categoría" onkeyup="filterTable()">
+
+        <!-- Tabla de Repuestos -->
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-custom">
+                <thead>
+                    <tr>
+                        <th>Nombre del Repuesto</th>
+                        <th>Modelo</th>
+                        <th>Zona de Uso</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Categoría</th>
+                    </tr>
+                </thead>
+                <tbody id="repuestosTableBody">
+                    <tr>
+                        <td>Freno de Disco</td>
+                        <td>FD123</td>
+                        <td>Delantero</td>
+                        <td>10</td>
+                        <td>$150.00</td>
+                        <td>Frenos</td>
+                    </tr>
+                    <tr>
+                        <td>Amortiguador</td>
+                        <td>AM456</td>
+                        <td>Trasero</td>
+                        <td>5</td>
+                        <td>$75.00</td>
+                        <td>Suspensión</td>
+                    </tr>
+                    <tr>
+                        <td>Filtro de Aceite</td>
+                        <td>FA789</td>
+                        <td>Motor</td>
+                        <td>20</td>
+                        <td>$20.00</td>
+                        <td>Filtros</td>
+                    </tr>
+                    <!-- Más filas de repuestos pueden ser agregadas aquí -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="text-center mt-4">
+            <a href="#" class="btn btn-custom btn-custom-add">Agregar</a>
+            <a href="#" class="btn btn-custom btn-custom-delete">Borrar</a>
+            <a href="#" class="btn btn-custom btn-custom-edit">Modificar</a>
         </div>
     </div>
 </main>
+
 
