@@ -74,10 +74,28 @@
                 </ul>
                 <i class="bi bi-list mobile-nav-toggle"></i>
             </nav><!-- .navbar -->
-            <a asp-area="" asp-controller="Home" asp-action="Login" class="book-a-table-btn scrollto d-none d-lg-flex">Iniciar Sesión</a>
-            <a asp-area="" asp-controller="Home" asp-action="Register" class="book-a-table-btn scrollto d-none d-lg-flex">Registrarse</a>
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <a asp-area="" asp-controller="Home" asp-action="Login" class="book-a-table-btn scrollto d-none d-lg-flex">Iniciar Sesión</a>
+                <a asp-area="" asp-controller="Home" asp-action="Register" class="book-a-table-btn scrollto d-none d-lg-flex">Registrarse</a>
+            }
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark">@User.Identity.Name</a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" asp-controller="Home" asp-action="Logout">
+                            <button type="submit" class="btn btn-danger">Cerrar Sesión</button>
+                        </form>
+                    </li>
+                </ul>
+            }
         </div>
     </header>
+
     <!-- End Header -->
 
     <main role="main" class="pb-3">@RenderBody()</main>

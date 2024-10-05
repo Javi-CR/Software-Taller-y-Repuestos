@@ -1,8 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Software_Taller_y_Repuestos.Models;
 using System.Diagnostics;
 using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 
 
 namespace Software_Taller_y_Repuestos.Controllers
@@ -49,16 +52,51 @@ namespace Software_Taller_y_Repuestos.Controllers
 
 
         [Route("Login")]
-        [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        [HttpPost]
-        public IActionResult Login(Usuario model)
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login(string Correo, string Contrasenna)
         {
+            var user = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Correo == Correo);
+
+            if (user != null && BCrypt.Net.BCrypt.Verify(Contrasenna, user.Contrasenna))
+            {
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Nombre),
+            new Claim(ClaimTypes.Email, user.Correo),
+            new Claim("UserId", user.UsuarioId.ToString())
+        };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true
+                };
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.ErrorMessage = "Usuario o contraseña incorrectos";
             return View();
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index");
+        }
+
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
     }
