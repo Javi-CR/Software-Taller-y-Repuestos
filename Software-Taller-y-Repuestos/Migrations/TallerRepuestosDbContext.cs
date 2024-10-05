@@ -10,8 +10,8 @@ using Software_Taller_y_Repuestos.Models;
 
 namespace Software_Taller_y_Repuestos.Migrations
 {
-    [DbContext(typeof(TallerRepuestosDbContext))]
-    partial class TallerRepuestosDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(Models.TallerRepuestosDbContext))]
+    partial class TallerRepuestosDbContext : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
