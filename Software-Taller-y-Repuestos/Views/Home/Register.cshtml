@@ -2,12 +2,10 @@
 
 @{
     ViewData["Title"] = "Crea una Cuenta";
-
 }
 
 <section id="register" class="contact section-bg d-flex align-items-center" style="min-height: 100vh;">
     <div class="container" data-aos="fade-up">
-
         <div class="section-title text-center">
             <h2>Registrarse</h2>
             <p>Crea tu cuenta</p>
@@ -17,7 +15,7 @@
             <div class="col-lg-6 mt-5 mt-lg-0">
 
                 <div class="php-email-form">
-
+                    <!-- Formulario -->
                     <form method="post" asp-controller="Home" asp-action="SubmitForm" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="Nombre">Nombre</label>
@@ -36,23 +34,15 @@
                         </div>
 
                         <div class="form-group">
-                        <input type="hidden" name="RolId" asp-for="RolId" value="2" />
+                            <input type="hidden" name="RolId" asp-for="RolId" value="2" />
                         </div>
 
                         <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+                            <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
                         </div>
                     </form>
 
-                    @if (ViewBag.ErrorMessage != null)
-                    {
-                        <div class="alert alert-danger mt-3">
-                            <span>@ViewBag.ErrorMessage</span>
-                        </div>
-                    }
-
                 </div>
-
 
                 <!-- Separador con línea y "O" en el centro -->
                 <div class="separator">
@@ -65,12 +55,11 @@
                         <i class="bi bi-google"></i> Continuar con Google
                     </button>
                 </div>
-
             </div>
         </div>
-
     </div>
 </section>
+
 
 @if (ViewBag.ErrorMessage != null)
 {
