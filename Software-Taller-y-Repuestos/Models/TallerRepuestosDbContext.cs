@@ -33,6 +33,8 @@ public partial class TallerRepuestosDbContext : DbContext
 
     public virtual DbSet<Producto> Productos { get; set; }
 
+    public virtual DbSet<Proveedore> Proveedores { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
@@ -208,6 +210,36 @@ public partial class TallerRepuestosDbContext : DbContext
                         j.ToTable("ProductosModelos");
                         j.IndexerProperty<int>("ProductoId").HasColumnName("ProductoID");
                         j.IndexerProperty<int>("ModeloId").HasColumnName("ModeloID");
+                    });
+        });
+
+        modelBuilder.Entity<Proveedore>(entity =>
+        {
+            entity.HasKey(e => e.ProveedorId).HasName("PK__Proveedo__61266A59B2C75164");
+
+            entity.Property(e => e.Direccion).HasMaxLength(200);
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.Nombre).HasMaxLength(100);
+            entity.Property(e => e.Ruc)
+                .HasMaxLength(20)
+                .HasColumnName("RUC");
+            entity.Property(e => e.Telefono).HasMaxLength(20);
+
+            entity.HasMany(d => d.Productos).WithMany(p => p.Proveedors)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ProveedoresProducto",
+                    r => r.HasOne<Producto>().WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK__Proveedor__Produ__6477ECF3"),
+                    l => l.HasOne<Proveedore>().WithMany()
+                        .HasForeignKey("ProveedorId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK__Proveedor__Prove__6383C8BA"),
+                    j =>
+                    {
+                        j.HasKey("ProveedorId", "ProductoId").HasName("PK__Proveedo__4B6560B3A9D5AFBE");
+                        j.ToTable("ProveedoresProductos");
                     });
         });
 
