@@ -1,5 +1,8 @@
-﻿@{
+﻿@model Usuario
+
+@{
     ViewData["Title"] = "Crea una Cuenta";
+
 }
 
 <section id="register" class="contact section-bg d-flex align-items-center" style="min-height: 100vh;">
@@ -13,24 +16,43 @@
         <div class="row justify-content-center">
             <div class="col-lg-6 mt-5 mt-lg-0">
 
-                <form asp-action="Register" method="post" role="form" class="php-email-form">
-                    <div class="form-group">
-                        <input type="text" name="FullName" class="form-control" id="name" placeholder="Nombre Completo" required>
-                    </div>
-                    <div class="form-group mt-3">
-                        <input type="email" name="Email" class="form-control" id="email" placeholder="Correo Electrónico" required>
-                    </div>
-                    <div class="form-group mt-3">
-                        <input type="password" name="Password" class="form-control" id="password" placeholder="Contraseña" required>
-                    </div>
-                    <div class="form-group mt-3">
-                        <input type="password" name="ConfirmPassword" class="form-control" id="confirm-password" placeholder="Confirmar Contraseña" required>
-                    </div>
+                <div class="php-email-form">
 
-                    <div class="text-center">
-                        <button type="submit">Registrarse</button>
-                    </div>
-                </form>
+                    <form method="post" asp-controller="Home" asp-action="SubmitForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="Nombre">Nombre</label>
+                            <input type="text" id="Nombre" asp-for="Nombre" class="form-control" required />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Correo">Correo</label>
+                            <input type="email" id="Correo" asp-for="Correo" class="form-control" required />
+                            <span asp-validation-for="Correo" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Contrasenna">Contraseña</label>
+                            <input type="password" id="Contrasenna" asp-for="Contrasenna" class="form-control" required />
+                            <span asp-validation-for="Contrasenna" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                        <input type="hidden" name="RolId" asp-for="RolId" value="2" />
+                        </div>
+
+                        <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+                        </div>
+                    </form>
+
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="alert alert-danger mt-3">
+                            <span>@ViewBag.ErrorMessage</span>
+                        </div>
+                    }
+
+                </div>
+
 
                 <!-- Separador con línea y "O" en el centro -->
                 <div class="separator">
@@ -49,3 +71,11 @@
 
     </div>
 </section>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div>
+        <span>@ViewBag.ErrorMessage</span>
+    </div>
+}
+

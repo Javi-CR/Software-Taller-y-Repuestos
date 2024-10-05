@@ -10,8 +10,8 @@ using Software_Taller_y_Repuestos.Models;
 
 namespace Software_Taller_y_Repuestos.Migrations
 {
-    [DbContext(typeof(Models.TallerRepuestosDbContext))]
-    partial class TallerRepuestosDbContext : ModelSnapshot
+    [DbContext(typeof(TallerRepuestosDbContext))]
+    partial class TallerRepuestosDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -38,6 +38,22 @@ namespace Software_Taller_y_Repuestos.Migrations
                     b.HasIndex("ModeloId");
 
                     b.ToTable("ProductosModelos", (string)null);
+                });
+
+            modelBuilder.Entity("ProveedoresProducto", b =>
+                {
+                    b.Property<int>("ProveedorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProveedorId", "ProductoId")
+                        .HasName("PK__Proveedo__4B6560B3A9D5AFBE");
+
+                    b.HasIndex("ProductoId");
+
+                    b.ToTable("ProveedoresProductos", (string)null);
                 });
 
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Categoria", b =>
@@ -360,6 +376,45 @@ namespace Software_Taller_y_Repuestos.Migrations
                     b.ToTable("Productos");
                 });
 
+            modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Proveedore", b =>
+                {
+                    b.Property<int>("ProveedorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProveedorId"));
+
+                    b.Property<string>("Direccion")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Ruc")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("RUC");
+
+                    b.Property<string>("Telefono")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("ProveedorId")
+                        .HasName("PK__Proveedo__61266A59B2C75164");
+
+                    b.ToTable("Proveedores");
+                });
+
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Role", b =>
                 {
                     b.Property<int>("RolId")
@@ -378,6 +433,23 @@ namespace Software_Taller_y_Repuestos.Migrations
                         .HasName("PK__Roles__F92302D1DDE5C884");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            RolId = 1,
+                            NombreRol = "Admin"
+                        },
+                        new
+                        {
+                            RolId = 2,
+                            NombreRol = "Cliente"
+                        },
+                        new
+                        {
+                            RolId = 3,
+                            NombreRol = "Empleado"
+                        });
                 });
 
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Usuario", b =>
@@ -388,6 +460,9 @@ namespace Software_Taller_y_Repuestos.Migrations
                         .HasColumnName("UsuarioID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsuarioId"));
+
+                    b.Property<string>("Contrasenna")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Correo")
                         .HasMaxLength(100)
@@ -445,6 +520,21 @@ namespace Software_Taller_y_Repuestos.Migrations
                         .HasForeignKey("ProductoId")
                         .IsRequired()
                         .HasConstraintName("FK__Productos__Produ__3F466844");
+                });
+
+            modelBuilder.Entity("ProveedoresProducto", b =>
+                {
+                    b.HasOne("Software_Taller_y_Repuestos.Models.Producto", null)
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .IsRequired()
+                        .HasConstraintName("FK__Proveedor__Produ__6477ECF3");
+
+                    b.HasOne("Software_Taller_y_Repuestos.Models.Proveedore", null)
+                        .WithMany()
+                        .HasForeignKey("ProveedorId")
+                        .IsRequired()
+                        .HasConstraintName("FK__Proveedor__Prove__6383C8BA");
                 });
 
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.CuentaBancarium", b =>

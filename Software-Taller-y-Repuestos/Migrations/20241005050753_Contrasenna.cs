@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Software_Taller_y_Repuestos.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class Contrasenna : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -57,6 +59,23 @@ namespace Software_Taller_y_Repuestos.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Proveedores",
+                columns: table => new
+                {
+                    ProveedorId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Direccion = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Telefono = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    RUC = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__Proveedo__61266A59B2C75164", x => x.ProveedorId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -103,6 +122,7 @@ namespace Software_Taller_y_Repuestos.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Correo = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Contrasenna = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Telefono = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Direccion = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     RolID = table.Column<int>(type: "int", nullable: false),
@@ -140,6 +160,28 @@ namespace Software_Taller_y_Repuestos.Migrations
                         column: x => x.ProductoID,
                         principalTable: "Productos",
                         principalColumn: "ProductoID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProveedoresProductos",
+                columns: table => new
+                {
+                    ProveedorId = table.Column<int>(type: "int", nullable: false),
+                    ProductoId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__Proveedo__4B6560B3A9D5AFBE", x => new { x.ProveedorId, x.ProductoId });
+                    table.ForeignKey(
+                        name: "FK__Proveedor__Produ__6477ECF3",
+                        column: x => x.ProductoId,
+                        principalTable: "Productos",
+                        principalColumn: "ProductoID");
+                    table.ForeignKey(
+                        name: "FK__Proveedor__Prove__6383C8BA",
+                        column: x => x.ProveedorId,
+                        principalTable: "Proveedores",
+                        principalColumn: "ProveedorId");
                 });
 
             migrationBuilder.CreateTable(
@@ -259,6 +301,16 @@ namespace Software_Taller_y_Repuestos.Migrations
                         principalColumn: "ProductoID");
                 });
 
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "RolID", "NombreRol" },
+                values: new object[,]
+                {
+                    { 1, "Admin" },
+                    { 2, "Cliente" },
+                    { 3, "Empleado" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_CuentaBancaria_UsuarioID",
                 table: "CuentaBancaria",
@@ -306,6 +358,11 @@ namespace Software_Taller_y_Repuestos.Migrations
                 column: "ModeloID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProveedoresProductos_ProductoId",
+                table: "ProveedoresProductos",
+                column: "ProductoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Usuarios_RolID",
                 table: "Usuarios",
                 column: "RolID");
@@ -340,6 +397,9 @@ namespace Software_Taller_y_Repuestos.Migrations
                 name: "ProductosModelos");
 
             migrationBuilder.DropTable(
+                name: "ProveedoresProductos");
+
+            migrationBuilder.DropTable(
                 name: "Facturas");
 
             migrationBuilder.DropTable(
@@ -347,6 +407,9 @@ namespace Software_Taller_y_Repuestos.Migrations
 
             migrationBuilder.DropTable(
                 name: "Productos");
+
+            migrationBuilder.DropTable(
+                name: "Proveedores");
 
             migrationBuilder.DropTable(
                 name: "Usuarios");
