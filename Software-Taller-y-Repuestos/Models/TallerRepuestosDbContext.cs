@@ -251,6 +251,12 @@ public partial class TallerRepuestosDbContext : DbContext
             entity.Property(e => e.NombreRol).HasMaxLength(50);
         });
 
+        modelBuilder.Entity<Role>().HasData(
+        new Role { RolId = 1, NombreRol = "Admin" },
+        new Role { RolId = 2, NombreRol = "Cliente" },
+        new Role { RolId = 3, NombreRol = "Empleado" }
+        );
+
         modelBuilder.Entity<Usuario>(entity =>
         {
             entity.HasKey(e => e.UsuarioId).HasName("PK__Usuarios__2B3DE798CBEB8A18");
