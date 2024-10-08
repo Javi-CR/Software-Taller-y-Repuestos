@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Software_Taller_y_Repuestos.Models.Producto>
+
+@{
+    ViewData["Title"] = "Lista de Productos";
+}
+
+<section id="productos" class="productos-section">
+    <div class="container" data-aos="fade-up">
+        <div class="section-title">
+            <h2>Lista de Productos</h2>
+        </div>
+
+        <!-- Botón para crear un nuevo producto -->
+        <div class="mb-3">
+            <a asp-action="Create" class="btn btn-primary">Crear Nuevo Producto</a>
+        </div>
+
+        <!-- Tabla de productos -->
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Código</th>
+                        <th>Categoría</th>
+                        <th>Cantidad</th>
+                        <th>Precio Venta</th>
+                        <th>Modelos Asociados</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Nombre</td>
+                            <td>@item.Codigo</td>
+                            <td>@item.Categoria.Nombre</td>
+                            <td>@item.Cantidad</td>
+                            <td>@item.PrecioVenta</td>
+                            <td>
+                                @foreach (var modelo in item.Modelos)
+                                {
+                                    <span class="badge bg-secondary">@modelo.Nombre </span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.ProductoId" class="btn btn-sm btn-warning">Editar</a>
+                                <a asp-action="Details" asp-route-id="@item.ProductoId" class="btn btn-sm btn-info">Detalles</a>
+                                <a asp-action="Delete" asp-route-id="@item.ProductoId" class="btn btn-sm btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/assets/vendor/aos/aos.js" asp-append-version="true"></script>
+    <script>
+        AOS.init();
+    </script>
+}
