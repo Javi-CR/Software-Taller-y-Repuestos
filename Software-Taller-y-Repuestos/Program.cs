@@ -1,22 +1,22 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+main
 using Microsoft.EntityFrameworkCore;
 using Software_Taller_y_Repuestos.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Añadir servicios al contenedor
+main
 builder.Services.AddControllersWithViews();
 
 // Registrar TallerRepuestosDbContext
 builder.Services.AddDbContext<TallerRepuestosDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Configurar la autenticación con cookies
+// Configurar la autenticaciÃ³n con cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.Cookie.Name = "RepuestosSalazarAuth";
-        options.Cookie.SameSite = SameSiteMode.Lax; // Ajusta según tus necesidades
+        options.Cookie.SameSite = SameSiteMode.Lax; // Ajusta segÃºn tus necesidades
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.IsEssential = true;
@@ -43,7 +43,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Middleware de Autenticación y Autorización
+// Middleware de AutenticaciÃ³n y AutorizaciÃ³n
 app.UseAuthentication();
 app.UseAuthorization();
 
