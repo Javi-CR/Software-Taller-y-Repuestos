@@ -1,4 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+using Software_Taller_y_Repuestos.Models;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<TallerRepuestosDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TallerRepuestosDB")));
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

@@ -4,58 +4,79 @@
     ViewData["Title"] = "Lista de Productos";
 }
 
-<section id="productos" class="productos-section">
-    <div class="container" data-aos="fade-up">
-        <div class="section-title">
-            <h2>Lista de Productos</h2>
-        </div>
+<div class="container my-5">
+    <!-- Sección de Productos -->
+    <section id="productos" class="productos-section">
+        <div class="container" data-aos="fade-up">
 
-        <!-- Botón para crear un nuevo producto -->
-        <div class="mb-3">
-            <a asp-action="Create" class="btn btn-primary">Crear Nuevo Producto</a>
-        </div>
+            <!-- Título -->
+            <div class="section-title">
+                <h2 class="text-center">Lista de Productos</h2>
+            </div>
 
-        <!-- Tabla de productos -->
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Código</th>
-                        <th>Categoría</th>
-                        <th>Cantidad</th>
-                        <th>Precio Venta</th>
-                        <th>Modelos Asociados</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
+            <!-- Botón para crear un nuevo producto -->
+            <div class="mb-4 text-right">
+                <a asp-action="Create" class="btn btn-success btn-lg">
+                    <i class="bi bi-plus-circle"></i> Crear Nuevo Producto
+                </a>
+            </div>
+
+            <!-- Barra de búsqueda y ordenación -->
+            <form asp-action="Index" method="get" class="form-inline mb-4">
+                <div class="input-group">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Buscar por nombre...">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+                    </div>
+                </div>
+                <div class="ml-auto">
+                    <span>Ordenar por:</span>
+                    <a asp-route-sortOrder="name" class="btn btn-link">Nombre</a> |
+                    <a asp-route-sortOrder="price" class="btn btn-link">Precio</a>
+                </div>
+            </form>
+
+            <!-- Tabla de productos -->
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead class="bg-dark text-white">
                         <tr>
-                            <td>@item.Nombre</td>
-                            <td>@item.Codigo</td>
-                            <td>@item.Categoria.Nombre</td>
-                            <td>@item.Cantidad</td>
-                            <td>@item.PrecioVenta</td>
-                            <td>
-                                @foreach (var modelo in item.Modelos)
-                                {
-                                    <span class="badge bg-secondary">@modelo.Nombre </span>
-                                }
-                            </td>
-                            <td>
-                                <a asp-action="Edit" asp-route-id="@item.ProductoId" class="btn btn-sm btn-warning">Editar</a>
-                                <a asp-action="Details" asp-route-id="@item.ProductoId" class="btn btn-sm btn-info">Detalles</a>
-                                <a asp-action="Delete" asp-route-id="@item.ProductoId" class="btn btn-sm btn-danger">Eliminar</a>
-                            </td>
+                            <th>Nombre</th>
+                            <th>Código</th>
+                            <th>Categoría</th>
+                            <th>Cantidad</th>
+                            <th>Precio Venta</th>
+                            <th>Acciones</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Nombre</td>
+                                <td>@item.Codigo</td>
+                                <td>@item.Categoria?.Nombre</td>
+                                <td>@item.Cantidad</td>
+                                <td>@item.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@item.ProductoId" class="btn btn-sm btn-warning mx-1">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.ProductoId" class="btn btn-sm btn-info mx-1">
+                                        <i class="bi bi-info-circle"></i> Detalles
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.ProductoId" class="btn btn-sm btn-danger mx-1">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+</div>
 
 @section Scripts {
     <script src="~/assets/vendor/aos/aos.js" asp-append-version="true"></script>
