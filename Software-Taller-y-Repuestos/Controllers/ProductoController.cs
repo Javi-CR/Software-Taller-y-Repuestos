@@ -2,16 +2,21 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Software_Taller_y_Repuestos.Models;
+using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
     public class ProductoController : Controller
     {
         private readonly TallerRepuestosDbContext _context;
+        private readonly ILogger<ProductoController> _logger;
 
-        public ProductoController(TallerRepuestosDbContext context)
+        public ProductoController(TallerRepuestosDbContext context, ILogger<ProductoController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Producto
@@ -51,6 +56,7 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             if (id == null)
             {
+                _logger.LogWarning("Producto ID nulo en Details.");
                 return NotFound();
             }
 
@@ -59,6 +65,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                 .FirstOrDefaultAsync(m => m.ProductoId == id);
             if (producto == null)
             {
+                _logger.LogWarning("Producto no encontrado con ID {ProductoId}.", id);
                 return NotFound();
             }
 
@@ -77,15 +84,31 @@ namespace Software_Taller_y_Repuestos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProductoId,Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Imagen")] Producto producto)
         {
+            _logger.LogInformation("Iniciando la creación de un nuevo producto.");
+
             if (ModelState.IsValid)
             {
-                // Guardar el nuevo producto en la base de datos
-                _context.Add(producto);
-                await _context.SaveChangesAsync();
-
-                // Redirigir a la vista Index después de la creación
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(producto);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("Producto creado correctamente con ID {ProductoId}.", producto.ProductoId);
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Error al crear el producto: {Message}", ex.Message);
+                }
             }
+            else
+            {
+                _logger.LogWarning("El modelo de Producto no es válido.");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("Error en el modelo: {ErrorMessage}", error.ErrorMessage);
+                }
+            }
+
             ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
             return View(producto);
         }
@@ -95,14 +118,17 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             if (id == null)
             {
+                _logger.LogWarning("Producto ID nulo en Edit.");
                 return NotFound();
             }
 
             var producto = await _context.Productos.FindAsync(id);
             if (producto == null)
             {
+                _logger.LogWarning("Producto no encontrado con ID {ProductoId}.", id);
                 return NotFound();
             }
+
             ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
             return View(producto);
         }
@@ -114,8 +140,11 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             if (id != producto.ProductoId)
             {
+                _logger.LogWarning("El ID proporcionado no coincide con el producto.");
                 return NotFound();
             }
+
+            _logger.LogInformation("Iniciando la edición del producto con ID {ProductoId}.", producto.ProductoId);
 
             if (ModelState.IsValid)
             {
@@ -123,9 +152,12 @@ namespace Software_Taller_y_Repuestos.Controllers
                 {
                     _context.Update(producto);
                     await _context.SaveChangesAsync();
+                    _logger.LogInformation("Producto editado correctamente.");
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
+                    _logger.LogError("Error de concurrencia al editar el producto: {Message}", ex.Message);
                     if (!ProductoExists(producto.ProductoId))
                     {
                         return NotFound();
@@ -135,8 +167,20 @@ namespace Software_Taller_y_Repuestos.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    _logger.LogError("Error inesperado al editar el producto: {Message}", ex.Message);
+                }
             }
+            else
+            {
+                _logger.LogWarning("El modelo de Producto no es válido.");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("Error en el modelo: {ErrorMessage}", error.ErrorMessage);
+                }
+            }
+
             ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
             return View(producto);
         }
@@ -146,6 +190,7 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             if (id == null)
             {
+                _logger.LogWarning("Producto ID nulo en Delete.");
                 return NotFound();
             }
 
@@ -154,6 +199,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                 .FirstOrDefaultAsync(m => m.ProductoId == id);
             if (producto == null)
             {
+                _logger.LogWarning("Producto no encontrado con ID {ProductoId}.", id);
                 return NotFound();
             }
 
@@ -166,8 +212,17 @@ namespace Software_Taller_y_Repuestos.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
-            _context.Productos.Remove(producto);
-            await _context.SaveChangesAsync();
+            if (producto != null)
+            {
+                _context.Productos.Remove(producto);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Producto eliminado con éxito con ID {ProductoId}.", id);
+            }
+            else
+            {
+                _logger.LogWarning("Producto no encontrado al intentar eliminar.");
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
