@@ -1,0 +1,31 @@
+﻿@model Software_Taller_y_Repuestos.Models.Producto
+
+@{
+    ViewData["Title"] = "Eliminar Producto";
+}
+
+<div class="container my-5" data-aos="fade-up">
+    <div class="section-title">
+        <h2 class="text-center">Eliminar Producto</h2>
+    </div>
+
+    <h4>¿Está seguro de que desea eliminar este producto?</h4>
+
+    <div class="form-group">
+        <label>Nombre</label>
+        <p class="form-control-static">@Model.Nombre</p>
+    </div>
+
+    <div class="form-group">
+        <label>Código</label>
+        <p class="form-control-static">@Model.Codigo</p>
+    </div>
+
+    <div class="text-right">
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="ProductoId" />
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>

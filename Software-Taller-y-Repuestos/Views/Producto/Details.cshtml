@@ -1,0 +1,43 @@
+﻿@model Software_Taller_y_Repuestos.Models.Producto
+
+@{
+    ViewData["Title"] = "Detalles del Producto";
+}
+
+<div class="container my-5" data-aos="fade-up">
+    <div class="section-title">
+        <h2 class="text-center">Detalles del Producto</h2>
+    </div>
+
+    <div class="form-group">
+        <label>Nombre</label>
+        <p class="form-control-static">@Model.Nombre</p>
+    </div>
+
+    <div class="form-group">
+        <label>Código</label>
+        <p class="form-control-static">@Model.Codigo</p>
+    </div>
+
+    <div class="form-group">
+        <label>Categoría</label>
+        <p class="form-control-static">@Model.Categoria?.Nombre</p>
+    </div>
+
+    <div class="form-group">
+        <label>Cantidad</label>
+        <p class="form-control-static">@Model.Cantidad</p>
+    </div>
+
+    <div class="form-group">
+        <label>Precio Venta</label>
+        <p>@Model.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</p>
+    </div>
+
+    
+
+    <div class="text-right">
+        <a asp-action="Index" class="btn btn-secondary">Volver</a>
+        <a asp-action="Edit" asp-route-id="@Model.ProductoId" class="btn btn-warning">Editar</a>
+    </div>
+</div>
