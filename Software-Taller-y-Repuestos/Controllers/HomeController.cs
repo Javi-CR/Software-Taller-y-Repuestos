@@ -40,6 +40,7 @@ namespace Software_Taller_y_Repuestos.Controllers
             if (usuario != null)
             {
                 // Asignar la fecha de ingreso
+                //.
                 usuario.FechaIngreso = DateTime.Now;
                 usuario.Contrasenna = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasenna);
 
