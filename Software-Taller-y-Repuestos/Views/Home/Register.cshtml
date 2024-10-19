@@ -14,28 +14,41 @@
         <div class="row justify-content-center">
             <div class="col-lg-6 mt-5 mt-lg-0">
 
+                @if (ViewBag.Mensaje != null)
+                {
+                    <div class="alert alert-secondary text-center">@ViewBag.Mensaje</div>
+                }
+
+
                 <div class="php-email-form">
+
                     <!-- Formulario -->
-                    <form method="post" asp-controller="Home" asp-action="SubmitForm" enctype="multipart/form-data">
+                    <form asp-action="Register" asp-controller="Home">
+                   
                         <div class="form-group">
                             <label for="Nombre">Nombre</label>
-                            <input type="text" id="Nombre" asp-for="Nombre" class="form-control" required />
+                            <input type="text" asp-for="Nombre" class="form-control" />
                             <span asp-validation-for="Nombre" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="Correo">Correo</label>
-                            <input type="email" id="Correo" asp-for="Correo" class="form-control" required />
-                            <span asp-validation-for="Correo" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="Contrasenna">Contraseña</label>
-                            <input type="password" id="Contrasenna" asp-for="Contrasenna" class="form-control" required />
-                            <span asp-validation-for="Contrasenna" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
-                            <input type="hidden" name="RolId" asp-for="RolId" value="2" />
+                            <label for="Apellidos">Apellidos</label>
+                            <input type="text" asp-for="Apellidos" class="form-control" />
+                            <span asp-validation-for="Apellidos" class="text-danger"></span>
                         </div>
+
+                        <div class="form-group">
+                            <label for="Correo">Correo</label>
+                            <input type="email" asp-for="Correo" class="form-control" />
+                            <span asp-validation-for="Correo" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Contrasenna">Contraseña</label>
+                            <input type="password" asp-for="Contrasenna" class="form-control" />
+                            <span asp-validation-for="Contrasenna" class="text-danger"></span>
+                        </div>
+
 
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
@@ -50,21 +63,16 @@
                 </div>
 
                 <!-- Botón de "Continuar con Google" -->
-                <div class="text-center mt-3">
-                    <button type="button" class="btn-google">
-                        <i class="bi bi-google"></i> Continuar con Google
-                    </button>
-                </div>
+                <form asp-action="ExternalLogin" method="post">
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn-google" name="provider" value="Google">
+                            <i class="bi bi-google"></i> Continuar con Google
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </section>
 
-
-@if (ViewBag.ErrorMessage != null)
-{
-    <div>
-        <span>@ViewBag.ErrorMessage</span>
-    </div>
-}
 
