@@ -16,6 +16,10 @@
             
             <div class="col-lg-6 mt-5 mt-lg-0">
 
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
+                }
 
                 <form method="post" asp-controller="Home" asp-action="Login" class="php-email-form">
 
@@ -41,11 +45,13 @@
                 </div>
 
                 <!-- Botón de "Continuar con Google" -->
-                <div class="text-center mt-3">
-                    <button type="button" class="btn-google">
-                        <i class="bi bi-google"></i> Continuar con Google
-                    </button>
-                </div>
+                <form asp-action="ExternalLogin" method="post">
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn-google" name="provider" value="Google">
+                            <i class="bi bi-google"></i> Continuar con Google
+                        </button>
+                    </div>
+                </form>
 
                 <!-- Enlaces de "Olvidé mi contraseña" y "No tengo cuenta" -->
                 <div class="text-center mt-4">
@@ -56,14 +62,5 @@
 
             </div>
         </div>
-
-
-        @if (ViewBag.ErrorMessage != null)
-        {
-            <div>
-                <span>@ViewBag.ErrorMessage</span>
-            </div>
-        }
-
     </div>
 </section>
