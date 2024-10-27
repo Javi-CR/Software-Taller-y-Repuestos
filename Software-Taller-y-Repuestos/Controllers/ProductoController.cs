@@ -5,6 +5,7 @@ using Software_Taller_y_Repuestos.Models;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
@@ -20,57 +21,43 @@ namespace Software_Taller_y_Repuestos.Controllers
         }
 
         // GET: Producto
-        public async Task<IActionResult> Index(string searchString, string sortOrder)
+        public async Task<IActionResult> Index(string searchString, string sortOrder, string currentFilter, int? pageNumber)
         {
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParam"] = sortOrder == "name" ? "name_desc" : "name";
+            ViewData["PriceSortParam"] = sortOrder == "price" ? "price_desc" : "price";
+
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
             ViewData["CurrentFilter"] = searchString;
-            ViewData["SortOrder"] = sortOrder;
 
-            var productos = _context.Productos.Include(p => p.Categoria).AsQueryable();
+            var productos = from p in _context.Productos.Include(p => p.Categoria)
+                            select p;
 
-            if (!string.IsNullOrEmpty(searchString))
+            if (!String.IsNullOrEmpty(searchString))
             {
                 productos = productos.Where(p => p.Nombre.Contains(searchString));
             }
 
-            switch (sortOrder)
+            productos = sortOrder switch
             {
-                case "name_desc":
-                    productos = productos.OrderByDescending(p => p.Nombre);
-                    break;
-                case "price":
-                    productos = productos.OrderBy(p => p.PrecioVenta);
-                    break;
-                case "price_desc":
-                    productos = productos.OrderByDescending(p => p.PrecioVenta);
-                    break;
-                default:
-                    productos = productos.OrderBy(p => p.Nombre);
-                    break;
-            }
+                "name_desc" => productos.OrderByDescending(p => p.Nombre),
+                "price" => productos.OrderBy(p => p.PrecioVenta),
+                "price_desc" => productos.OrderByDescending(p => p.PrecioVenta),
+                _ => productos.OrderBy(p => p.Nombre),
+            };
 
-            return View(await productos.ToListAsync());
+            int pageSize = 10; // Cantidad de productos por página
+            return View(await PaginatedList<Producto>.CreateAsync(productos.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
-        // GET: Producto/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                _logger.LogWarning("Producto ID nulo en Details.");
-                return NotFound();
-            }
-
-            var producto = await _context.Productos
-                .Include(p => p.Categoria)
-                .FirstOrDefaultAsync(m => m.ProductoId == id);
-            if (producto == null)
-            {
-                _logger.LogWarning("Producto no encontrado con ID {ProductoId}.", id);
-                return NotFound();
-            }
-
-            return View(producto);
-        }
 
         // GET: Producto/Create
         public IActionResult Create()
@@ -82,50 +69,55 @@ namespace Software_Taller_y_Repuestos.Controllers
         // POST: Producto/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductoId,Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Imagen")] Producto producto)
+        public async Task<IActionResult> Create(Producto producto)
         {
             _logger.LogInformation("Iniciando la creación de un nuevo producto.");
 
-            if (ModelState.IsValid)
+            // Registra el valor de CategoriaId recibido en el modelo
+            _logger.LogInformation("Valor de CategoriaId recibido: {CategoriaId}", producto.CategoriaId);
+
+            // Asignar la relación de categoría explícitamente
+            producto.Categoria = await _context.Categorias.FindAsync(producto.CategoriaId);
+
+            // Verificación del código único
+            if (_context.Productos.Any(p => p.Codigo == producto.Codigo))
             {
-                try
-                {
-                    _context.Add(producto);
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation("Producto creado correctamente con ID {ProductoId}.", producto.ProductoId);
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError("Error al crear el producto: {Message}", ex.Message);
-                }
-            }
-            else
-            {
-                _logger.LogWarning("El modelo de Producto no es válido.");
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    _logger.LogWarning("Error en el modelo: {ErrorMessage}", error.ErrorMessage);
-                }
+                ModelState.AddModelError("Codigo", "El código ingresado ya está en uso. Por favor ingrese uno nuevo.");
             }
 
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
+            if (ModelState.IsValid)
+            {
+                _context.Add(producto);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Producto creado exitosamente.");
+                return RedirectToAction(nameof(Index));
+            }
+
+
+            // Si el modelo no es válido, registrar un mensaje de advertencia
+            _logger.LogWarning("El modelo de Producto no es válido.");
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogWarning("Error en el modelo: {ErrorMessage}", error.ErrorMessage);
+            }
+
+            // Recargar las categorías en caso de que la creación falle
+            ViewBag.CategoriaId = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
             return View(producto);
         }
+
 
         // GET: Producto/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                _logger.LogWarning("Producto ID nulo en Edit.");
                 return NotFound();
             }
 
             var producto = await _context.Productos.FindAsync(id);
             if (producto == null)
             {
-                _logger.LogWarning("Producto no encontrado con ID {ProductoId}.", id);
                 return NotFound();
             }
 
@@ -140,57 +132,48 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             if (id != producto.ProductoId)
             {
-                _logger.LogWarning("El ID proporcionado no coincide con el producto.");
                 return NotFound();
             }
 
-            _logger.LogInformation("Iniciando la edición del producto con ID {ProductoId}.", producto.ProductoId);
-
-            if (ModelState.IsValid)
+            // Verificación del código único para evitar duplicados
+            if (_context.Productos.Any(p => p.Codigo == producto.Codigo && p.ProductoId != producto.ProductoId))
             {
-                try
-                {
-                    _context.Update(producto);
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation("Producto editado correctamente.");
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateConcurrencyException ex)
-                {
-                    _logger.LogError("Error de concurrencia al editar el producto: {Message}", ex.Message);
-                    if (!ProductoExists(producto.ProductoId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError("Error inesperado al editar el producto: {Message}", ex.Message);
-                }
-            }
-            else
-            {
-                _logger.LogWarning("El modelo de Producto no es válido.");
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    _logger.LogWarning("Error en el modelo: {ErrorMessage}", error.ErrorMessage);
-                }
+                ModelState.AddModelError("Codigo", "El código ingresado ya está en uso. Por favor ingrese uno nuevo.");
             }
 
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
-            return View(producto);
+            if (!ModelState.IsValid)
+            {
+                // Cargar las categorías de nuevo para la lista desplegable en caso de error
+                ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
+                return View(producto); // Regresa a la vista Edit con el mensaje de error
+            }
+
+            try
+            {
+                _context.Update(producto);
+                await _context.SaveChangesAsync();
+                TempData["Mensaje"] = "Producto actualizado exitosamente.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProductoExists(producto.ProductoId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
+
 
         // GET: Producto/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                _logger.LogWarning("Producto ID nulo en Delete.");
                 return NotFound();
             }
 
@@ -199,7 +182,6 @@ namespace Software_Taller_y_Repuestos.Controllers
                 .FirstOrDefaultAsync(m => m.ProductoId == id);
             if (producto == null)
             {
-                _logger.LogWarning("Producto no encontrado con ID {ProductoId}.", id);
                 return NotFound();
             }
 
@@ -216,19 +198,66 @@ namespace Software_Taller_y_Repuestos.Controllers
             {
                 _context.Productos.Remove(producto);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Producto eliminado con éxito con ID {ProductoId}.", id);
+                TempData["Mensaje"] = "Producto eliminado exitosamente.";
             }
-            else
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Producto/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
             {
-                _logger.LogWarning("Producto no encontrado al intentar eliminar.");
+                return NotFound();
             }
 
-            return RedirectToAction(nameof(Index));
+            var producto = await _context.Productos
+                .Include(p => p.Categoria)
+                .FirstOrDefaultAsync(m => m.ProductoId == id);
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            return View(producto);
         }
 
         private bool ProductoExists(int id)
         {
             return _context.Productos.Any(e => e.ProductoId == id);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> VerificarCodigoUnico(string codigo, int? productoId)
+        {
+            // Verifica si el código ya existe en otro producto
+            bool existeCodigo = await _context.Productos.AnyAsync(p => p.Codigo == codigo && p.ProductoId != productoId);
+            return Json(!existeCodigo); // Retorna false si existe (para que muestre el mensaje de error)
+        }
+
+        public class PaginatedList<T> : List<T>
+        {
+            public int PageIndex { get; private set; }
+            public int TotalPages { get; private set; }
+
+            public PaginatedList(List<T> items, int count, int pageIndex, int pageSize)
+            {
+                PageIndex = pageIndex;
+                TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+                AddRange(items);
+            }
+
+            public bool HasPreviousPage => PageIndex > 1;
+            public bool HasNextPage => PageIndex < TotalPages;
+
+            public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageIndex, int pageSize)
+            {
+                var count = await source.CountAsync();
+                var items = await source.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+                return new PaginatedList<T>(items, count, pageIndex, pageSize);
+            }
+        }
+
+
     }
 }

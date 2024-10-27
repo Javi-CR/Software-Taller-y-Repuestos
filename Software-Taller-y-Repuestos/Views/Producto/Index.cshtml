@@ -24,19 +24,22 @@
 
 
             <!-- Barra de búsqueda y ordenación -->
-            <form asp-action="Index" method="get" class="form-inline mb-4">
-                <div class="input-group">
+            <form asp-action="Index" method="get" class="form-inline mb-4 d-flex justify-content-between align-items-center">
+                <div class="input-group w-50">
                     <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Buscar por nombre...">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
                     </div>
                 </div>
-                <div class="ml-auto">
-                    <span>Ordenar por:</span>
-                    <a asp-route-sortOrder="name" class="btn btn-link">Nombre</a> |
-                    <a asp-route-sortOrder="price" class="btn btn-link">Precio</a>
+                <div class="ml-3">
+                    <span class="font-weight-bold">Ordenar por:</span>
+                    <a asp-route-sortOrder="@ViewData["NameSortParam"]" class="btn btn-link">Nombre</a> |
+                    <a asp-route-sortOrder="@ViewData["PriceSortParam"]" class="btn btn-link">Precio</a>
                 </div>
             </form>
+
 
             <!-- Tabla de productos -->
             <div class="table-responsive">
