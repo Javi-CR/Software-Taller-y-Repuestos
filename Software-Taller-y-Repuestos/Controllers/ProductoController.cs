@@ -18,7 +18,7 @@ namespace Software_Taller_y_Repuestos.Controllers
             _context = context;
             _logger = logger;
         }
-
+        //COMENTARIO
         // GET: Producto
         public async Task<IActionResult> Index(string searchString, string sortOrder)
         {
