@@ -1,0 +1,65 @@
+﻿@model Usuario
+
+@{
+    ViewData["Title"] = "Gestión de Horarios";
+}
+
+<section id="login" class="contact section-bg d-flex align-items-center" style="min-height: 100vh;">
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
+    }
+
+    <div class="container">
+        <h3>Horarios del Empleado</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Correo</th>
+                    <th>Fecha</th>
+                    <th>Horas Trabajadas</th>
+                    <th>Horas Extras</th>
+                    <th>Ausencias</th>
+                    <th>Permisos</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.Horarios != null && Model.Horarios.Any())
+                {
+                    foreach (var horario in Model.Horarios)
+                    {
+                        <tr>
+                            <td>@Model.Correo</td>
+                            <td>@horario.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@horario.HorasTrabajadas</td>
+                            <td>@horario.HorasExtras</td>
+                            <td>@horario.Ausencias</td>
+                            <td>@horario.Permisos</td>
+                            <td>
+                                <form asp-action="EditarHorario" method="get" style="display:inline;">
+                                    <input type="hidden" name="usuarioId" value="@Model.UsuarioId" />
+                                    <input type="hidden" name="horarioId" value="@horario.HorarioId" />
+                                    <button type="submit" class="btn btn-primary btn-sm">Editar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td>@Model?.Correo</td>
+                        <td colspan="6">No hay horarios disponibles.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <form asp-action="EditarHorario" method="get">
+            <input type="hidden" name="usuarioId" value="@Model.UsuarioId" />
+            <button type="submit" class="btn btn-success">Agregar Nuevo Horario</button>
+        </form>
+    </div>
+</section>

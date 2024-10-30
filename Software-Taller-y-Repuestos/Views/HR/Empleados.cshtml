@@ -1,0 +1,57 @@
+﻿@model List<Usuario>
+@{
+    ViewData["Title"] = "Empleados";
+}
+
+
+<!-- Segundo Navbar -->
+<header id="header" class="fixed-top d-flex align-items-cente" style="margin-top: 65px;">
+    <div class="container-fluid container-xl d-flex align-items-center justify-content-lg-between">
+        <nav id="navbar" class="navbar order-last order-lg-0">
+            <ul>
+                <li><a class="nav-link scrollto active" href="@Url.Action("Empleados","HR")">Empleados Disponibles</a></li>
+                <li><a class="nav-link scrollto" href="@Url.Action("AgregarEmpleados","HR")">Agregar empleados</a></li>
+            </ul>
+            <i class="bi bi-list mobile-nav-toggle"></i>
+        </nav>
+    </div>
+</header>
+
+<section id="login" class="contact section-bg d-flex align-items-center" style="min-height: 100vh;">
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
+    }
+
+    <div class="container">
+        <h2>Lista de Empleados</h2>
+        <div class="row">
+            @foreach (var empleado in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="~/images/@(empleado.Imagen ?? "default.jpg")" alt="Foto de @empleado.Nombre" class="card-img-top" />
+                        <div class="card-body">
+                            <h5 class="card-title">@empleado.Nombre @empleado.Apellidos</h5>
+                            <p class="card-text">
+                                <strong>Correo:</strong> @empleado.Correo <br />
+                                <strong>Teléfono:</strong> @(empleado.Telefono ?? "") <br />
+                                <strong>Dirección:</strong> @(empleado.Direccion ?? "") <br />
+                                <strong>Salario Base:</strong> @(empleado.SalarioBase?.ToString("C", new System.Globalization.CultureInfo("es-CR")) ?? "")
+                            </p>
+                            <div class="d-flex justify-content-between">
+                                <form asp-action="AsignarRolCliente" method="post">
+                                    <input type="hidden" name="usuarioId" value="@empleado.UsuarioId" />
+                                    <button type="submit" class="btn btn-danger">Suspender</button>
+                                </form>
+                                <a href="@Url.Action("EditarInformacion", "HR", new { usuarioId = empleado.UsuarioId })" class="btn btn-secondary">Editar</a>
+                                <a href="@Url.Action("GestionHorarios", "HR", new { usuarioId = empleado.UsuarioId })" class="btn btn-primary">Horarios</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
