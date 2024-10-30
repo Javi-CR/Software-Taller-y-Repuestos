@@ -1,5 +1,26 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<Software_Taller_y_Repuestos.Models.Producto>
+
 @{
+    ViewData["Title"] = "Subir Productos";
+}
+
+<h1>Subir Productos desde Excel/CSV</h1>
+
+<form asp-action="Upload" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="file">Seleccionar archivo (CSV o Excel):</label>
+        <input type="file" class="form-control" id="file" name="file" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Subir</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
 }
