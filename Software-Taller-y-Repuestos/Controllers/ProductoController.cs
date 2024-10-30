@@ -5,6 +5,7 @@ using Software_Taller_y_Repuestos.Models;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
+using OfficeOpenXml;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
@@ -230,5 +231,105 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             return _context.Productos.Any(e => e.ProductoId == id);
         }
+
+
+        // GET: Producto/Upload
+        [HttpPost]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                ModelState.AddModelError("", "Por favor, seleccione un archivo.");
+                return View();
+            }
+
+            // Validar que sea un archivo CSV o Excel
+            if (!file.FileName.EndsWith(".csv") && !file.FileName.EndsWith(".xlsx"))
+            {
+                ModelState.AddModelError("", "Formato de archivo no válido. Solo se aceptan archivos CSV o Excel.");
+                return View();
+            }
+
+            var productos = new List<Producto>();
+
+            // Leer el archivo Excel
+            if (file.FileName.EndsWith(".xlsx"))
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await file.CopyToAsync(stream);
+                    using (var package = new ExcelPackage(stream))
+                    {
+                        var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+                        if (worksheet == null)
+                        {
+                            ModelState.AddModelError("", "El archivo no contiene hojas.");
+                            return View();
+                        }
+
+                        // Leer las filas
+                        for (int row = 2; row <= worksheet.Dimension.End.Row; row++) // Comienza en 2 para saltar el encabezado
+                        {
+                            var nombre = worksheet.Cells[row, 1].Text;
+                            var codigo = worksheet.Cells[row, 2].Text;
+                            var categoriaNombre = worksheet.Cells[row, 3].Text; // Cambiar a CategoriaNombre
+                            var descripcion = worksheet.Cells[row, 4].Text;
+                            var cantidad = int.Parse(worksheet.Cells[row, 5].Text);
+                            var precioCompra = decimal.Parse(worksheet.Cells[row, 6].Text);
+                            var precioVenta = decimal.Parse(worksheet.Cells[row, 7].Text);
+                            var marca = worksheet.Cells[row, 8].Text;
+                            var imagen = worksheet.Cells[row, 9].Text;
+
+                            // Crear objeto Producto
+                            var producto = new Producto
+                            {
+                                Nombre = nombre,
+                                Codigo = codigo,
+                                CategoriaNombre = categoriaNombre, // Asignar el nombre de la categoría aquí
+                                Descripcion = descripcion,
+                                Cantidad = cantidad,
+                                PrecioCompra = precioCompra,
+                                PrecioVenta = precioVenta,
+                                Marca = marca,
+                                Imagen = imagen
+                            };
+                            productos.Add(producto);
+                        }
+                    }
+                }
+            }
+
+            // El resto de la lógica para validar y guardar productos sigue igual
+            foreach (var producto in productos)
+            {
+                // Verificar si la categoría existe, si no, agregarla
+                var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.Nombre == producto.CategoriaNombre);
+                if (categoria == null)
+                {
+                    categoria = new Categoria { Nombre = producto.CategoriaNombre, Descripcion = "Descripción automática" };
+                    _context.Categorias.Add(categoria);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Asignar el ID de categoría al producto
+                producto.CategoriaId = categoria.CategoriaId;
+
+                // Verificar si el código es único
+                var existingProduct = await _context.Productos.FirstOrDefaultAsync(p => p.Codigo == producto.Codigo);
+                if (existingProduct == null)
+                {
+                    _context.Productos.Add(producto);
+                }
+                else
+                {
+                    ModelState.AddModelError("", $"El código {producto.Codigo} ya está en uso. No se agregó el producto.");
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+
     }
 }
