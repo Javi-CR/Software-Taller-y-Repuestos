@@ -19,9 +19,30 @@
                 <a asp-action="Create" class="btn btn-success btn-lg">
                     <i class="bi bi-plus-circle"></i> Crear Nuevo Producto
                 </a>
-                
+
             </div>
 
+            <!-- Sección para subir productos desde archivo -->
+            <section id="subir-productos" class="my-4">
+                <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="file">Seleccionar archivo (CSV o Excel):</label>
+                        <input type="file" class="form-control" id="file" name="file" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Subir</button>
+                </form>
+
+                <!-- Muestra errores de validación -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger mt-2">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <p>@error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+            </section>
             <!-- Botón para subir productos desde un archivo -->
             <a asp-controller="Producto" asp-action="Upload" class="btn btn-primary">Subir Productos</a>
 
@@ -92,5 +113,5 @@
     <script>
         AOS.init();
     </script>
-    
+
 }
