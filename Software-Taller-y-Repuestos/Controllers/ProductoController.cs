@@ -299,22 +299,24 @@ namespace Software_Taller_y_Repuestos.Controllers
                 }
             }
 
-            // El resto de la lógica para validar y guardar productos sigue igual
+            // Procesar y guardar productos
             foreach (var producto in productos)
             {
-                // Verificar si la categoría existe, si no, agregarla
+                // Buscar categoría existente por nombre
                 var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.Nombre == producto.CategoriaNombre);
+
+                // Solo si no se encuentra la categoría, se crea una nueva
                 if (categoria == null)
                 {
                     categoria = new Categoria { Nombre = producto.CategoriaNombre, Descripcion = "Descripción automática" };
                     _context.Categorias.Add(categoria);
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(); // Guardar para obtener el ID de la categoría nueva
                 }
 
-                // Asignar el ID de categoría al producto
+                // Asignar el ID de categoría existente o nuevo al producto
                 producto.CategoriaId = categoria.CategoriaId;
 
-                // Verificar si el código es único
+                // Verificar si el código del producto es único
                 var existingProduct = await _context.Productos.FirstOrDefaultAsync(p => p.Codigo == producto.Codigo);
                 if (existingProduct == null)
                 {
