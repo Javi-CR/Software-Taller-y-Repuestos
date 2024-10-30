@@ -1,0 +1,24 @@
+﻿
+@model IEnumerable<Software_Taller_y_Repuestos.Models.Factura>
+
+<h2>Lista de Facturas</h2>
+<table>
+    <tr>
+        <th>Factura ID</th>
+        <th>Fecha</th>
+        <th>Total</th>
+        <th>Acciones</th>
+    </tr>
+    @foreach (var factura in Model)
+    {
+        <tr>
+            <td>@factura.FacturaId</td>
+            <td>@factura.Fecha</td>
+            <td>@factura.Total</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@factura.FacturaId">Detalles</a>
+            </td>
+        </tr>
+    }
+</table>
+
