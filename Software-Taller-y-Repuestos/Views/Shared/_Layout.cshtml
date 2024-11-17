@@ -13,6 +13,7 @@
     <link href="~/assets/img/favicon.png" rel="icon" asp-append-version="true">
     <link href="~/assets/img/apple-touch-icon.png" rel="apple-touch-icon" asp-append-version="true">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 
     <!-- Google Fonts -->
@@ -150,6 +151,22 @@
     <div id="preloader"></div>
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
+    <!-- Chat Icon (Left) -->
+    <div class="chat-icon-container">
+        <a href="javascript:void(0);" onclick="toggleChat()">
+            <i class="bi bi-chat"></i>
+        </a>
+    </div>
+
+    <!-- Ventana de chat -->
+    <div id="chatBox">
+        <div id="chatHeader" onclick="toggleChat()">Chat con Soporte</div>
+        <div id="chatMessages"></div>
+        <div id="chatInput">
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
+            <button id="sendMessageButton">Enviar</button>
+        </div>
+    </div>
     <!-- Vendor JS Files -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Agregado jQuery -->
     <script src="~/assets/vendor/aos/aos.js" asp-append-version="true"></script>
@@ -168,6 +185,40 @@
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 
+    <!-- Chatbox JS -->
+    <script>
+        function toggleChat() {
+            var chatBox = document.getElementById("chatBox");
+
+            // Verifica si el chat está visible
+            if (chatBox.style.display === "none" || chatBox.style.display === "") {
+                chatBox.style.display = "block";
+                setTimeout(function () {
+                    chatBox.style.opacity = 1;
+                    chatBox.style.bottom = "90px";
+                }, 10);
+            } else {
+                chatBox.style.opacity = 0;
+                chatBox.style.bottom = "-500px";
+                setTimeout(function () {
+                    chatBox.style.display = "none";
+                }, 300);
+            }
+        }
+
+        // Enviar mensaje
+        document.getElementById("sendMessageButton").addEventListener("click", function () {
+            var messageInput = document.getElementById("messageInput");
+            var chatMessages = document.getElementById("chatMessages");
+
+            if (messageInput.value.trim() !== "") {
+                var newMessage = document.createElement("div");
+                newMessage.textContent = messageInput.value;
+                chatMessages.appendChild(newMessage);
+                messageInput.value = ""; // Limpiar campo
+            }
+        });
+    </script>
 </body>
 
 </html>
