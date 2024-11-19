@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
 using OfficeOpenXml;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
@@ -20,53 +22,53 @@ namespace Software_Taller_y_Repuestos.Controllers
             _logger = logger;
         }
 
-        // GET: Producto
+        // GET: Producto/Index
         public async Task<IActionResult> Index(string searchString, string sortOrder)
         {
+            _logger.LogInformation("Accediendo a la lista de productos.");
+
+            // Mantener los filtros actuales en la vista
             ViewData["CurrentFilter"] = searchString;
             ViewData["SortOrder"] = sortOrder;
 
+            // Consulta inicial
             var productos = _context.Productos.Include(p => p.Categoria).AsQueryable();
 
+            // Filtrar por nombre
             if (!string.IsNullOrEmpty(searchString))
             {
                 productos = productos.Where(p => p.Nombre.Contains(searchString));
             }
 
-            switch (sortOrder)
+            // Ordenar resultados
+            productos = sortOrder switch
             {
-                case "name_desc":
-                    productos = productos.OrderByDescending(p => p.Nombre);
-                    break;
-                case "price":
-                    productos = productos.OrderBy(p => p.PrecioVenta);
-                    break;
-                case "price_desc":
-                    productos = productos.OrderByDescending(p => p.PrecioVenta);
-                    break;
-                default:
-                    productos = productos.OrderBy(p => p.Nombre);
-                    break;
-            }
+                "name_desc" => productos.OrderByDescending(p => p.Nombre),
+                "price" => productos.OrderBy(p => p.PrecioVenta),
+                "price_desc" => productos.OrderByDescending(p => p.PrecioVenta),
+                _ => productos.OrderBy(p => p.Nombre),
+            };
 
             return View(await productos.ToListAsync());
         }
+
 
         // GET: Producto/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                _logger.LogWarning("Producto ID nulo en Details.");
+                _logger.LogWarning("ID nulo en Details.");
                 return NotFound();
             }
 
             var producto = await _context.Productos
                 .Include(p => p.Categoria)
                 .FirstOrDefaultAsync(m => m.ProductoId == id);
+
             if (producto == null)
             {
-                _logger.LogWarning("Producto no encontrado con ID {ProductoId}.", id);
+                _logger.LogWarning($"Producto con ID {id} no encontrado.");
                 return NotFound();
             }
 
@@ -85,28 +87,19 @@ namespace Software_Taller_y_Repuestos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProductoId,Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Imagen")] Producto producto)
         {
-            _logger.LogInformation("Iniciando la creación de un nuevo producto.");
-
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Add(producto);
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation("Producto creado correctamente con ID {ProductoId}.", producto.ProductoId);
+                    _logger.LogInformation($"Producto creado con éxito: {producto.Nombre}");
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Error al crear el producto: {Message}", ex.Message);
-                }
-            }
-            else
-            {
-                _logger.LogWarning("El modelo de Producto no es válido.");
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    _logger.LogWarning("Error en el modelo: {ErrorMessage}", error.ErrorMessage);
+                    _logger.LogError($"Error al crear el producto: {ex.Message}");
+                    ModelState.AddModelError("", "No se pudo guardar el producto. Intente nuevamente.");
                 }
             }
 
@@ -119,14 +112,14 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             if (id == null)
             {
-                _logger.LogWarning("Producto ID nulo en Edit.");
+                _logger.LogWarning("ID nulo en Edit.");
                 return NotFound();
             }
 
             var producto = await _context.Productos.FindAsync(id);
             if (producto == null)
             {
-                _logger.LogWarning("Producto no encontrado con ID {ProductoId}.", id);
+                _logger.LogWarning($"Producto con ID {id} no encontrado.");
                 return NotFound();
             }
 
@@ -145,20 +138,18 @@ namespace Software_Taller_y_Repuestos.Controllers
                 return NotFound();
             }
 
-            _logger.LogInformation("Iniciando la edición del producto con ID {ProductoId}.", producto.ProductoId);
-
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(producto);
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation("Producto editado correctamente.");
+                    _logger.LogInformation($"Producto con ID {id} editado correctamente.");
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    _logger.LogError("Error de concurrencia al editar el producto: {Message}", ex.Message);
+                    _logger.LogError($"Error de concurrencia al editar: {ex.Message}");
                     if (!ProductoExists(producto.ProductoId))
                     {
                         return NotFound();
@@ -170,15 +161,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Error inesperado al editar el producto: {Message}", ex.Message);
-                }
-            }
-            else
-            {
-                _logger.LogWarning("El modelo de Producto no es válido.");
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    _logger.LogWarning("Error en el modelo: {ErrorMessage}", error.ErrorMessage);
+                    _logger.LogError($"Error al editar producto: {ex.Message}");
                 }
             }
 
@@ -191,16 +174,17 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             if (id == null)
             {
-                _logger.LogWarning("Producto ID nulo en Delete.");
+                _logger.LogWarning("ID nulo en Delete.");
                 return NotFound();
             }
 
             var producto = await _context.Productos
                 .Include(p => p.Categoria)
                 .FirstOrDefaultAsync(m => m.ProductoId == id);
+
             if (producto == null)
             {
-                _logger.LogWarning("Producto no encontrado con ID {ProductoId}.", id);
+                _logger.LogWarning($"Producto con ID {id} no encontrado.");
                 return NotFound();
             }
 
@@ -213,125 +197,115 @@ namespace Software_Taller_y_Repuestos.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
+
             if (producto != null)
             {
                 _context.Productos.Remove(producto);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Producto eliminado con éxito con ID {ProductoId}.", id);
+                _logger.LogInformation($"Producto con ID {id} eliminado correctamente.");
             }
             else
             {
-                _logger.LogWarning("Producto no encontrado al intentar eliminar.");
+                _logger.LogWarning($"Producto con ID {id} no encontrado durante la eliminación.");
             }
 
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductoExists(int id)
+        [HttpGet]
+        public IActionResult Upload()
         {
-            return _context.Productos.Any(e => e.ProductoId == id);
+            return View();
         }
 
 
-        // GET: Producto/Upload
+        // POST: Producto/Upload
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
                 ModelState.AddModelError("", "Por favor, seleccione un archivo.");
-                return View();
+                return RedirectToAction(nameof(Index));
             }
 
-            // Validar que sea un archivo CSV o Excel
             if (!file.FileName.EndsWith(".csv") && !file.FileName.EndsWith(".xlsx"))
             {
-                ModelState.AddModelError("", "Formato de archivo no válido. Solo se aceptan archivos CSV o Excel.");
-                return View();
+                ModelState.AddModelError("", "Formato no válido. Solo archivos CSV o Excel.");
+                return RedirectToAction(nameof(Index));
             }
 
+            var productos = await ProcesarArchivo(file);
+
+            if (productos.Count > 0)
+            {
+                foreach (var producto in productos)
+                {
+                    var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.Nombre == producto.CategoriaNombre)
+                                   ?? new Categoria { Nombre = producto.CategoriaNombre };
+
+                    if (categoria.CategoriaId == 0)
+                    {
+                        _context.Categorias.Add(categoria);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    producto.CategoriaId = categoria.CategoriaId;
+
+                    if (!_context.Productos.Any(p => p.Codigo == producto.Codigo))
+                    {
+                        _context.Productos.Add(producto);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Archivo procesado correctamente.");
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<List<Producto>> ProcesarArchivo(IFormFile file)
+        {
             var productos = new List<Producto>();
 
-            // Leer el archivo Excel
-            if (file.FileName.EndsWith(".xlsx"))
+            using (var stream = new MemoryStream())
             {
-                using (var stream = new MemoryStream())
+                await file.CopyToAsync(stream);
+                using (var package = new ExcelPackage(stream))
                 {
-                    await file.CopyToAsync(stream);
-                    using (var package = new ExcelPackage(stream))
+                    var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+
+                    if (worksheet == null)
                     {
-                        var worksheet = package.Workbook.Worksheets.FirstOrDefault();
-                        if (worksheet == null)
-                        {
-                            ModelState.AddModelError("", "El archivo no contiene hojas.");
-                            return View();
-                        }
+                        _logger.LogWarning("El archivo no contiene hojas.");
+                        return productos;
+                    }
 
-                        // Leer las filas
-                        for (int row = 2; row <= worksheet.Dimension.End.Row; row++) // Comienza en 2 para saltar el encabezado
+                    for (int row = 2; row <= worksheet.Dimension.End.Row; row++)
+                    {
+                        productos.Add(new Producto
                         {
-                            var nombre = worksheet.Cells[row, 1].Text;
-                            var codigo = worksheet.Cells[row, 2].Text;
-                            var categoriaNombre = worksheet.Cells[row, 3].Text; // Cambiar a CategoriaNombre
-                            var descripcion = worksheet.Cells[row, 4].Text;
-                            var cantidad = int.Parse(worksheet.Cells[row, 5].Text);
-                            var precioCompra = decimal.Parse(worksheet.Cells[row, 6].Text);
-                            var precioVenta = decimal.Parse(worksheet.Cells[row, 7].Text);
-                            var marca = worksheet.Cells[row, 8].Text;
-                            var imagen = worksheet.Cells[row, 9].Text;
-
-                            // Crear objeto Producto
-                            var producto = new Producto
-                            {
-                                Nombre = nombre,
-                                Codigo = codigo,
-                                CategoriaNombre = categoriaNombre, // Asignar el nombre de la categoría aquí
-                                Descripcion = descripcion,
-                                Cantidad = cantidad,
-                                PrecioCompra = precioCompra,
-                                PrecioVenta = precioVenta,
-                                Marca = marca,
-                                Imagen = imagen
-                            };
-                            productos.Add(producto);
-                        }
+                            Nombre = worksheet.Cells[row, 1].Text,
+                            Codigo = worksheet.Cells[row, 2].Text,
+                            CategoriaNombre = worksheet.Cells[row, 3].Text,
+                            Descripcion = worksheet.Cells[row, 4].Text,
+                            Cantidad = int.TryParse(worksheet.Cells[row, 5].Text, out var cantidad) ? cantidad : 0,
+                            PrecioCompra = decimal.TryParse(worksheet.Cells[row, 6].Text, out var compra) ? compra : 0,
+                            PrecioVenta = decimal.TryParse(worksheet.Cells[row, 7].Text, out var venta) ? venta : 0,
+                            Marca = worksheet.Cells[row, 8].Text,
+                            Imagen = worksheet.Cells[row, 9].Text
+                        });
                     }
                 }
             }
 
-            // Procesar y guardar productos
-            foreach (var producto in productos)
-            {
-                // Buscar categoría existente por nombre
-                var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.Nombre == producto.CategoriaNombre);
-
-                // Solo si no se encuentra la categoría, se crea una nueva
-                if (categoria == null)
-                {
-                    categoria = new Categoria { Nombre = producto.CategoriaNombre, Descripcion = "Descripción automática" };
-                    _context.Categorias.Add(categoria);
-                    await _context.SaveChangesAsync(); // Guardar para obtener el ID de la categoría nueva
-                }
-
-                // Asignar el ID de categoría existente o nuevo al producto
-                producto.CategoriaId = categoria.CategoriaId;
-
-                // Verificar si el código del producto es único
-                var existingProduct = await _context.Productos.FirstOrDefaultAsync(p => p.Codigo == producto.Codigo);
-                if (existingProduct == null)
-                {
-                    _context.Productos.Add(producto);
-                }
-                else
-                {
-                    ModelState.AddModelError("", $"El código {producto.Codigo} ya está en uso. No se agregó el producto.");
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return productos;
         }
 
-
+        private bool ProductoExists(int id)
+        {
+            return _context.Productos.Any(e => e.ProductoId == id);
+        }
     }
 }
