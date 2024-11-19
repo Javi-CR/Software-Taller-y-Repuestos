@@ -9,9 +9,12 @@
 # General
 --------------------------------------------------------------*/
 body {
-  font-family: "Open Sans", sans-serif;
-  background: #0c0b09;
-  color: #fff;
+    font-family: "Open Sans", sans-serif;
+    background: #0c0b09;
+    color: #fff;
+    height: 100%; 
+    margin: 0; 
+    overflow-y: auto; 
 }
 
 a {
@@ -646,7 +649,8 @@ h1, h2, h3, h4, h5, h6 {
 --------------------------------------------------------------*/
 section {
   padding: 60px 0;
-  overflow: hidden;
+  overflow: visible;
+  height: auto;
 }
 
 .section-bg {
@@ -1808,6 +1812,8 @@ section {
 
     #productos .container {
         padding-top: 110px;
+        height: auto;
+        overflow: visible;
     }
 
 @media (max-width: 992px) {
@@ -1930,9 +1936,31 @@ td {
     color: white;
 }
 
+.form-floating label {
+    color: #000 !important;
+}
 
-/* Card styling */
-.card {
+/* Ajustar posición de las flechas */
+.custom-carousel-control {
+    width: 5%; /* Aumenta el área de clic para las flechas */
+}
+
+.carousel-control-prev {
+    left: -8rem; /* Empuja la flecha izquierda más hacia afuera */
+}
+
+.carousel-control-next {
+    right: -2rem; /* Empuja la flecha derecha más hacia afuera */
+}
+
+/* Ajustar el tamaño de las flechas */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    width: 2rem; /* Ancho de la flecha */
+    height: 2rem; /* Alto de la flecha */
+    background-size: 100%; /* Asegura que las flechas llenen el contenedor */
+    /* Card styling */
+    .card {
     border: none;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -2109,5 +2137,7 @@ td {
         }
     }
 
+    
+    
 
 }
