@@ -1,0 +1,72 @@
+﻿@model Usuario
+
+@{
+    ViewData["Title"] = "Perfil";
+}
+
+<section id="login" class="contact section-bg d-flex align-items-center" style="min-height: 130vh;">
+    <div class="container">
+        <div class="heading">
+            <div class="row d-flex justify-content-center text-center">
+                <div class="col-lg-8">
+                    <!-- Perfil del usuario -->
+                    <div class="testimonials">
+                        <div class="testimonial-profile">
+                            @if (string.IsNullOrEmpty(Model.Imagen))
+                            {
+                                <img class="testimonial-img" src="~/assets/img/default.png" alt="User Profile Picture">
+                            }
+                            else
+                            {
+                                <img class="testimonial-img" src="@Model.Imagen" alt="User Profile Picture">
+                            }
+                        </div>
+                    </div>
+
+
+
+                    <h1>Mi Cuenta</h1>
+                    <p>@Model.Nombre (@Model.Correo)</p>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación del perfil -->
+        <nav class="breadcrumbs">
+            <div class="container">
+                <ol>
+                    <li><a href="@Url.Action("Perfil","Usuario")">Información</a></li>
+                    <li><a href="@Url.Action("EditarPerfil","Usuario")" style="color: white;">Editar Perfil</a></li>
+                </ol>
+            </div>
+        </nav>
+
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
+        }
+
+        <div class="container">
+            <form class="php-email-form">
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <input type="text" class="form-control" id="name" placeholder="Sin Nombre" value="@Model.Nombre" disabled>
+                    </div>
+                    <div class="col-md-6 form-group mt-3 mt-md-0">
+                        <input type="text" class="form-control" id="apellidos" placeholder="Sin Apellidos" value="@Model.Apellidos" disabled>
+                    </div>
+                </div>
+                <div class="form-group mt-3">
+                    <input type="email" class="form-control" id="correo" placeholder="Sin Correo" value="@Model.Correo" disabled>
+                </div>
+                <div class="form-group mt-3">
+                    <input type="text" class="form-control" id="telefono" placeholder="Sin número de teléfono" value="@Model.Telefono" disabled>
+                </div>
+                <div class="form-group mt-3">
+                    <textarea class="form-control" id="direccion" rows="8" placeholder="Sin dirección" disabled>@Model.Direccion</textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

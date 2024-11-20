@@ -1,0 +1,97 @@
+﻿@model Usuario
+
+@{
+    ViewData["Title"] = "Editar Perfil";
+}
+
+<div >
+
+    <nav class="breadcrumbs">
+        <div class="container">
+            <ol>
+                <li><a href="@Url.Action("Perfil","Usuario")" style="color: white;">Información</a></li>
+                <li><a href="@Url.Action("EditarPerfil","Usuario")">Editar Perfil</a></li>
+            </ol>
+        </div>
+    </nav>
+
+</div>
+    
+
+<div class="row d-flex justify-content-center text-center">
+    <div class="col-lg-8">
+        <!-- Perfil del usuario -->
+        <div class="testimonials">
+            <div class="testimonial-profile">
+                @if (string.IsNullOrEmpty(Model.Imagen))
+                {
+                    <img class="testimonial-img" src="~/assets/img/default.png" alt="User Profile Picture">
+                }
+                else
+                {
+                    <img class="testimonial-img" src="@Model.Imagen" alt="User Profile Picture">
+                }
+            </div>
+        </div>
+
+
+        <h1>..</h1>
+        <p>(@Model.Correo)</p>
+
+    </div>
+
+<section id="login" class="contact section-bg d-flex align-items-center">
+    <div class="container" data-aos="fade-up">
+
+        <div class="section-title text-center">
+            <h2>Editar Perfil</h2>
+        </div>
+
+      
+
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6 mt-5 mt-lg-0">
+
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
+                }
+
+                    <form method="post" asp-controller="Usuario" asp-action="EditarPerfil" class="php-email-form" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label asp-for="Nombre"></label>
+                            <input asp-for="Nombre" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Apellidos"></label>
+                            <input asp-for="Apellidos" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Telefono"></label>
+                            <input asp-for="Telefono" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Direccion"></label>
+                            <input asp-for="Direccion" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Imagen">Cambiar imagen de perfil</label>
+                            <input type="file" id="Imagen" name="Imagen" class="form-control-file" accept="image/*" />
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-block">Actualizar</button>
+                        </div>
+                    </form>
+
+
+
+            </div>
+        </div>
+    </div>
+</section>

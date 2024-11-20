@@ -1262,6 +1262,18 @@ section {
   border: 6px solid rgba(255, 255, 255, 0.2);
 }
 
+.testimonials .testimonial-profile .testimonial-img {
+    width: 250px; /* Tamaño fijo de la imagen */
+    height: 250px; /* Altura igual al ancho para mantenerla cuadrada */
+    border-radius: 50%; /* Convertir en un círculo */
+    position: relative;
+    z-index: 2;
+    border: 6px solid rgba(255, 255, 255, 0.2);
+    object-fit: cover; 
+    overflow: hidden; 
+}
+
+
 .testimonials .testimonial-item h3 {
   font-size: 18px;
   font-weight: bold;
@@ -2137,7 +2149,6 @@ td {
         }
     }
 
-    
-    
 
 }
+
