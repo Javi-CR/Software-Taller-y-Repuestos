@@ -206,32 +206,5 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        [HttpPost]
-        public JsonResult BuscarProducto(string nombre)
-        {
-            // Buscar el producto en la base de datos
-            var producto = _context.Productos
-                .Where(p => p.Nombre.Contains(nombre) && p.Cantidad > 1)
-                .FirstOrDefault();
-
-            if (producto != null)
-            {
-                var resultado = new
-                {
-                    Nombre = producto.Nombre,
-                    Descripcion = producto.Descripcion,
-                    Codigo = producto.Codigo,
-                    Categoria = producto.Categoria?.Nombre,
-                    Cantidad = producto.Cantidad,
-                    PrecioVenta = producto.PrecioVenta.ToString("C", new System.Globalization.CultureInfo("es-CR"))
-                };
-
-                return Json(new { success = true, data = resultado });
-            }
-            else
-            {
-                return Json(new { success = false, message = "Producto no encontrado o cantidad insuficiente." });
-            }
-        }
     }
 }
