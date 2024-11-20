@@ -1,4 +1,4 @@
-﻿@model Software_Taller_y_Repuestos.Models.Producto﻿
+﻿﻿
 <!DOCTYPE html>
 <html lang="es">
 
@@ -163,11 +163,10 @@
         <div id="chatHeader" onclick="toggleChat()">Chat con Soporte</div>
         <div id="chatMessages"></div>
         <div id="chatInput">
-            <input type="text" id="messageInput" placeholder="Escribe el nombre del producto...">
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
             <button id="sendMessageButton">Enviar</button>
         </div>
     </div>
-
     <!-- Vendor JS Files -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Agregado jQuery -->
     <script src="~/assets/vendor/aos/aos.js" asp-append-version="true"></script>
@@ -188,13 +187,10 @@
 
     <!-- Chatbox JS -->
     <script>
-        // URL generada usando  Url Action desde Razor
-        var buscarProductoUrl = '@Url.Action("BuscarProducto", "Home")';
-
-        // Función para mostrar y ocultar el chat
         function toggleChat() {
             var chatBox = document.getElementById("chatBox");
 
+            // Verifica si el chat está visible
             if (chatBox.style.display === "none" || chatBox.style.display === "") {
                 chatBox.style.display = "block";
                 setTimeout(function () {
@@ -216,123 +212,13 @@
             var chatMessages = document.getElementById("chatMessages");
 
             if (messageInput.value.trim() !== "") {
-                var message = messageInput.value.trim();
                 var newMessage = document.createElement("div");
-                newMessage.textContent = "Cliente: " + message;
+                newMessage.textContent = messageInput.value;
                 chatMessages.appendChild(newMessage);
-
-                // Llamada AJAX al backend para buscar el producto usando la URL generada
-                $.ajax({
-                    url: buscarProductoUrl,  // Usamos la URL generada por Razor
-                    type: "POST",
-                    dataType: "json",
-                    data: { nombreProducto: message },
-                    success: function (data) {
-                        var responseMessage = document.createElement("div");
-
-                        if (data.success) {
-                            // Si el producto existe y tiene suficiente stock
-                            responseMessage.innerHTML = `
-                                    <strong>Producto encontrado:</strong><br>
-                                    <strong>Nombre:</strong> ${data.data.Nombre}<br>
-                                    <strong>Cantidad disponible:</strong> ${data.data.Cantidad}<br>
-                                    <strong>Descripción:</strong> ${data.data.Descripcion}<br>
-                                    <strong>Código:</strong> ${data.data.Codigo}<br>
-                                    <strong>Categoría:</strong> ${data.data.Categoria}<br>
-                                    <strong>Precio:</strong> ${data.data.PrecioVenta}<br>
-                                `;
-                        } else {
-                            // Si no se encuentra el producto o no tiene suficiente stock
-                            responseMessage.textContent = "Lo siento, no hemos encontrado ese producto o la cantidad es insuficiente.";
-                        }
-
-                        chatMessages.appendChild(responseMessage);
-                        chatMessages.scrollTop = chatMessages.scrollHeight; // Desplazar hacia abajo
-                    },
-                    error: function (error) {
-                        console.error("Error:", error);
-                        var errorMessage = document.createElement("div");
-                        errorMessage.textContent = "Hubo un problema al procesar la solicitud. Inténtalo de nuevo.";
-                        chatMessages.appendChild(errorMessage);
-                    }
-                });
-
-                // Limpiar el campo de entrada
-                messageInput.value = "";
+                messageInput.value = ""; // Limpiar campo
             }
         });
     </script>
 </body>
 
-<style>
-    #chatBox {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        width: 300px;
-        height: 400px;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        display: none;
-        opacity: 0;
-        transition: all 0.3s ease-in-out;
-    }
-
-    #chatHeader {
-        background-color: #007bff;
-        color: #fff;
-        padding: 10px;
-        font-size: 18px;
-        cursor: pointer;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
-    }
-
-    #chatMessages {
-        padding: 10px;
-        height: 270px;
-        overflow-y: auto;
-        font-size: 14px;
-    }
-
-    #chatInput {
-        display: flex;
-        padding: 10px;
-        background-color: #f8f9fa;
-        border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
-    }
-
-    #messageInput {
-        flex-grow: 1;
-        padding: 5px;
-        font-size: 14px;
-    }
-
-    #sendMessageButton {
-        margin-left: 10px;
-        padding: 5px 10px;
-        font-size: 14px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        cursor: pointer;
-    }
-
-    .message {
-        margin-bottom: 10px;
-    }
-
-        .message.client {
-            text-align: right;
-            color: #007bff;
-        }
-
-        .message.system {
-            text-align: left;
-            color: #333;
-        }
-</style>
 </html>
