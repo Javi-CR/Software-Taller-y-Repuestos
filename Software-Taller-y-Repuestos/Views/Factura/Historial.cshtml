@@ -1,0 +1,31 @@
+﻿@model IEnumerable<Software_Taller_y_Repuestos.Models.Factura>
+
+<div class="container mt-5">
+    <h2>Historial de Facturas</h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Fecha de Compra</th>
+                <th>Subtotal</th>
+                <th>IVA</th>
+                <th>Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var factura in Model)
+            {
+                <tr>
+                    <td>@factura.FechaCompra.ToString("dd/MM/yyyy")</td>
+                    <td>@factura.Subtotal.ToString("C")</td>
+                    <td>@factura.IVA.ToString("C")</td>
+                    <td>@factura.Total.ToString("C")</td>
+                    <td>
+                        <a href="@Url.Action("VerDetalleFactura", new { facturaId = factura.FacturaId })" class="btn btn-info">Ver Detalle</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

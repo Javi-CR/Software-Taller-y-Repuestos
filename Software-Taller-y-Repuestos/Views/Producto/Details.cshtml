@@ -20,15 +20,16 @@
             <div class="col-md-8">
                 <div class="card-body">
 
-                    <h5 class="card-title">@Model.Nombre</h5>
-                    <p class="card-text">@Model.Descripcion</p>
-                    <p class="card-text"><strong>Código:</strong> @Model.Codigo</p>
-                    <p class="card-text"><strong>Categoría:</strong> @Model.Categoria?.Nombre</p>
-                    <p class="card-text"><strong>Cantidad en Stock:</strong> @Model.Cantidad</p>
-                    <p class="card-text">
+                    <h5 class="card-title text-dark">@Model.Nombre</h5>
+                    <p class="card-text text-dark">@Model.Descripcion</p>
+                    <p class="card-text text-dark"><strong>Código:</strong> @Model.Codigo</p>
+                    <p class="card-text text-dark"><strong>Categoría:</strong> @Model.Categoria?.Nombre</p>
+                    <p class="card-text text-dark"><strong>Cantidad en Stock:</strong> @Model.Cantidad</p>
+                    <p class="card-text text-dark">
                         <strong>Precio de Venta:</strong>
                         @Model.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))
                     </p>
+
                     
                 </div>
             </div>

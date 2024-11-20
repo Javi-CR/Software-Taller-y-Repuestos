@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Software_Taller_y_Repuestos.Models;
 using Microsoft.Extensions.Logging;
 using System.Linq;
@@ -8,6 +7,8 @@ using System.Threading.Tasks;
 using OfficeOpenXml;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Software_Taller_y_Repuestos.Extensions;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
@@ -82,30 +83,36 @@ namespace Software_Taller_y_Repuestos.Controllers
             return View();
         }
 
-        // POST: Producto/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductoId,Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Imagen")] Producto producto)
+        public async Task<IActionResult> Create([Bind("Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca")] Producto producto, IFormFile imagen)
         {
             if (ModelState.IsValid)
             {
-                try
+                // Subir imagen si se proporciona
+                if (imagen != null && imagen.Length > 0)
                 {
-                    _context.Add(producto);
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation($"Producto creado con éxito: {producto.Nombre}");
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Error al crear el producto: {ex.Message}");
-                    ModelState.AddModelError("", "No se pudo guardar el producto. Intente nuevamente.");
-                }
-            }
+                    var fileName = Path.GetFileNameWithoutExtension(imagen.FileName);
+                    var extension = Path.GetExtension(imagen.FileName);
+                    var newFileName = $"{fileName}_{Guid.NewGuid()}{extension}";
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", newFileName);
 
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await imagen.CopyToAsync(stream);
+                    }
+
+                    producto.Imagen = $"/images/{newFileName}";
+                }
+
+                _context.Add(producto);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
             ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
             return View(producto);
         }
+
 
         // GET: Producto/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -130,11 +137,10 @@ namespace Software_Taller_y_Repuestos.Controllers
         // POST: Producto/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductoId,Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Imagen")] Producto producto)
+        public async Task<IActionResult> Edit(int id, [Bind("ProductoId,Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Imagen")] Producto producto, IFormFile imagen)
         {
             if (id != producto.ProductoId)
             {
-                _logger.LogWarning("El ID proporcionado no coincide con el producto.");
                 return NotFound();
             }
 
@@ -142,14 +148,37 @@ namespace Software_Taller_y_Repuestos.Controllers
             {
                 try
                 {
+                    // Subir nueva imagen si se proporciona
+                    if (imagen != null && imagen.Length > 0)
+                    {
+                        // Eliminar la imagen anterior si existe
+                        if (!string.IsNullOrEmpty(producto.Imagen))
+                        {
+                            var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", producto.Imagen.TrimStart('/'));
+                            if (System.IO.File.Exists(oldPath))
+                            {
+                                System.IO.File.Delete(oldPath);
+                            }
+                        }
+
+                        var fileName = Path.GetFileNameWithoutExtension(imagen.FileName);
+                        var extension = Path.GetExtension(imagen.FileName);
+                        var newFileName = $"{fileName}_{Guid.NewGuid()}{extension}";
+                        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", newFileName);
+
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            await imagen.CopyToAsync(stream);
+                        }
+
+                        producto.Imagen = $"/images/{newFileName}";
+                    }
+
                     _context.Update(producto);
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation($"Producto con ID {id} editado correctamente.");
-                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException ex)
+                catch (DbUpdateConcurrencyException)
                 {
-                    _logger.LogError($"Error de concurrencia al editar: {ex.Message}");
                     if (!ProductoExists(producto.ProductoId))
                     {
                         return NotFound();
@@ -159,15 +188,12 @@ namespace Software_Taller_y_Repuestos.Controllers
                         throw;
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Error al editar producto: {ex.Message}");
-                }
+                return RedirectToAction(nameof(Index));
             }
-
             ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
             return View(producto);
         }
+
 
         // GET: Producto/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -191,26 +217,29 @@ namespace Software_Taller_y_Repuestos.Controllers
             return View(producto);
         }
 
-        // POST: Producto/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
-
             if (producto != null)
             {
+                // Eliminar la imagen asociada si existe
+                if (!string.IsNullOrEmpty(producto.Imagen))
+                {
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", producto.Imagen.TrimStart('/'));
+                    if (System.IO.File.Exists(path))
+                    {
+                        System.IO.File.Delete(path);
+                    }
+                }
+
                 _context.Productos.Remove(producto);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation($"Producto con ID {id} eliminado correctamente.");
             }
-            else
-            {
-                _logger.LogWarning($"Producto con ID {id} no encontrado durante la eliminación.");
-            }
-
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpGet]
         public IActionResult Upload()
@@ -307,5 +336,6 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             return _context.Productos.Any(e => e.ProductoId == id);
         }
+
     }
 }

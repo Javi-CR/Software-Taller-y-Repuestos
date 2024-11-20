@@ -1,0 +1,66 @@
+﻿@model List<Software_Taller_y_Repuestos.Models.CarritoViewModel>
+
+@{
+    ViewData["Title"] = "Carrito de Compras";
+}
+
+<div class="container mt-5 pt-5">
+    <div class="section-title mb-4">
+        <h2 class="text-center">Carrito de Compras</h2>
+    </div>
+
+    <!-- Tabla de productos en el carrito -->
+    <form method="post" action="@Url.Action("ModificarCantidad")">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Producto.Nombre</td>
+                        <td>
+                            <input type="number" name="cantidad" value="@item.Cantidad" min="1" class="form-control" style="width: 80px;" />
+                            <input type="hidden" name="productoId" value="@item.Producto.ProductoId" />
+                        </td>
+                        <td>@item.Producto.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
+                        <td>@item.Subtotal.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
+                        <td>
+                            <button type="submit" class="btn btn-warning btn-sm">Modificar Cantidad</button>
+                            <form method="post" asp-action="EliminarDelCarrito" style="display:inline;">
+                                <input type="hidden" name="productoId" value="@item.Producto.ProductoId" />
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </form>
+
+    <!-- Total del carrito -->
+    <div class="row justify-content-end">
+        <div class="col-md-4">
+            <h3>Total: @ViewBag.Total.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</h3>
+        </div>
+    </div>
+
+    <!-- Botones de acciones -->
+    <div class="row justify-content-between">
+        <div class="col-md-4">
+            <form method="post" asp-action="VaciarCarrito">
+                <button type="submit" class="btn btn-warning btn-block">Vaciar Carrito</button>
+            </form>
+        </div>
+        <div class="col-md-4 text-right">
+            <a asp-controller="Factura" asp-action="ConfirmarCompra" class="btn btn-success btn-block">Ir a la Compra</a>
+        </div>
+    </div>
+</div>

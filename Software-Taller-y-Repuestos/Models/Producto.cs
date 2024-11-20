@@ -17,8 +17,7 @@ public partial class Producto
     public string? Marca { get; set; }
     public string? Imagen { get; set; }
     public virtual Categoria? Categoria { get; set; } = null!;
-    public virtual ICollection<DetallesFactura> DetallesFacturas { get; set; } = new List<DetallesFactura>();
+    public virtual ICollection<DetalleFactura> DetallesFacturas { get; set; } = new List<DetalleFactura>();
     public virtual ICollection<ModelosAuto> Modelos { get; set; } = new List<ModelosAuto>();
-    public virtual ICollection<Proveedore> Proveedors { get; set; } = new List<Proveedore>();
 }
 
