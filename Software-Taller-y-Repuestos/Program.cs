@@ -13,7 +13,7 @@ builder.Services.AddDbContext<TallerRepuestosDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configurar la autenticación con cookies y Google
-/*builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -36,7 +36,7 @@ builder.Services.AddDbContext<TallerRepuestosDbContext>(options =>
     googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
-*/
+
 
 var app = builder.Build();
 
