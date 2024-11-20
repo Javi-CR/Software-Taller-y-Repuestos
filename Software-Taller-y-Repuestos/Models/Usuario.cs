@@ -26,7 +26,6 @@ public partial class Usuario
     public decimal? SalarioBase { get; set; }
     public string? Imagen { get; set; }
 
-    public virtual ICollection<CuentaBancarium> CuentaBancaria { get; set; } = new List<CuentaBancarium>();
 
     public virtual ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 

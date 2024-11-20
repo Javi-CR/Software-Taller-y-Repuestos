@@ -1,184 +1,94 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Software_Taller_y_Repuestos.Models;
+using Software_Taller_y_Repuestos.Extensions;
 using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
     public class FacturaController : Controller
     {
         private readonly TallerRepuestosDbContext _context;
-        private readonly ILogger<FacturaController> _logger;
 
-        public FacturaController(TallerRepuestosDbContext context, ILogger<FacturaController> logger)
+        public FacturaController(TallerRepuestosDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
-        // GET: Factura
-        public async Task<IActionResult> Index()
+        public IActionResult ConfirmarCompra()
         {
-            var facturas = await _context.Facturas.Include(f => f.Usuario).ToListAsync();
-            return View(facturas);
-        }
+            var carrito = HttpContext.Session.Get<List<Producto>>("Carrito");
 
-        // GET: Factura/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
+            if (carrito == null || !carrito.Any())
             {
-                _logger.LogWarning("Factura ID nulo en Details.");
-                return NotFound();
+                // Si el carrito está vacío o no existe, redirigir al carrito
+                return RedirectToAction("Index", "Carrito");
             }
 
-            var factura = await _context.Facturas
-                .Include(f => f.DetallesFacturas)
-                .ThenInclude(df => df.Producto)
-                .Include(f => f.Usuario)
-                .FirstOrDefaultAsync(m => m.FacturaId == id);
-
-            if (factura == null)
+            // Verificar que el carrito tenga productos con los datos necesarios
+            var carritoViewModel = carrito.Select(p => new CarritoViewModel
             {
-                _logger.LogWarning("Factura no encontrada con ID {FacturaId}.", id);
-                return NotFound();
-            }
+                Producto = p,
+                Cantidad = 1 // Asegúrate de que esta cantidad esté bien establecida
+            }).ToList();
 
-            return View(factura);
-        }
+            // Calcular el subtotal
+            var subtotal = carritoViewModel.Where(p => p.Producto != null && p.Cantidad > 0)
+                                            .Sum(p => p.Cantidad * p.Producto.PrecioVenta);
 
-        // GET: Factura/Create
-        public IActionResult Create()
-        {
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "UsuarioId", "Nombre");
-            return View();
-        }
+            var iva = subtotal * 0.13m; //IVA (13%)
+            var total = subtotal + iva;
 
-        // POST: Factura/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FacturaId,UsuarioId,Fecha,Total,Impuestos,Descuento,CorreoEnviado,CodigoDescuentoId")] Factura factura)
-        {
-            _logger.LogInformation("Iniciando la creación de una nueva factura.");
-
-            if (ModelState.IsValid)
+            // Crear la factura y asegurarse de que los detalles de factura estén correctamente inicializados
+            var factura = new Factura
             {
-                _context.Add(factura);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("Factura creada correctamente con ID {FacturaId}.", factura.FacturaId);
-                return RedirectToAction(nameof(Index));
-            }
-
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "UsuarioId", "Nombre", factura.UsuarioId);
-            return View(factura);
-        }
-
-        // GET: Factura/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                _logger.LogWarning("Factura ID nulo en Edit.");
-                return NotFound();
-            }
-
-            var factura = await _context.Facturas.FindAsync(id);
-            if (factura == null)
-            {
-                _logger.LogWarning("Factura no encontrada con ID {FacturaId}.", id);
-                return NotFound();
-            }
-
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "UsuarioId", "Nombre", factura.UsuarioId);
-            return View(factura);
-        }
-
-        // POST: Factura/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("FacturaId,UsuarioId,Fecha,Total,Impuestos,Descuento,CorreoEnviado,CodigoDescuentoId")] Factura factura)
-        {
-            if (id != factura.FacturaId)
-            {
-                _logger.LogWarning("El ID proporcionado no coincide con la factura.");
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                FechaCompra = DateTime.Now,
+                Subtotal = subtotal,
+                IVA = iva,
+                Total = total,
+                DetalleFacturas = carritoViewModel.Select(p => new DetalleFactura
                 {
-                    _context.Update(factura);
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation("Factura editada correctamente.");
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateConcurrencyException ex)
-                {
-                    _logger.LogError("Error de concurrencia al editar la factura: {Message}", ex.Message);
-                    if (!FacturaExists(factura.FacturaId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
+                    ProductoId = p.Producto.ProductoId,
+                    Cantidad = p.Cantidad,
+                    PrecioUnitario = p.Producto.PrecioVenta
+                }).ToList() ?? new List<DetalleFactura>()
+            };
 
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "UsuarioId", "Nombre", factura.UsuarioId);
-            return View(factura);
+            _context.Facturas.Add(factura);
+            _context.SaveChanges();
+
+            HttpContext.Session.Remove("Carrito"); // Limpiar el carrito de la sesión
+
+            return View(factura); // Mostrar la factura generada
         }
 
-        // GET: Factura/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                _logger.LogWarning("Factura ID nulo en Delete.");
-                return NotFound();
-            }
 
-            var factura = await _context.Facturas
-                .Include(f => f.Usuario)
-                .FirstOrDefaultAsync(m => m.FacturaId == id);
+
+
+        public IActionResult Historial()
+        {
+            var usuarioId = User.Identity.Name; // Obtener el usuario autenticado
+            var facturas = _context.Facturas
+                                   .Where(f => f.UsuarioId == usuarioId)
+                                   .OrderByDescending(f => f.FechaCompra)
+                                   .ToList();
+            return View(facturas); // Mostrar el historial de facturas del usuario
+        }
+
+        public IActionResult VerDetalleFactura(int facturaId)
+        {
+            var factura = _context.Facturas
+                                .Where(f => f.FacturaId == facturaId)
+                                .Include(f => f.DetalleFacturas)
+                                .ThenInclude(d => d.Producto)
+                                .FirstOrDefault();
+
             if (factura == null)
             {
-                _logger.LogWarning("Factura no encontrada con ID {FacturaId}.", id);
                 return NotFound();
             }
 
-            return View(factura);
+            return View(factura); // Mostrar los detalles de la factura seleccionada
         }
-
-        // POST: Factura/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var factura = await _context.Facturas.FindAsync(id);
-            if (factura != null)
-            {
-                _context.Facturas.Remove(factura);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("Factura eliminada con éxito con ID {FacturaId}.", id);
-            }
-            else
-            {
-                _logger.LogWarning("Factura no encontrada al intentar eliminar.");
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool FacturaExists(int id)
-        {
-            return _context.Facturas.Any(e => e.FacturaId == id);
-        }
-
     }
 }

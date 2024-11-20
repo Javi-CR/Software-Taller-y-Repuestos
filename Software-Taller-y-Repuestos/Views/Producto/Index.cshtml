@@ -5,14 +5,10 @@
 }
 
 <div class="container mt-5 pt-5">
-    
-
-    <!-- Título de la sección -->
     <div class="section-title mb-4">
         <h2 class="text-center">Nuestros Productos</h2>
     </div>
 
-    <!-- Barra de navegación -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Productos</a>
@@ -25,7 +21,7 @@
                         <a class="nav-link active" href="@Url.Action("Index", new { sortOrder = "name" })">Ordenar por Nombre</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", new { sortOrder = "price" })">Ordenar por Precio</a>
+                        <a class="nav-link active" href="@Url.Action("Index", new { sortOrder = "price" })">Ordenar por Precio</a>
                     </li>
                 </ul>
                 <form class="d-flex" method="get" asp-action="Index">
@@ -36,16 +32,13 @@
         </div>
     </nav>
 
-    <!-- Botones de acción -->
     <div class="mb-4 text-center">
         <a asp-action="Create" class="btn btn-success mr-2">Agregar un producto</a>
         <a asp-action="Upload" class="btn btn-primary mr-2">Subir archivo</a>
     </div>
 
-    <!-- Carrusel -->
     <div id="productCarousel" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
-            @* Dividimos los productos en grupos de 3 *@
             @{
                 var chunkedProducts = Model
                 .Select((product, index) => new { product, index })
@@ -78,6 +71,11 @@
                                         <a asp-action="Details" asp-route-id="@item.ProductoId" class="btn btn-info">Detalles</a>
                                         <a asp-action="Edit" asp-route-id="@item.ProductoId" class="btn btn-warning">Editar</a>
                                         <a asp-action="Delete" asp-route-id="@item.ProductoId" class="btn btn-danger">Eliminar</a>
+                                        <form method="post" asp-controller="Carrito" asp-action="AgregarAlCarrito" asp-route-productoId="@item.ProductoId">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-cart"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>

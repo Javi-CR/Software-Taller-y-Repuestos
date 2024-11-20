@@ -1,27 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Software_Taller_y_Repuestos.Models;
-
-public partial class Factura
+﻿
+namespace Software_Taller_y_Repuestos.Models
 {
-    public int FacturaId { get; set; }
+    public class Factura
+    {
+        public int FacturaId { get; set; }
+        public string? UsuarioId { get; set; } // Asociado al usuario autenticado
+        public DateTime FechaCompra { get; set; }
+        public decimal Subtotal { get; set; }
+        public decimal IVA { get; set; }
+        public decimal Total { get; set; }
 
-    public int UsuarioId { get; set; }
+        public virtual ICollection<DetalleFactura> DetalleFacturas { get; set; }
+        public List<Producto> Productos { get; internal set; }
+    }
 
-    public DateTime Fecha { get; set; }
-
-    public decimal Total { get; set; }
-
-    public decimal? Impuestos { get; set; }
-
-    public decimal? Descuento { get; set; }
-
-    public bool CorreoEnviado { get; set; }
-
-    public int? CodigoDescuentoId { get; set; }
-
-    public virtual ICollection<DetallesFactura> DetallesFacturas { get; set; } = new List<DetallesFactura>();
-
-    public virtual Usuario Usuario { get; set; } = null!;
 }

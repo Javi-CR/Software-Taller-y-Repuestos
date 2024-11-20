@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Software_Taller_y_Repuestos.Models;
 
@@ -11,9 +12,11 @@ using Software_Taller_y_Repuestos.Models;
 namespace Software_Taller_y_Repuestos.Migrations
 {
     [DbContext(typeof(TallerRepuestosDbContext))]
-    partial class TallerRepuestosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241120180708_carrito")]
+    partial class carrito
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -290,9 +293,6 @@ namespace Software_Taller_y_Repuestos.Migrations
                     b.Property<string>("Descripcion")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("FacturaId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Imagen")
                         .HasColumnType("nvarchar(max)");
 
@@ -316,8 +316,6 @@ namespace Software_Taller_y_Repuestos.Migrations
 
                     b.HasIndex("Codigo")
                         .IsUnique();
-
-                    b.HasIndex("FacturaId");
 
                     b.ToTable("Productos");
                 });
@@ -502,10 +500,6 @@ namespace Software_Taller_y_Repuestos.Migrations
                         .HasForeignKey("CategoriaId")
                         .IsRequired();
 
-                    b.HasOne("Software_Taller_y_Repuestos.Models.Factura", null)
-                        .WithMany("Productos")
-                        .HasForeignKey("FacturaId");
-
                     b.Navigation("Categoria");
                 });
 
@@ -532,8 +526,6 @@ namespace Software_Taller_y_Repuestos.Migrations
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Factura", b =>
                 {
                     b.Navigation("DetalleFacturas");
-
-                    b.Navigation("Productos");
                 });
 
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Producto", b =>
