@@ -11,6 +11,7 @@ using Dapper;
 using Microsoft.AspNetCore.Authentication.OAuth; // Para OAuth
 using Microsoft.AspNetCore.Authentication.Google; // Google provider
 using System.Threading.Tasks;
+using System.Data;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
@@ -41,84 +42,131 @@ namespace Software_Taller_y_Repuestos.Controllers
 
         [Route("Register")]
         [HttpPost]
-        public IActionResult Register(Usuario usuario)
+        public IActionResult Register(CuentaUsuario usuario)
         {
+            if (!ModelState.IsValid)
+            {
+                // Si el modelo no es válido, se regresa a la vista con los mensajes de error.
+                return View(usuario);
+            }
+
             try
             {
-                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasenna);
-
                 using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
                 {
-                    string sqlQuery = @"
-                    INSERT INTO Usuarios (Nombre, Apellidos, Correo, Contrasenna, Telefono, Direccion, RolID, FechaIngreso)
-                    VALUES (@Nombre, @Apellidos, @Correo, @Contrasenna, @Telefono, @Direccion, @RolID, @FechaIngreso)";
+                    
+                    // Definir el ID del rol predeterminado.
+                    int rolID = 2;
 
-                    var parameters = new
+                    // Hashear la contraseña usando BCrypt.
+                    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasenna);
+
+                    // Ejecutar el procedimiento almacenado "CrearUsuario".
+                    var result = connection.Execute(
+                        "CrearUsuario",
+                        new
+                        {
+                            usuario.Nombre,
+                            usuario.Apellidos,
+                            usuario.Correo,
+                            Contrasenna = hashedPassword,
+                            RolID = rolID
+                        },
+                        commandType: CommandType.StoredProcedure);
+
+                    if (result > 0)
                     {
-                        Nombre = usuario.Nombre,
-                        Apellidos = usuario.Apellidos,
-                        Correo = usuario.Correo,
-                        Contrasenna = hashedPassword,
-                        Telefono = string.IsNullOrEmpty(usuario.Telefono) ? null : usuario.Telefono,
-                        Direccion = string.IsNullOrEmpty(usuario.Direccion) ? null : usuario.Direccion,
-                        RolID = 2,
-                        FechaIngreso = DateTime.Now
-                    };
 
-                    int rowsAffected = connection.Execute(sqlQuery, parameters);
+                        // En caso de que algo falle sin excepción.
+                        ViewBag.Mensaje = "No se pudo crear la cuenta. Intente de nuevo.";
+                        return View(usuario);
 
-                    if (rowsAffected > 0)
-                    {
-                        ViewBag.Mensaje = "Usuario registrado exitosamente.";
-                        return RedirectToAction("Index");
                     }
                     else
                     {
-                        ViewBag.Mensaje = "Ocurrió un error al registrar el usuario.";
+                        // Si la cuenta se creó correctamente.
+                        ViewBag.Mensaje = "Cuenta creada exitosamente. Por favor, inicie sesión.";
+                        //return RedirectToAction("Index");
+                        return View(usuario);
+
                     }
                 }
             }
-            catch
+            catch (SqlException ex)
             {
-                ViewBag.Mensaje = "Este Usuario ya existe.";
-            }
+                if (ex.Number == 50001) // Error personalizado lanzado por el procedimiento almacenado.
+                {
+                    ViewBag.Mensaje = ex.Message;
+                }
+                else
+                {
+                    ViewBag.Mensaje = "Ocurrió un error inesperado al crear la cuenta.";
+                }
 
-            return View(usuario);
+                return View(usuario);
+            }
         }
 
+
         [Route("Login")]
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login(string Correo, string Contrasenna)
+        [Route("Login")]
+        [HttpPost]
+        public async Task<IActionResult> Login(Login model)
         {
-            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == Correo);
-
-            if (user != null && BCrypt.Net.BCrypt.Verify(Contrasenna, user.Contrasenna))
+            try
             {
-                var claims = new List<Claim>
+                using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
                 {
-                    new Claim(ClaimTypes.Name, user.Nombre),
-                    new Claim(ClaimTypes.Email, user.Correo),
-                    new Claim("UserId", user.UsuarioId.ToString())
-                };
+                    // Llamar al procedimiento almacenado
+                    var usuario = connection.QueryFirstOrDefault<Login>(
+                        "IniciarSesion",
+                        new { model.Correo },
+                        commandType: CommandType.StoredProcedure);
 
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties
-                {
-                    IsPersistent = true
-                };
+                    if (usuario == null)
+                    {
+                        ViewBag.Mensaje = "El usuario no existe.";
+                        return View(model);
+                    }
 
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-                return RedirectToAction("Index");
+                    // Validar contraseña
+                    if (!BCrypt.Net.BCrypt.Verify(model.Contrasenna, usuario.Contrasenna))
+                    {
+                        ViewBag.Mensaje = "La contraseña es incorrecta.";
+                        return View(model);
+                    }
+
+                    // Crear claims
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, usuario.Nombre),
+                        new Claim(ClaimTypes.Email, usuario.Correo),
+                        new Claim(ClaimTypes.Role, usuario.NombreRol),  // Usar el NombreRol del usuario
+                        new Claim("UserId", usuario.UsuarioId.ToString())
+                    };
+
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
+
+                    // Registrar autenticación
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+                    return RedirectToAction("Index", "Home");
+                }
             }
-
-            ViewBag.ErrorMessage = "Usuario o contraseña incorrectos";
-            return View();
+            catch (SqlException ex)
+            {
+                ViewBag.Mensaje = "Ocurrió un error inesperado al iniciar sesión.";
+                return View(model);
+            }
         }
+
 
         // Método para iniciar sesión con Google
         [HttpPost]
