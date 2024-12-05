@@ -56,3 +56,54 @@ BEGIN
 END
 GO
 
+
+
+
+CREATE PROCEDURE CrearUsuario
+    @Nombre NVARCHAR(50),
+    @Apellidos NVARCHAR(50),
+    @Correo NVARCHAR(100),
+    @Contrasenna NVARCHAR(100),
+    @RolID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Verificar si ya existe un usuario con el mismo correo
+    IF EXISTS (SELECT 1 FROM Usuarios WHERE Correo = @Correo)
+    BEGIN
+        THROW 50001, 'El correo ya está en uso. Por favor, elija otro.', 1;
+    END
+
+    -- Insertar el nuevo usuario
+    INSERT INTO Usuarios (Nombre, Apellidos, Correo, Contrasenna, RolID, FechaIngreso)
+    VALUES (@Nombre, @Apellidos, @Correo, @Contrasenna, @RolID, GETDATE());
+    
+    -- Confirmación de éxito
+    SELECT SCOPE_IDENTITY() AS UsuarioId;
+END;
+
+
+CREATE PROCEDURE IniciarSesion
+    @Correo NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        U.UsuarioId,
+        U.Nombre,
+        U.Apellidos,
+        U.Correo,
+        U.Contrasenna,
+        U.Telefono,
+        U.Direccion,
+        U.RolID,
+        R.NombreRol,  -- Incluir el nombre del rol
+        U.FechaIngreso,
+        U.SalarioBase,
+        U.Imagen
+    FROM Usuarios U
+    INNER JOIN Roles R ON U.RolID = R.RolId  -- Hacer el JOIN con la tabla Roles
+    WHERE U.Correo = @Correo;
+END;

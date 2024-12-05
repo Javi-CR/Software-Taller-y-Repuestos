@@ -52,22 +52,7 @@
                 <ul>
                     <li><a class="nav-link scrollto active" href="#">Inicio</a></li>
 
-                    <li><a class="nav-link scrollto" href="@Url.Action("Empleados", "HR")">Empleados</a></li>
-                    <li><a class="nav-link" href="@Url.Action("Index", "Producto")">Productos</a></li>
-                    <li><a class="nav-link" href="@Url.Action("Index", "Carrito")">Carrito</a></li>
-
-
-                    @if (User.Identity.IsAuthenticated)
-                    {
-
-                        <li class="dropdown">
-                            <a href="#"><span>@User.Identity.Name</span> <i class="bi bi-chevron-down"></i></a>
-                            <ul>
-                                <li><a href="@Url.Action("Perfil", "Usuario")">Mi Perfil</a></li>
-                                <li><a href="@Url.Action("Logout", "Home")">Cerrar Sesión</a></li>
-                            </ul>
-                        </li>
-                    }
+                    
 
 
 
@@ -79,6 +64,10 @@
                     @if (User.IsInRole("Cliente"))
                     {
 
+                        <li><a class="nav-link scrollto" href="@Url.Action("Empleados", "HR")">Empleados</a></li>
+                        <li><a class="nav-link" href="@Url.Action("Index", "Producto")">Productos</a></li>
+                        <li><a class="nav-link" href="@Url.Action("Index", "Carrito")">Carrito</a></li>
+
 
 
                     }
@@ -86,6 +75,18 @@
                     @if (User.IsInRole("Empleado"))
                     {
 
+                    }
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+
+                        <li class="dropdown">
+                            <a href="#"><span>@User.Identity.Name</span> <i class="bi bi-chevron-down"></i></a>
+                            <ul>
+                                <li><a href="@Url.Action("Perfil", "Usuario")">Mi Perfil</a></li>
+                                <li><a href="@Url.Action("Logout", "Home")">Cerrar Sesión</a></li>
+                            </ul>
+                        </li>
                     }
 
                 </ul>
