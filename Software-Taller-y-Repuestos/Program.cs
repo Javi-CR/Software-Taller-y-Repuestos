@@ -53,7 +53,7 @@ builder.Services.AddAuthentication(options =>
 
     options.ClientId     = builder.Configuration.GetSection("GoogleKeys:ClientId").Value;
     options.ClientSecret = builder.Configuration.GetSection("GoogleKeys:ClientSecret").Value;
-    options.ClaimActions.MapJsonKey("urn: google:picture", "picture", "url");
+    options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
 
     options.Events = new OAuthEvents
     {
