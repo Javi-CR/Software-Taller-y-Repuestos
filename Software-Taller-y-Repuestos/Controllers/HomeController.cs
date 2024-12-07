@@ -168,78 +168,93 @@ namespace Software_Taller_y_Repuestos.Controllers
         }
 
 
-        // Método para iniciar sesión con Google
-        [HttpPost]
-        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        public async Task LoginWithGoogle()
         {
-            var redirectUrl = Url.Action("ExternalLoginCallback", "Home", new { ReturnUrl = returnUrl });
-            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-            return Challenge(properties, provider);
+            await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme,
+                new AuthenticationProperties
+                {
+                    RedirectUri = Url.Action("GoogleResponse")
+                });
         }
 
-
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null)
+        public async Task<IActionResult> GoogleResponse()
         {
             try
             {
-                returnUrl = returnUrl ?? Url.Content("~/");
+                var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-                // Obtener la información de autenticación del proveedor externo
-                var info = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                if (info == null)
+
+                // Extraer información del usuario de Google
+                var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
+                var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var firstName = claims?.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value;
+                var lastName = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value;
+                var picture = claims?.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value;
+
+                if (email == null)
                 {
-                    throw new Exception("Hubo un problema al autenticar con el proveedor externo.");
+                    ViewBag.Mensaje = "No se pudo obtener la información del usuario.";
+                    return RedirectToAction("Login");
                 }
 
-                // Obtener las claims de email, nombre y foto
-                var emailClaim = info.Principal?.FindFirst(ClaimTypes.Email);
-                var nameClaim = info.Principal?.FindFirst(ClaimTypes.Name);
-                var pictureClaim = info.Principal?.FindFirst("picture");
 
-                if (emailClaim == null)
+
+                Login? usuario;
+
+                // Registrar o actualizar al usuario en la base de datos
+                using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
                 {
-                    throw new Exception("No se pudo obtener el correo del proveedor externo.");
-                }
+                    connection.Execute(
+                        "RegistrarUsuarioGoogle",
+                        new
+                        {
+                            Nombre = firstName,
+                            Apellidos = lastName,
+                            Correo = email,
+                            Imagen = picture,
+                            RolID = 2 // Rol predeterminado
+                        },
+                        commandType: CommandType.StoredProcedure
+                    );
 
-                // Buscar si el usuario ya existe
-                var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == emailClaim.Value);
 
-                // Si el usuario no existe, crearlo automáticamente
-                if (user == null)
-                {
-                    user = new Usuario
+                    // Usar el procedimiento almacenado IniciarSesion para obtener los datos completos
+                    usuario = connection.QueryFirstOrDefault<Login>("IniciarSesion",
+                        new { Correo = email }, commandType: CommandType.StoredProcedure);
+
+                    }
+
+                    if (usuario == null)
                     {
-                        Nombre = nameClaim?.Value ?? "Usuario Externo",
-                        Correo = emailClaim.Value,
-                        Contrasenna = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()), // Generar una contraseña aleatoria
-                        RolId = 2, 
-                        FechaIngreso = DateTime.Now,
-                        Imagen = pictureClaim?.Value 
+                        ViewBag.Mensaje = "No se pudo autenticar al usuario.";
+                        return RedirectToAction("Login");
+                    }
+
+                    // Crear claims
+                    var userClaims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, usuario.Nombre),
+                        new Claim(ClaimTypes.Email, usuario.Correo),
+                        new Claim(ClaimTypes.Role, usuario.NombreRol),  // Usar el NombreRol del usuario
+                        new Claim("UserId", usuario.UsuarioId.ToString())
                     };
 
-                    // Agregar el nuevo usuario a la base de datos
-                    _context.Usuarios.Add(user);
-                    await _context.SaveChangesAsync();
-                }
+                    var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
 
-                // Crear las claims para iniciar sesión
-                var claimsIdentity = new ClaimsIdentity(info.Principal.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+                    // Registrar autenticación
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                // Redirigir a la página principal (Index)
-                return RedirectToAction("Index", "Home");
-            }
-            catch (AuthenticationFailureException ex)
-            {
-                // Si el usuario cancela la autenticación, lo redirigimos a la página de login
-                return RedirectToAction(nameof(Login), new { errorMessage = "El acceso fue denegado o se canceló el proceso de autenticación." });
+                    return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
             {
-                // Manejar cualquier otro error
-                return RedirectToAction(nameof(Login), new { errorMessage = ex.Message });
+                _logger.LogError(ex, "Error durante el inicio de sesión con Google");
+                ViewBag.Mensaje = "Ocurrió un error al iniciar sesión.";
+                return RedirectToAction("Login");
             }
         }
+
 
 
 

@@ -45,9 +45,9 @@
                 </div>
 
                 <!-- Botón de "Continuar con Google" -->
-                <form asp-action="ExternalLogin" method="post">
+                <form  asp-controller="Home" asp-action="LoginWithGoogle">
                     <div class="text-center mt-3">
-                        <button type="submit" class="btn-google" name="provider" value="Google" disabled>
+                        <button type="submit" class="btn-google" name="provider" value="Google">
                             <i class="bi bi-google"></i> Continuar con Google
                         </button>
                     </div>

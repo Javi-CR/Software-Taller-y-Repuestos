@@ -107,3 +107,24 @@ BEGIN
     INNER JOIN Roles R ON U.RolID = R.RolId  -- Hacer el JOIN con la tabla Roles
     WHERE U.Correo = @Correo;
 END;
+
+
+
+
+CREATE PROCEDURE RegistrarUsuarioGoogle
+    @Nombre NVARCHAR(100),
+    @Apellidos NVARCHAR(100),
+    @Correo NVARCHAR(100),
+    @Imagen NVARCHAR(MAX),
+    @RolID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Solo insertar si el usuario no existe
+    IF NOT EXISTS (SELECT 1 FROM Usuarios WHERE Correo = @Correo)
+    BEGIN
+        INSERT INTO Usuarios (Nombre, Apellidos, Correo, Imagen, RolID)
+        VALUES (@Nombre, @Apellidos, @Correo, @Imagen, @RolID);
+    END
+END
