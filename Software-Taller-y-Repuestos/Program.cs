@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
 using Software_Taller_y_Repuestos.Models;
 
@@ -20,12 +23,18 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true; // Asegura que la cookie sea esencial
 });
 
-// Configurar la autenticación con cookies y Google
+// Configurar la autenticación con cookies
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+
+
 })
 .AddCookie(options =>
 {
@@ -39,10 +48,23 @@ builder.Services.AddAuthentication(options =>
     options.LoginPath = "/Home/Login";
     options.AccessDeniedPath = "/Home/AccessDenied";
 })
-.AddGoogle(googleOptions =>
+.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
 {
-    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+
+    options.ClientId     = builder.Configuration.GetSection("GoogleKeys:ClientId").Value;
+    options.ClientSecret = builder.Configuration.GetSection("GoogleKeys:ClientSecret").Value;
+    options.ClaimActions.MapJsonKey("urn: google:picture", "picture", "url");
+
+    options.Events = new OAuthEvents
+    {
+        OnRemoteFailure = context =>
+        {
+            context.Response.Redirect("/");
+            context.HandleResponse();
+            return Task.CompletedTask;
+        }
+    };
+
 });
 
 var app = builder.Build();
