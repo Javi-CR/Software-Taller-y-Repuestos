@@ -191,13 +191,10 @@ namespace Software_Taller_y_Repuestos.Controllers
                 var lastName = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value;
                 var picture = claims?.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value;
 
-                if (email == null)
+                if (lastName == null)
                 {
-                    ViewBag.Mensaje = "No se pudo obtener la información del usuario.";
-                    return RedirectToAction("Login");
+                    lastName = "Agrega un apellido, editando el perfil";
                 }
-
-
 
                 Login? usuario;
 
