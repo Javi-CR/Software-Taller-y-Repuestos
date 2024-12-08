@@ -86,14 +86,14 @@ namespace Software_Taller_y_Repuestos.Controllers
 
                 if (userIdClaim == null)
                 {
-                    return RedirectToAction("Logout", "Home"); 
+                    return RedirectToAction("Logout", "Home");
                 }
 
                 var usuarioId = int.Parse(userIdClaim.Value);
 
                 string imagenAnterior;
 
-              
+                // Obtener datos del usuario desde la base de datos
                 using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
                 {
                     var usuario = connection.QueryFirstOrDefault<Usuario>(
@@ -104,20 +104,34 @@ namespace Software_Taller_y_Repuestos.Controllers
                     if (usuario == null)
                     {
                         ViewBag.ErrorMessage = "Usuario no encontrado.";
-                        return View(model);
+                        return View(model ?? new Usuario()); // Devuelve un modelo inicializado
                     }
 
-                
                     imagenAnterior = usuario.Imagen;
                 }
 
                 // Procesar la nueva imagen
                 if (Imagen != null && Imagen.Length > 0)
                 {
-                    // Generar un nombre único para la nueva imagen
-                    var nombreArchivo = $"{Guid.NewGuid()}{Path.GetExtension(Imagen.FileName)}";
+                    // Validar que el archivo sea una imagen
+                    var formatosValidos = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var extensionArchivo = Path.GetExtension(Imagen.FileName).ToLowerInvariant();
 
-                    // Ruta para guardar la nueva imagen
+                    if (!formatosValidos.Contains(extensionArchivo))
+                    {
+                        ViewBag.ErrorMessage = "El archivo debe ser una imagen en formato JPG, JPEG, PNG o GIF.";
+                        return View(model);
+                    }
+
+                    // Validar tipo MIME (opcional pero recomendable)
+                    if (!Imagen.ContentType.StartsWith("image/"))
+                    {
+                        ViewBag.ErrorMessage = "El archivo subido no es un tipo de imagen válido.";
+                        return View(model);
+                    }
+
+                    // Generar un nombre único para la nueva imagen
+                    var nombreArchivo = $"{Guid.NewGuid()}{extensionArchivo}";
                     var rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagen");
                     if (!Directory.Exists(rutaCarpeta))
                     {
@@ -141,36 +155,36 @@ namespace Software_Taller_y_Repuestos.Controllers
                         }
                     }
 
-                    // Actualizar el modelo con la nueva ruta de la imagen
+                    // Asignar la nueva ruta de la imagen
                     model.Imagen = $"/imagen/{nombreArchivo}";
                 }
                 else
                 {
                     // Mantener la imagen anterior si no se carga una nueva
-                    model.Imagen = imagenAnterior;
+                    model.Imagen = imagenAnterior ?? string.Empty; // Valor predeterminado
                 }
 
                 // Crear los parámetros para el procedimiento almacenado de actualización
                 var parametros = new
                 {
-                    usuarioId,
+                    UsuarioId = usuarioId,
                     model.Nombre,
                     model.Apellidos,
                     model.Telefono,
                     model.Direccion,
-                    model.Imagen 
+                    model.Imagen
                 };
 
-                // Llamar al procedimiento almacenado para actualizar el perfil
+                // Actualizar el perfil en la base de datos
                 using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
                 {
                     var result = connection.Execute("ActualizarPerfilUsuario", parametros, commandType: CommandType.StoredProcedure);
 
                     if (result > 0)
                     {
+                        // Si el nombre cambió, cerrar sesión
                         if (!string.Equals(username, model.Nombre, StringComparison.OrdinalIgnoreCase))
                         {
-                            // Si el nombre ha cambiado
                             return RedirectToAction("Logout", "Home");
                         }
 
@@ -182,23 +196,13 @@ namespace Software_Taller_y_Repuestos.Controllers
                         return View(model);
                     }
                 }
-
-
             }
             catch (Exception ex)
             {
-                // Manejar errores y registrar detalles
-                ViewBag.ErrorMessage = $"Ocurrió un error: {ex.Message}";
-                return View(model);
+                // Manejar errores inesperados
+                ViewBag.ErrorMessage = $"Ocurrió un error inesperado, Vuelva a intentarlo más tarde";
+                return View(model ?? new Usuario()); // Asegurar que el modelo no sea null
             }
-        }
-
-
-        [HttpGet]
-        public IActionResult PerfilUI()
-        {
-            return View();
-
         }
 
 

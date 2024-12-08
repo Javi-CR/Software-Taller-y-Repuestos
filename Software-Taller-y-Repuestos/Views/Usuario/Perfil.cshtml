@@ -4,69 +4,92 @@
     ViewData["Title"] = "Perfil";
 }
 
-<section id="login" class="contact section-bg d-flex align-items-center" style="min-height: 130vh;">
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
+}
+
+<section id="login" class="contact section-bg d-flex align-items-center" style="min-height: 100vh;">
     <div class="container">
         <div class="heading">
-            <div class="row d-flex justify-content-center text-center">
-                <div class="col-lg-8">
-                    <!-- Perfil del usuario -->
-                    <div class="testimonials">
-                        <div class="testimonial-profile">
-                            @if (string.IsNullOrEmpty(Model.Imagen))
-                            {
-                                <img class="testimonial-img" src="~/assets/img/default.png" alt="User Profile Picture">
-                            }
-                            else
-                            {
-                                <img class="testimonial-img" src="@Model.Imagen">
-                            }
+            <div class="row gutters-sm">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body" style="background-color: black">
+                            <div class="d-flex flex-column align-items-center text-center">
+                                @if (string.IsNullOrEmpty(Model.Imagen))
+                                {
+                                    <img alt="User Profile Picture"
+                                         src="~/assets/img/default.png"
+                                         style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; object-position: center; display: block;">
+                                }
+                                else
+                                {
+                                    <img alt="User Profile Picture"
+                                         src="@Model.Imagen"
+                                         style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; object-position: center; display: block;">
+                                }
+
+                                <div class="mt-3">
+                                    <hr>
+                                    <h4>Mi cuenta</h4>
+                                    <p class="text-muted font-size-sm">(@Model.Correo)</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                </div>
+                <div class="col-md-8">
+                    <div class="card mb-3">
+                        <div class="card-body" style="background: #0C0B09">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Nombre</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    @(@Model.Nombre ?? "Error al obtener")
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Apellidos</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    @(@Model.Apellidos ?? "Agrega un Apellido")
+                                </div>
+                            </div>
+                            <hr>
 
-
-                    <h1>Mi Cuenta</h1>
-                    <p>@Model.Nombre (@Model.Correo)</p>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Teléfono</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    @(@Model.Telefono ?? "Agrega un Teléfono")
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Dirección</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    @(@Model.Direccion ?? "Agrega una dirección")
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <a class="btn btn-primary btn-block" target="__blank" href="@Url.Action("EditarPerfil","Usuario")">Editar Perfil</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
-        </div>
-
-        <!-- Navegación del perfil -->
-        <nav class="breadcrumbs">
-            <div class="container">
-                <ol>
-                    <li><a href="@Url.Action("Perfil","Usuario")">Información</a></li>
-                    <li><a href="@Url.Action("EditarPerfil","Usuario")" style="color: white;">Editar Perfil</a></li>
-                </ol>
-            </div>
-        </nav>
-
-        @if (ViewBag.ErrorMessage != null)
-        {
-            <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
-        }
-
-        <div class="container">
-            <form class="php-email-form">
-                <div class="row">
-                    <div class="col-md-6 form-group">
-                        <input type="text" class="form-control" id="name" placeholder="Sin Nombre" value="@Model.Nombre" disabled>
-                    </div>
-                    <div class="col-md-6 form-group mt-3 mt-md-0">
-                        <input type="text" class="form-control" id="apellidos" placeholder="Sin Apellidos" value="@Model.Apellidos" disabled>
-                    </div>
-                </div>
-                <div class="form-group mt-3">
-                    <input type="email" class="form-control" id="correo" placeholder="Sin Correo" value="@Model.Correo" disabled>
-                </div>
-                <div class="form-group mt-3">
-                    <input type="text" class="form-control" id="telefono" placeholder="Sin número de teléfono" value="@Model.Telefono" disabled>
-                </div>
-                <div class="form-group mt-3">
-                    <textarea class="form-control" id="direccion" rows="8" placeholder="Sin dirección" disabled>@Model.Direccion</textarea>
-                </div>
-            </form>
         </div>
     </div>
 </section>
