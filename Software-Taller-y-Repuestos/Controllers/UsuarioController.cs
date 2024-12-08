@@ -82,6 +82,8 @@ namespace Software_Taller_y_Repuestos.Controllers
             {
                 // Recuperar el UsuarioID desde los claims
                 var userIdClaim = User.FindFirst("UserId");
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
                 if (userIdClaim == null)
                 {
                     return RedirectToAction("Logout", "Home"); 
@@ -159,21 +161,6 @@ namespace Software_Taller_y_Repuestos.Controllers
                     model.Imagen 
                 };
 
-
-                // Actualizar los claims
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, model.Nombre),
-                    new Claim(ClaimTypes.Email, User.FindFirst(ClaimTypes.Email)?.Value),
-                    new Claim("UserId", usuarioId.ToString())
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties { IsPersistent = true };
-
-                HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties).Wait();
-
-
                 // Llamar al procedimiento almacenado para actualizar el perfil
                 using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
                 {
@@ -181,6 +168,12 @@ namespace Software_Taller_y_Repuestos.Controllers
 
                     if (result > 0)
                     {
+                        if (!string.Equals(username, model.Nombre, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Si el nombre ha cambiado
+                            return RedirectToAction("Logout", "Home");
+                        }
+
                         return RedirectToAction("Perfil", "Usuario");
                     }
                     else
