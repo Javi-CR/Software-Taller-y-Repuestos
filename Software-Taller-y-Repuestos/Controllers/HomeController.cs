@@ -183,17 +183,40 @@ namespace Software_Taller_y_Repuestos.Controllers
             {
                 var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-
                 // Extraer información del usuario de Google
                 var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
                 var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
                 var firstName = claims?.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value;
                 var lastName = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value;
-                var picture = claims?.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value;
+                var pictureUrl = claims?.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value;
 
                 if (lastName == null)
                 {
                     lastName = "Agrega un apellido, editando el perfil";
+                }
+
+                string relativePath = null;
+
+                if (!string.IsNullOrEmpty(pictureUrl))
+                {
+                    // Descargar y guardar la imagen
+                    using (var httpClient = new HttpClient())
+                    {
+                        var imageBytes = await httpClient.GetByteArrayAsync(pictureUrl);
+                        var fileName = $"{Guid.NewGuid()}.jpg";
+                        var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagen");
+                        var filePath = Path.Combine(folderPath, fileName);
+
+                        if (!Directory.Exists(folderPath))
+                        {
+                            Directory.CreateDirectory(folderPath);
+                        }
+
+                        await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
+
+                        // Ruta relativa para la base de datos
+                        relativePath = $"/imagen/{fileName}";
+                    }
                 }
 
                 Login? usuario;
@@ -208,46 +231,45 @@ namespace Software_Taller_y_Repuestos.Controllers
                             Nombre = firstName,
                             Apellidos = lastName,
                             Correo = email,
-                            Imagen = picture,
+                            Imagen = relativePath, // Guardar la ruta relativa
                             RolID = 2 // Rol predeterminado
                         },
                         commandType: CommandType.StoredProcedure
                     );
 
-
                     // Usar el procedimiento almacenado IniciarSesion para obtener los datos completos
                     usuario = connection.QueryFirstOrDefault<Login>("IniciarSesion",
                         new { Correo = email }, commandType: CommandType.StoredProcedure);
+                }
 
-                    }
+                if (usuario == null)
+                {
+                    ViewBag.Mensaje = "No se pudo autenticar al usuario.";
+                    return RedirectToAction("Login");
+                }
 
-                    if (usuario == null)
-                    {
-                        ViewBag.Mensaje = "No se pudo autenticar al usuario.";
-                        return RedirectToAction("Login");
-                    }
+                // Crear claims
+                var userClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, usuario.Nombre),
+                    new Claim(ClaimTypes.Email, usuario.Correo),
+                    new Claim(ClaimTypes.Role, usuario.NombreRol),  // Usar el NombreRol del usuario
+                    new Claim("UserId", usuario.UsuarioId.ToString())
+                };
 
-                    // Crear claims
-                    var userClaims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, usuario.Nombre),
-                        new Claim(ClaimTypes.Email, usuario.Correo),
-                        new Claim(ClaimTypes.Role, usuario.NombreRol),  // Usar el NombreRol del usuario
-                        new Claim("UserId", usuario.UsuarioId.ToString())
-                    };
+                var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
 
-                    var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var principal = new ClaimsPrincipal(identity);
+                // Registrar autenticación
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                    // Registrar autenticación
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-                    return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error durante el inicio de sesión con Google");
                 ViewBag.Mensaje = "Ocurrió un error al iniciar sesión.";
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return RedirectToAction("Login");
             }
         }

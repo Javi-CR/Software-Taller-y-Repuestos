@@ -201,6 +201,12 @@ namespace Software_Taller_y_Repuestos.Controllers
         }
 
 
+        [HttpGet]
+        public IActionResult PerfilUI()
+        {
+            return View();
+
+        }
 
 
 
