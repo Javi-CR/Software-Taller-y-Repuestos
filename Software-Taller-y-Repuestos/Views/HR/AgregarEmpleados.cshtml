@@ -5,24 +5,27 @@
 }
 
 <!-- Segundo Navbar -->
-<header id="header" class="fixed-top d-flex align-items-cente" style="margin-top: 65px;">
-    <div class="container-fluid container-xl d-flex align-items-center justify-content-lg-between">
-        <nav id="navbar" class="navbar order-last order-lg-0">
-            <ul>
-                <li><a class="nav-link scrollto" href="@Url.Action("Empleados","HR")">Empleados Disponibles</a></li>
-                <li><a class="nav-link scrollto active" href="@Url.Action("AgregarEmpleados","HR")">Agregar empleados</a></li>
-            </ul>
-            <i class="bi bi-list mobile-nav-toggle"></i>
-        </nav>
-    </div>
-</header>
+<div>
+    <nav class="breadcrumbs">
+        <div class="container">
+            <ol>
+                <li><a href="@Url.Action("Empleados","HR")" style="color: white;">Empleados Disponibles</a></li>
+                <li><a href="@Url.Action("AgregarEmpleados","HR")">Agregar empleados</a></li>
+            </ol>
+        </div>
+    </nav>
+</div>
 
 <!-- Lista de Usuarios Clientes Para Agregar -->
-<section id="login" class="contact section-bg d-flex align-items-center" style="min-height: 100vh;">
+<section id="usuarios" class="contact section-bg d-flex align-items-center">
+    
     <div class="container mt-4">
-        <h3>Usuarios Disponibles</h3>
+       
+        <br>
 
-        @if (!Model.Any()) // La lista esta vacia?
+        <h3 class="mb-4">Usuarios Disponibles</h3>
+
+        @if (!Model.Any())
         {
             <div class="alert alert-info" role="alert">
                 No hay usuarios disponibles.
@@ -30,30 +33,38 @@
         }
         else
         {
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Correo</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var cliente in Model)
-                    {
-                        <tr>
-                            <td>@cliente.Nombre @cliente.Apellidos</td>
-                            <td>@cliente.Correo</td>
-                            <td>
+            <div class="row">
+                @foreach (var cliente in Model)
+                {
+                    <div class="col-md-4 col-sm-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center" style="background-color: black">
+                                <!-- Foto de perfil circular -->
+                                <img src="@Url.Content(cliente.Imagen ?? "~/assets/img/default.png")"
+                                     class="rounded-circle mb-3"
+                                     alt="Foto de @cliente.Nombre"
+                                     style="width: 100px; height: 100px; object-fit: cover;">
+
+                                <h5 class="card-title">@cliente.Nombre @cliente.Apellidos</h5>
+                                <p class="card-text text-muted">@cliente.Correo</p>
+
+                                <!-- Botón para asignar -->
                                 <form asp-action="AsignarRolEmpleado" asp-controller="HR" method="post">
                                     <input type="hidden" name="usuarioId" value="@cliente.UsuarioId" />
-                                    <button type="submit" class="btn btn-primary">Asignar a Empleado</button>
+                                    <button type="submit" class="btn btn-primary btn-sm">Asignar a Empleado</button>
                                 </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
         }
+
+        <br>
+        <br>
+        <br>
+        <br>
+        
+
     </div>
 </section>

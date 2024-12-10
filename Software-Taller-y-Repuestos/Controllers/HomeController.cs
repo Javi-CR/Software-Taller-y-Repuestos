@@ -192,7 +192,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
                 if (lastName == null)
                 {
-                    lastName = "Agrega un apellido, editando el perfil";
+                    lastName = "-";
                 }
 
                 string relativePath = null;

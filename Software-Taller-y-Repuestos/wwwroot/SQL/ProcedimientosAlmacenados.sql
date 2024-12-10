@@ -128,3 +128,12 @@ BEGIN
         VALUES (@Nombre, @Apellidos, @Correo, @Imagen, @RolID);
     END
 END
+
+
+
+
+
+INSERT INTO [TallerRepuestosDB].[dbo].[Usuarios] 
+    ([Nombre], [Correo], [Contrasenna], [Telefono], [Direccion], [RolID], [FechaIngreso], [SalarioBase], [Imagen], [Apellidos])
+VALUES 
+    ('Administrador', 'admin@taller.com', '$2a$11$2RSevFCMI5xO2TfltJQzseFbj4DR/NFFGJAQedoPkusJcNaEqxqWK', NULL, NULL, 1, GETDATE(), NULL, NULL, 'Admin');
