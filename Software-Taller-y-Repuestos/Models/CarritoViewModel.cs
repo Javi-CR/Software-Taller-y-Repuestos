@@ -1,4 +1,6 @@
-﻿namespace Software_Taller_y_Repuestos.Models
+﻿using Microsoft.AspNetCore.Http; // Asegúrate de incluir este namespace
+
+namespace Software_Taller_y_Repuestos.Models
 {
     public class CarritoViewModel
     {
@@ -17,6 +19,7 @@
                 return 0; // Si Producto es null, retornar 0
             }
         }
-    }
 
+        public IFormFile Recibo { get; set; } // Cambia HttpPostedFileBase por IFormFile
+    }
 }

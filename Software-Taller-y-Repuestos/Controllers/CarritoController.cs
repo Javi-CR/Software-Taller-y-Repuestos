@@ -4,6 +4,7 @@ using Software_Taller_y_Repuestos.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
@@ -93,6 +94,56 @@ namespace Software_Taller_y_Repuestos.Controllers
 
             HttpContext.Session.Set("Carrito", carrito);
 
+            return RedirectToAction("Index");
+        }
+
+        // Acción para mostrar el popup de opciones de pago
+        public IActionResult ProcesoPago()
+        {
+            return PartialView("_PopupPago");
+        }
+
+        // Acción para manejar el pago con Sinpe Móvil
+        [HttpPost]
+        public async Task<IActionResult> PagoSinpe(IFormFile recibo)
+        {
+            if (recibo != null && recibo.Length > 0)
+            {
+                var fileName = Path.GetFileName(recibo.FileName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", fileName);
+
+                // Crear carpeta si no existe
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await recibo.CopyToAsync(stream);
+                }
+
+                // Guardar ruta del archivo en la base de datos
+                var carrito = new Carrito
+                {
+                    ReciboPath = fileName // Solo guardar el nombre del archivo
+                };
+
+                _context.Carritos.Add(carrito);
+                await _context.SaveChangesAsync();
+
+                TempData["Message"] = "El recibo se subió correctamente.";
+            }
+            else
+            {
+                TempData["Error"] = "Por favor, sube un archivo válido.";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        // Acción para manejar el pago presencial
+        [HttpPost]
+        public IActionResult PagoPresencial()
+        {
+            TempData["Message"] = "Gracias. Continúe con su pago en la sucursal.";
             return RedirectToAction("Index");
         }
 
