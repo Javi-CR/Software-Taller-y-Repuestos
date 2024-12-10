@@ -20,12 +20,12 @@ namespace Software_Taller_y_Repuestos.Controllers
         // Mostrar el carrito de compras
         public IActionResult Index()
         {
-            var carrito = HttpContext.Session.Get<List<Producto>>("Carrito") ?? new List<Producto>();
+            var carrito = HttpContext.Session.Get<List<CarritoItem>>("Carrito") ?? new List<CarritoItem>();
 
-            var carritoViewModel = carrito.Select(p => new CarritoViewModel
+            var carritoViewModel = carrito.Select(item => new CarritoViewModel
             {
-                Producto = p,
-                Cantidad = 1 // O la cantidad correspondiente que esté guardada en el carrito
+                Producto = item.Producto,
+                Cantidad = item.Cantidad
             }).ToList();
 
             // Calcular el total del carrito
@@ -47,11 +47,24 @@ namespace Software_Taller_y_Repuestos.Controllers
                 return NotFound();
             }
 
-            var carrito = HttpContext.Session.Get<List<Producto>>("Carrito") ?? new List<Producto>();
+            var carrito = HttpContext.Session.Get<List<CarritoItem>>("Carrito") ?? new List<CarritoItem>();
 
-            carrito.Add(producto);
+            var carritoItem = carrito.FirstOrDefault(item => item.Producto.ProductoId == productoId);
+
+            if (carritoItem != null)
+            {
+                // Si el producto ya está en el carrito, incrementar la cantidad
+                carritoItem.Cantidad++;
+            }
+            else
+            {
+                // Si el producto no está, agregarlo
+                carrito.Add(new CarritoItem { Producto = producto, Cantidad = 1 });
+            }
 
             HttpContext.Session.Set("Carrito", carrito);
+
+            TempData["Message"] = "Producto agregado exitosamente al carrito.";
 
             return RedirectToAction("Index", "Producto");
         }
@@ -60,9 +73,9 @@ namespace Software_Taller_y_Repuestos.Controllers
         [HttpPost]
         public IActionResult EliminarDelCarrito(int productoId)
         {
-            var carrito = HttpContext.Session.Get<List<Producto>>("Carrito") ?? new List<Producto>();
+            var carrito = HttpContext.Session.Get<List<CarritoItem>>("Carrito") ?? new List<CarritoItem>();
 
-            var item = carrito.FirstOrDefault(p => p.ProductoId == productoId);
+            var item = carrito.FirstOrDefault(p => p.Producto.ProductoId == productoId);
             if (item != null)
             {
                 carrito.Remove(item);
@@ -84,9 +97,9 @@ namespace Software_Taller_y_Repuestos.Controllers
         [HttpPost]
         public IActionResult ModificarCantidad(int productoId, int cantidad)
         {
-            var carrito = HttpContext.Session.Get<List<Producto>>("Carrito") ?? new List<Producto>();
+            var carrito = HttpContext.Session.Get<List<CarritoItem>>("Carrito") ?? new List<CarritoItem>();
 
-            var item = carrito.FirstOrDefault(p => p.ProductoId == productoId);
+            var item = carrito.FirstOrDefault(p => p.Producto.ProductoId == productoId);
             if (item != null && cantidad > 0)
             {
                 item.Cantidad = cantidad;  // Actualizar la cantidad
@@ -120,15 +133,6 @@ namespace Software_Taller_y_Repuestos.Controllers
                     await recibo.CopyToAsync(stream);
                 }
 
-                // Guardar ruta del archivo en la base de datos
-                var carrito = new Carrito
-                {
-                    ReciboPath = fileName // Solo guardar el nombre del archivo
-                };
-
-                _context.Carritos.Add(carrito);
-                await _context.SaveChangesAsync();
-
                 TempData["Message"] = "El recibo se subió correctamente.";
             }
             else
@@ -150,18 +154,17 @@ namespace Software_Taller_y_Repuestos.Controllers
         // Acción para ir a la facturación
         public IActionResult Facturacion()
         {
-            var carrito = HttpContext.Session.Get<List<Producto>>("Carrito") ?? new List<Producto>();
+            var carrito = HttpContext.Session.Get<List<CarritoItem>>("Carrito") ?? new List<CarritoItem>();
 
             if (!carrito.Any())
             {
                 return RedirectToAction("Index");
             }
 
-            // Aquí puedes pasar los datos del carrito a la vista de facturación
-            var carritoViewModel = carrito.Select(p => new CarritoViewModel
+            var carritoViewModel = carrito.Select(item => new CarritoViewModel
             {
-                Producto = p,
-                Cantidad = 1 // O la cantidad correspondiente
+                Producto = item.Producto,
+                Cantidad = item.Cantidad
             }).ToList();
 
             var total = carritoViewModel.Sum(item => item.Subtotal);
@@ -170,5 +173,11 @@ namespace Software_Taller_y_Repuestos.Controllers
 
             return View(carritoViewModel);
         }
+    }
+
+    public class CarritoItem
+    {
+        public Producto Producto { get; set; }
+        public int Cantidad { get; set; }
     }
 }

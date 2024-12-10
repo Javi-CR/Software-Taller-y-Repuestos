@@ -20,4 +20,3 @@ public partial class Producto
     public virtual ICollection<DetalleFactura> DetallesFacturas { get; set; } = new List<DetalleFactura>();
     public virtual ICollection<ModelosAuto> Modelos { get; set; } = new List<ModelosAuto>();
 }
-
