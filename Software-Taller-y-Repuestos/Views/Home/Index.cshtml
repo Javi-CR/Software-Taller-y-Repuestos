@@ -11,8 +11,12 @@
                 <h2>¡Cuidando de su auto por mas de 10 años!</h2>
 
                 <div class="btns">
-                    <a href="#menu" class="btn-menu animated fadeInUp scrollto">Nuestros productos</a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a href="@Url.Action("Index", "Producto")" class="btn-menu animated fadeInUp scrollto">Nuestros productos</a>
+                    }
                 </div>
+
             </div>
             <div class="col-lg-4 d-flex align-items-center justify-content-center position-relative" data-aos="zoom-in" data-aos-delay="200">
                 <a href="https://www.youtube.com/watch?v=EDSTDHU6oFI" class="glightbox play-btn"></a>

@@ -31,7 +31,7 @@
                                             <td>@factura.Cantidad</td>
                                             <td>@factura.EstadoPago</td>
                                             <td>@factura.FechaCompra.ToString("dd/MM/yyyy")</td>
-                                            <td>@factura.Total.ToString("C")</td>
+                                            <td>@factura.Total.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
                                             <td>
                                                 <form method="post" asp-action="CambiarEstado" asp-controller="AdminFactura">
                                                     <input type="hidden" name="id" value="@factura.FacturaId" />
