@@ -9,9 +9,11 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Software_Taller_y_Repuestos.Extensions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
+    [Authorize]
     public class ProductoController : Controller
     {
         private readonly TallerRepuestosDbContext _context;
@@ -24,6 +26,7 @@ namespace Software_Taller_y_Repuestos.Controllers
         }
 
         // GET: Producto/Index
+        [Authorize(Roles = "Admin,Empleado,Cliente")]
         public async Task<IActionResult> Index(string searchString, string sortOrder)
         {
             _logger.LogInformation("Accediendo a la lista de productos.");
@@ -55,6 +58,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
 
         // GET: Producto/Details/5
+        [Authorize(Roles = "Admin,Empleado,Cliente")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -77,6 +81,7 @@ namespace Software_Taller_y_Repuestos.Controllers
         }
 
         // GET: Producto/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre");
@@ -85,6 +90,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca")] Producto producto, IFormFile imagen)
         {
             if (ModelState.IsValid)
@@ -115,6 +121,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
 
         // GET: Producto/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -137,6 +144,7 @@ namespace Software_Taller_y_Repuestos.Controllers
         // POST: Producto/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("ProductoId,Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Imagen")] Producto producto, IFormFile imagen)
         {
             if (id != producto.ProductoId)
@@ -196,6 +204,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
 
         // GET: Producto/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -219,6 +228,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
@@ -242,6 +252,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Upload()
         {
             return View();
@@ -250,6 +261,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
         // POST: Producto/Upload
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
             if (file == null || file.Length == 0)

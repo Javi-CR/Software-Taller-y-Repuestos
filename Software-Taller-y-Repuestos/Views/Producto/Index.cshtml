@@ -33,8 +33,11 @@
     </nav>
 
     <div class="mb-4 text-center">
-        <a asp-action="Create" class="btn btn-success mr-2">Agregar un producto</a>
-        <a asp-action="Upload" class="btn btn-primary mr-2">Subir archivo</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-success mr-2">Agregar un producto</a>
+            <a asp-action="Upload" class="btn btn-primary mr-2">Subir archivo</a>
+        }
     </div>
 
     <div id="productCarousel" class="carousel slide" data-ride="carousel">
@@ -69,13 +72,19 @@
                                     </ul>
                                     <div class="btn-group" role="group" aria-label="Basic mixed styles example">
                                         <a asp-action="Details" asp-route-id="@item.ProductoId" class="btn btn-info">Detalles</a>
-                                        <a asp-action="Edit" asp-route-id="@item.ProductoId" class="btn btn-warning">Editar</a>
-                                        <a asp-action="Delete" asp-route-id="@item.ProductoId" class="btn btn-danger">Eliminar</a>
+
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.ProductoId" class="btn btn-warning">Editar</a>
+                                            <a asp-action="Delete" asp-route-id="@item.ProductoId" class="btn btn-danger">Eliminar</a>
+                                        }
+
                                         <form method="post" asp-controller="Carrito" asp-action="AgregarAlCarrito" asp-route-productoId="@item.ProductoId">
-                                            <button type="submit" class="btn btn-success">
-                                                <i class="bi bi-cart"></i>
-                                            </button>
+                                             <button type="submit" class="btn btn-success">
+                                                 <i class="bi bi-cart"></i>
+                                             </button>
                                         </form>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -95,6 +104,7 @@
             <span class="sr-only">Siguiente</span>
         </a>
     </div>
+
 </div>
 
 @section Scripts {

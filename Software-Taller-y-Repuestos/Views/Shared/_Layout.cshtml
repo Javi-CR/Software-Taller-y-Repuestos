@@ -58,13 +58,15 @@
 
                     @if (User.IsInRole("Admin"))
                     {
+                        <li><a class="nav-link scrollto" href="@Url.Action("Empleados", "HR")">Empleados</a></li>
+                        <li><a class="nav-link" href="@Url.Action("Index", "Producto")">Productos</a></li>
+                        <li><a class="nav-link" href="@Url.Action("Index", "Carrito")">Carrito</a></li>
 
                     }
 
                     @if (User.IsInRole("Cliente"))
                     {
 
-                        <li><a class="nav-link scrollto" href="@Url.Action("Empleados", "HR")">Empleados</a></li>
                         <li><a class="nav-link" href="@Url.Action("Index", "Producto")">Productos</a></li>
                         <li><a class="nav-link" href="@Url.Action("Index", "Carrito")">Carrito</a></li>
 
@@ -74,7 +76,8 @@
 
                     @if (User.IsInRole("Empleado"))
                     {
-
+                        <li><a class="nav-link" href="@Url.Action("Index", "Producto")">Productos</a></li>
+                        <li><a class="nav-link" href="@Url.Action("Index", "Carrito")">Carrito</a></li>
                     }
 
                     @if (User.Identity.IsAuthenticated)

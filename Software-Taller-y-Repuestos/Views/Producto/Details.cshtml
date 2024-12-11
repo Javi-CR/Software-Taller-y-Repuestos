@@ -30,7 +30,6 @@
                         @Model.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))
                     </p>
 
-                    
                 </div>
             </div>
         </div>
@@ -39,7 +38,11 @@
     <!-- Botones de acción -->
     <div class="text-center">
         <a asp-action="Index" class="btn btn-secondary me-2">Volver</a>
-        <a asp-action="Edit" asp-route-id="@Model.ProductoId" class="btn btn-warning me-2">Editar</a>
-        <a asp-action="Delete" asp-route-id="@Model.ProductoId" class="btn btn-danger">Eliminar</a>
+
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.ProductoId" class="btn btn-warning me-2">Editar</a>
+            <a asp-action="Delete" asp-route-id="@Model.ProductoId" class="btn btn-danger">Eliminar</a>
+        }
     </div>
 </div>

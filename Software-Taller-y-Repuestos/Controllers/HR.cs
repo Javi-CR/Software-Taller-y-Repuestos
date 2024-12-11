@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Software_Taller_y_Repuestos.Models;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
+   [Authorize(Roles = "Admin")]
     public class HR : Controller
     {
 
@@ -18,6 +20,8 @@ namespace Software_Taller_y_Repuestos.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+
         public IActionResult Empleados()
         {
             // Obtén todos los usuarios con el rol de "Empleado"
