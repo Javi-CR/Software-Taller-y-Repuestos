@@ -6,6 +6,8 @@ using Microsoft.Data.SqlClient;
 using Software_Taller_y_Repuestos.Models;
 using System.Data;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
@@ -19,33 +21,51 @@ namespace Software_Taller_y_Repuestos.Controllers
             _conf = conf;
         }
 
+
+
         [HttpGet]
         public IActionResult Perfil()
         {
-            // Recuperar el UsuarioID desde los claims
+            // Recuperar el ID del usuario desde los claims
             var userIdClaim = User.FindFirst("UserId");
             if (userIdClaim == null)
             {
-                return RedirectToAction("Logout", "Home"); // Redirigir si no está autenticado
+                return RedirectToAction("Logout", "Home");
             }
 
             var usuarioId = int.Parse(userIdClaim.Value);
 
             using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
             {
+                // Obtener el modelo Usuario desde la base de datos
                 var usuario = connection.QueryFirstOrDefault<Usuario>(
                     "ConsultarPerfilUsuario",
                     new { UsuarioID = usuarioId },
-                    commandType: System.Data.CommandType.StoredProcedure);
+                    commandType: CommandType.StoredProcedure);
 
                 if (usuario == null)
                 {
+                    ViewBag.ErrorMessage = "Usuario no encontrado.";
                     return View();
                 }
 
-                return View(usuario);
+                // Obtener las facturas del usuario (modelo UsuarioFactura)
+                var facturas = connection.Query<UsuarioFactura>(
+                    "ObtenerFacturaPorUsuario",
+                    new { UsuarioId = usuarioId },
+                    commandType: CommandType.StoredProcedure).ToList();
+
+                // Crear el ViewModel
+                var viewModel = new PerfilViewModel
+                {
+                    Usuario = usuario,
+                    Facturas = facturas
+                };
+
+                return View(viewModel);
             }
         }
+
 
         [HttpGet]
         public IActionResult EditarPerfil()
@@ -204,6 +224,11 @@ namespace Software_Taller_y_Repuestos.Controllers
                 return View(model ?? new Usuario()); // Asegurar que el modelo no sea null
             }
         }
+
+
+
+
+
 
 
 

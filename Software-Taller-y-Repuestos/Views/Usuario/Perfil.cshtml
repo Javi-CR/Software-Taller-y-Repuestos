@@ -1,4 +1,4 @@
-﻿@model Usuario
+﻿@model Software_Taller_y_Repuestos.Models.PerfilViewModel
 
 @{
     ViewData["Title"] = "Perfil";
@@ -13,33 +13,35 @@
     <div class="container">
         <div class="heading">
             <div class="row gutters-sm">
+                <!-- Tarjeta de Perfil del Usuario -->
                 <div class="col-md-4 mb-3">
                     <div class="card">
                         <div class="card-body" style="background-color: black">
                             <div class="d-flex flex-column align-items-center text-center">
-                                @if (string.IsNullOrEmpty(Model.Imagen))
+                                @if (string.IsNullOrEmpty(Model.Usuario.Imagen))
                                 {
                                     <img alt="User Profile Picture"
                                          src="~/assets/img/default.png"
-                                         style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; object-position: center; display: block;">
+                                         style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; object-position: center;">
                                 }
                                 else
                                 {
                                     <img alt="User Profile Picture"
-                                         src="@Model.Imagen"
-                                         style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; object-position: center; display: block;">
+                                         src="@Model.Usuario.Imagen"
+                                         style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; object-position: center;">
                                 }
 
                                 <div class="mt-3">
                                     <hr>
                                     <h4>Mi cuenta</h4>
-                                    <p class="text-muted font-size-sm">(@Model.Correo)</p>
+                                    <p class="text-muted font-size-sm">(@Model.Usuario.Correo)</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
+
+                <!-- Detalles del Usuario -->
                 <div class="col-md-8">
                     <div class="card mb-3">
                         <div class="card-body" style="background: #0C0B09">
@@ -48,7 +50,7 @@
                                     <h6 class="mb-0">Nombre</h6>
                                 </div>
                                 <div class="col-sm-9 text-secondary">
-                                    @(@Model.Nombre ?? "Error al obtener")
+                                    @(@Model.Usuario.Nombre ?? "Error al obtener")
                                 </div>
                             </div>
                             <hr>
@@ -57,17 +59,16 @@
                                     <h6 class="mb-0">Apellidos</h6>
                                 </div>
                                 <div class="col-sm-9 text-secondary">
-                                    @(@Model.Apellidos ?? "Agrega un Apellido")
+                                    @(@Model.Usuario.Apellidos ?? "Agrega un Apellido")
                                 </div>
                             </div>
                             <hr>
-
                             <div class="row">
                                 <div class="col-sm-3">
                                     <h6 class="mb-0">Teléfono</h6>
                                 </div>
                                 <div class="col-sm-9 text-secondary">
-                                    @(@Model.Telefono ?? "Agrega un Teléfono")
+                                    @(@Model.Usuario.Telefono ?? "Agrega un Teléfono")
                                 </div>
                             </div>
                             <hr>
@@ -76,20 +77,69 @@
                                     <h6 class="mb-0">Dirección</h6>
                                 </div>
                                 <div class="col-sm-9 text-secondary">
-                                    @(@Model.Direccion ?? "Agrega una dirección")
+                                    @(@Model.Usuario.Direccion ?? "Agrega una dirección")
                                 </div>
                             </div>
                             <hr>
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <a class="btn btn-primary btn-block" target="__blank" href="@Url.Action("EditarPerfil","Usuario")">Editar Perfil</a>
+                                    <a class="btn btn-primary btn-block" target="__blank" href="@Url.Action("EditarPerfil", "Usuario")">Editar Perfil</a>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
+
+            <!-- Tabla de Facturas -->
+            <div class="row gutters-sm">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body" style="background-color: black;">
+                            <h5 class="text-center text-light">Facturas Asociadas</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Producto</th>
+                                            <th>Cantidad</th>
+                                            <th>Estado de Pago</th>
+                                            <th>Fecha de Compra</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.Facturas.Any())
+                                        {
+                                            int index = 1;
+                                            foreach (var factura in Model.Facturas)
+                                            {
+                                                <tr>
+                                                    <td>@index</td>
+                                                    <td>@factura.NombreProducto</td>
+                                                    <td>@factura.Cantidad</td>
+                                                    <td>@factura.EstadoPago</td>
+                                                    <td>@factura.FechaCompra.ToString("dd/MM/yyyy")</td>
+                                                    <td>@factura.Total.ToString("C")</td>
+                                                </tr>
+                                                index++;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="6" class="text-center">No se encontraron facturas.</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
