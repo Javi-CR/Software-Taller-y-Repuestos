@@ -167,3 +167,46 @@ BEGIN
     WHERE 
         f.UsuarioId = @UsuarioId;
 END;
+
+
+
+
+----------------------------------------------------
+CREATE PROCEDURE ObtenerTodasLasFacturas
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        f.FacturaId,
+        f.FechaCompra,
+        f.IVA,
+        f.Subtotal,  
+        f.Total,    
+        df.Cantidad,
+        df.EstadoPago,
+        p.Nombre AS NombreProducto
+    FROM 
+        TallerRepuestosDB.dbo.Facturas f
+    INNER JOIN 
+        TallerRepuestosDB.dbo.DetalleFacturas df
+        ON f.FacturaId = df.FacturaId
+    INNER JOIN 
+        TallerRepuestosDB.dbo.Productos p
+        ON df.ProductoId = p.ProductoId;
+END;
+
+
+
+CREATE PROCEDURE ActualizarEstadoFactura
+    @FacturaId INT,
+    @NuevoEstado NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE df
+    SET df.EstadoPago = @NuevoEstado
+    FROM TallerRepuestosDB.dbo.DetalleFacturas df
+    WHERE df.FacturaId = @FacturaId;
+END;

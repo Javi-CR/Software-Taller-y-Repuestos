@@ -1,0 +1,62 @@
+﻿@model IEnumerable<FacturaViewModel>
+
+<div class="container mt-5 pt-5">
+    <div class="row gutters-sm">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body" style="background-color: black;">
+                    <h5 class="text-center text-light">Todas las Facturas</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-dark">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Estado de Pago</th>
+                                    <th>Fecha de Compra</th>
+                                    <th>Total</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Any())
+                                {
+                                    int index = 1;
+                                    foreach (var factura in Model)
+                                    {
+                                        <tr>
+                                            <td>@index</td>
+                                            <td>@factura.NombreProducto</td>
+                                            <td>@factura.Cantidad</td>
+                                            <td>@factura.EstadoPago</td>
+                                            <td>@factura.FechaCompra.ToString("dd/MM/yyyy")</td>
+                                            <td>@factura.Total.ToString("C")</td>
+                                            <td>
+                                                <form method="post" asp-action="CambiarEstado" asp-controller="AdminFactura">
+                                                    <input type="hidden" name="id" value="@factura.FacturaId" />
+                                                    <select name="nuevoEstado" class="form-control form-control-sm">
+                                                        <option value="En revisión">En revisión</option>
+                                                        <option value="Aprobado">Aprobado</option>
+                                                    </select>
+                                                    <button type="submit" class="btn btn-sm btn-primary mt-2">Actualizar</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        index++;
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center">No se encontraron facturas.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
