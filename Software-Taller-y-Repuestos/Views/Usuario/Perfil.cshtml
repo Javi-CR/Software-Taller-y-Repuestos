@@ -121,7 +121,7 @@
                                                     <td>@factura.Cantidad</td>
                                                     <td>@factura.EstadoPago</td>
                                                     <td>@factura.FechaCompra.ToString("dd/MM/yyyy")</td>
-                                                    <td>@factura.Total.ToString("C")</td>
+                                                    <td>@factura.Total.ToString("C", new System.Globalization.CultureInfo("es-CR"))</td>
                                                 </tr>
                                                 index++;
                                             }
@@ -139,6 +139,7 @@
                     </div>
                 </div>
             </div>
+
 
         </div>
     </div>
