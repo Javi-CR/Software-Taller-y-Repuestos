@@ -15,6 +15,9 @@ namespace Software_Taller_y_Repuestos.Controllers
             _context = context;
         }
 
+        //volver hacer otra vez desde 0
+
+
         public IActionResult ConfirmarCompra()
         {
             var carrito = HttpContext.Session.Get<List<Producto>>("Carrito");

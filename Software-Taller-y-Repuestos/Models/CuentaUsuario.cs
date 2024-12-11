@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Software_Taller_y_Repuestos.Models
 {
+
+    [NotMapped]
     public class CuentaUsuario
     {
 
