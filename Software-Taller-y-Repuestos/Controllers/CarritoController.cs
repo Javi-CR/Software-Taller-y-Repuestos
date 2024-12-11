@@ -110,6 +110,8 @@ namespace Software_Taller_y_Repuestos.Controllers
             return RedirectToAction("Index");
         }
 
+
+
         // Acción para mostrar el popup de opciones de pago
         public IActionResult ProcesoPago()
         {
@@ -120,12 +122,26 @@ namespace Software_Taller_y_Repuestos.Controllers
         [HttpPost]
         public async Task<IActionResult> PagoSinpe(IFormFile recibo)
         {
-            if (recibo != null && recibo.Length > 0)
+            try
             {
+                var carrito = HttpContext.Session.Get<List<CarritoItem>>("Carrito") ?? new List<CarritoItem>();
+
+                if (!carrito.Any())
+                {
+                    TempData["Message"] = "El carrito está vacío.";
+                    return RedirectToAction("Index");
+                }
+
+                if (recibo == null || recibo.Length == 0)
+                {
+                    TempData["Message"] = "Por favor, sube un archivo válido.";
+                    return RedirectToAction("ProcesoPago");
+                }
+
+                // Guardar el archivo recibido
+                string imagenPath;
                 var fileName = Path.GetFileName(recibo.FileName);
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", fileName);
-
-                // Crear carpeta si no existe
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
                 using (var stream = new FileStream(path, FileMode.Create))
@@ -133,46 +149,131 @@ namespace Software_Taller_y_Repuestos.Controllers
                     await recibo.CopyToAsync(stream);
                 }
 
-                TempData["Message"] = "El recibo se subió correctamente.";
-            }
-            else
-            {
-                TempData["Error"] = "Por favor, sube un archivo válido.";
-            }
+                imagenPath = $"/uploads/{fileName}"; // Ruta relativa para guardar en la base de datos
 
-            return RedirectToAction("Index");
-        }
+                // Obtener el ID del usuario autenticado desde los claims
+                var userIdClaim = User.FindFirst("UserId")?.Value;
 
-        // Acción para manejar el pago presencial
-        [HttpPost]
-        public IActionResult PagoPresencial()
-        {
-            TempData["Message"] = "Gracias. Continúe con su pago en la sucursal.";
-            return RedirectToAction("Index");
-        }
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    TempData["Message"] = "No se pudo obtener el ID del usuario autenticado.";
+                    return RedirectToAction("Index");
+                }
 
-        // Acción para ir a la facturación
-        public IActionResult Facturacion()
-        {
-            var carrito = HttpContext.Session.Get<List<CarritoItem>>("Carrito") ?? new List<CarritoItem>();
+                // Crear y guardar factura
+                var factura = new Factura
+                {
+                    UsuarioId = userIdClaim,
+                    FechaCompra = DateTime.Now,
+                    Subtotal = carrito.Sum(item => item.Producto.PrecioVenta * item.Cantidad),
+                    IVA = carrito.Sum(item => item.Producto.PrecioVenta * item.Cantidad) * 0.13m,
+                    Total = carrito.Sum(item => item.Producto.PrecioVenta * item.Cantidad) * 1.13m
+                };
 
-            if (!carrito.Any())
-            {
+                _context.Facturas.Add(factura);
+                await _context.SaveChangesAsync();
+
+                // Crear detalles de factura
+                foreach (var item in carrito)
+                {
+                    var detalleFactura = new DetalleFactura
+                    {
+                        FacturaId = factura.FacturaId,
+                        ProductoId = item.Producto.ProductoId,
+                        Cantidad = item.Cantidad,
+                        PrecioUnitario = item.Producto.PrecioVenta,
+                        ImagenFactura = imagenPath,
+                        EstadoPago = "Pendiente"
+                    };
+
+                    _context.DetalleFacturas.Add(detalleFactura);
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Limpiar el carrito
+                HttpContext.Session.Remove("Carrito");
+
+                TempData["Message"] = "El pago con Sinpe Móvil fue registrado correctamente.";
                 return RedirectToAction("Index");
             }
-
-            var carritoViewModel = carrito.Select(item => new CarritoViewModel
+            catch (Exception ex)
             {
-                Producto = item.Producto,
-                Cantidad = item.Cantidad
-            }).ToList();
-
-            var total = carritoViewModel.Sum(item => item.Subtotal);
-
-            ViewData["Total"] = total;
-
-            return View(carritoViewModel);
+                TempData["Message"] = "Ocurrió un error al procesar el pago";
+                return RedirectToAction("Index");
+            }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> PagoPresencial()
+        {
+            try
+            {
+                // Obtener el carrito de la sesión
+                var carrito = HttpContext.Session.Get<List<CarritoItem>>("Carrito") ?? new List<CarritoItem>();
+
+                if (!carrito.Any())
+                {
+                    TempData["Message"] = "El carrito está vacío.";
+                    return RedirectToAction("Index");
+                }
+
+                // Obtener el ID del usuario autenticado desde los claims
+                var userIdClaim = User.FindFirst("UserId")?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    TempData["Message"] = "No se pudo obtener el ID del usuario autenticado.";
+                    return RedirectToAction("Index");
+                }
+
+                // Crear y guardar la factura
+                var factura = new Factura
+                {
+                    UsuarioId = userIdClaim,
+                    FechaCompra = DateTime.Now,
+                    Subtotal = carrito.Sum(item => item.Producto.PrecioVenta * item.Cantidad),
+                    IVA = carrito.Sum(item => item.Producto.PrecioVenta * item.Cantidad) * 0.13m,
+                    Total = carrito.Sum(item => item.Producto.PrecioVenta * item.Cantidad) * 1.13m
+                };
+
+                _context.Facturas.Add(factura);
+                await _context.SaveChangesAsync();
+
+                // Crear y guardar los detalles de factura
+                foreach (var item in carrito)
+                {
+                    var detalleFactura = new DetalleFactura
+                    {
+                        FacturaId = factura.FacturaId,
+                        ProductoId = item.Producto.ProductoId,
+                        Cantidad = item.Cantidad,
+                        PrecioUnitario = item.Producto.PrecioVenta,
+                        ImagenFactura = "/img/default.png", // No aplica para pagos presenciales
+                        EstadoPago = "Presencial"
+                    };
+
+                    _context.DetalleFacturas.Add(detalleFactura);
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Limpiar el carrito
+                HttpContext.Session.Remove("Carrito");
+
+                TempData["Message"] = "El pago presencial fue registrado correctamente. Por favor, continúe con su pago en la sucursal.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Message"] = "Ocurrió un error al procesar el pago";
+                return RedirectToAction("Index");
+            }
+        }
+
+
+
+
     }
 
     public class CarritoItem
