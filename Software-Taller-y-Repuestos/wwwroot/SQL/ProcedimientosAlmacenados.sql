@@ -141,7 +141,6 @@ VALUES
 
 
 
-
 CREATE PROCEDURE ObtenerFacturaPorUsuario
     @UsuarioId INT
 AS
@@ -152,8 +151,8 @@ BEGIN
         f.FacturaId,
         f.FechaCompra,
         f.IVA,
-        f.Subtotal,
-        f.Total,
+        f.Subtotal,  
+        f.Total,    
         df.Cantidad,
         df.EstadoPago,
         p.Nombre AS NombreProducto
@@ -167,4 +166,4 @@ BEGIN
         ON df.ProductoId = p.ProductoId
     WHERE 
         f.UsuarioId = @UsuarioId;
-END
+END;

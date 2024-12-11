@@ -106,30 +106,38 @@
                                             <th>Cantidad</th>
                                             <th>Estado de Pago</th>
                                             <th>Fecha de Compra</th>
-                                            <th>Total</th>
+                                            <th>Subtotal</th> <!-- Subtotal -->
+                                            <th>Total</th>     <!-- Total -->
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @if (Model.Facturas.Any())
                                         {
                                             int index = 1;
+                                            decimal totalGeneral = 0; // Variable para acumular el total
+
                                             foreach (var factura in Model.Facturas)
                                             {
+                                                totalGeneral += factura.Total; // Sumar el total actual al total general
+
                                                 <tr>
                                                     <td>@index</td>
                                                     <td>@factura.NombreProducto</td>
                                                     <td>@factura.Cantidad</td>
                                                     <td>@factura.EstadoPago</td>
                                                     <td>@factura.FechaCompra.ToString("dd/MM/yyyy")</td>
-                                                    <td>@factura.Total.ToString("C", new System.Globalization.CultureInfo("es-CR"))</td>
+                                                    <td>@factura.Subtotal.ToString("C", new System.Globalization.CultureInfo("es-CR"))</td>
+                                                    <td>@factura.Total.ToString("C", new System.Globalization.CultureInfo("es-CR"))</td> <!-- Mostrar Total -->
                                                 </tr>
                                                 index++;
                                             }
+
+                                            
                                         }
                                         else
                                         {
                                             <tr>
-                                                <td colspan="6" class="text-center">No se encontraron facturas.</td>
+                                                <td colspan="7" class="text-center">No se encontraron facturas.</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -139,6 +147,7 @@
                     </div>
                 </div>
             </div>
+
 
 
         </div>
