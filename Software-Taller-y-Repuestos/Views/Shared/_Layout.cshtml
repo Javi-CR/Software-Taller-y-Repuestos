@@ -1,5 +1,4 @@
-﻿﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -15,7 +14,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
-
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 
@@ -30,6 +28,35 @@
 
     <!-- Template Main CSS File -->
     <link href="~/assets/css/style.css" rel="stylesheet" asp-append-version="true">
+
+    <style>
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            left: 20px; /* Cambiado de right a left */
+            background-color: #25d366;
+            color: white;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+            .whatsapp-float:hover {
+                transform: scale(1.1);
+                background-color: #20b858;
+            }
+
+            .whatsapp-float i {
+                font-size: 36px;
+            }
+    </style>
+
 </head>
 
 <body>
@@ -52,27 +79,18 @@
                 <ul>
                     <li><a class="nav-link scrollto active" href="@Url.Action("Index","Home")">Inicio</a></li>
 
-                    
-
-
-
                     @if (User.IsInRole("Admin"))
                     {
                         <li><a class="nav-link scrollto" href="@Url.Action("Empleados", "HR")">Empleados</a></li>
                         <li><a class="nav-link" href="@Url.Action("Index", "Producto")">Productos</a></li>
                         <li><a class="nav-link" href="@Url.Action("Index", "Carrito")">Carrito</a></li>
                         <li><a class="nav-link" href="@Url.Action("Index", "AdminFactura")">Administrar Facturas</a></li>
-
                     }
 
                     @if (User.IsInRole("Cliente"))
                     {
-
                         <li><a class="nav-link" href="@Url.Action("Index", "Producto")">Productos</a></li>
                         <li><a class="nav-link" href="@Url.Action("Index", "Carrito")">Carrito</a></li>
-
-
-
                     }
 
                     @if (User.IsInRole("Empleado"))
@@ -83,7 +101,6 @@
 
                     @if (User.Identity.IsAuthenticated)
                     {
-
                         <li class="dropdown">
                             <a href="#"><span>@User.Identity.Name</span> <i class="bi bi-chevron-down"></i></a>
                             <ul>
@@ -92,20 +109,17 @@
                             </ul>
                         </li>
                     }
-
                 </ul>
                 <i class="bi bi-list mobile-nav-toggle"></i>
             </nav><!-- .navbar -->
             @if (!User.Identity.IsAuthenticated)
             {
                 <div class="d-flex align-items-cente">
-                <a asp-area="" asp-controller="Home" asp-action="Login" class="book-a-table-btn scrollto d-none d-lg-flex">Iniciar Sesión</a>
-                <a asp-area="" asp-controller="Home" asp-action="Register" class="book-a-table-btn scrollto d-none d-lg-flex">Registrarse</a>
+                    <a asp-area="" asp-controller="Home" asp-action="Login" class="book-a-table-btn scrollto d-none d-lg-flex">Iniciar Sesión</a>
+                    <a asp-area="" asp-controller="Home" asp-action="Register" class="book-a-table-btn scrollto d-none d-lg-flex">Registrarse</a>
                 </div>
             }
         </div>
-
-
     </header>
 
     <!-- End Header -->
@@ -134,22 +148,12 @@
     <div id="preloader"></div>
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-    <!-- Chat Icon (Left) -->
-    <div class="chat-icon-container">
-        <a href="javascript:void(0);" onclick="toggleChat()">
-            <i class="bi bi-chat"></i>
+    <div>
+        <a href="https://wa.me/50688407277" target="_blank" class="whatsapp-float">
+            <i class="fab fa-whatsapp"></i>
         </a>
     </div>
 
-    <!-- Ventana de chat -->
-    <div id="chatBox">
-        <div id="chatHeader" onclick="toggleChat()">Chat con Soporte</div>
-        <div id="chatMessages"></div>
-        <div id="chatInput">
-            <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
-            <button id="sendMessageButton">Enviar</button>
-        </div>
-    </div>
     <!-- Vendor JS Files -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Agregado jQuery -->
     <script src="~/assets/vendor/aos/aos.js" asp-append-version="true"></script>
@@ -167,41 +171,6 @@
     <script src="~/lib/jquery/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-
-    <!-- Chatbox JS -->
-    <script>
-        function toggleChat() {
-            var chatBox = document.getElementById("chatBox");
-
-            // Verifica si el chat está visible
-            if (chatBox.style.display === "none" || chatBox.style.display === "") {
-                chatBox.style.display = "block";
-                setTimeout(function () {
-                    chatBox.style.opacity = 1;
-                    chatBox.style.bottom = "90px";
-                }, 10);
-            } else {
-                chatBox.style.opacity = 0;
-                chatBox.style.bottom = "-500px";
-                setTimeout(function () {
-                    chatBox.style.display = "none";
-                }, 300);
-            }
-        }
-
-        // Enviar mensaje
-        document.getElementById("sendMessageButton").addEventListener("click", function () {
-            var messageInput = document.getElementById("messageInput");
-            var chatMessages = document.getElementById("chatMessages");
-
-            if (messageInput.value.trim() !== "") {
-                var newMessage = document.createElement("div");
-                newMessage.textContent = messageInput.value;
-                chatMessages.appendChild(newMessage);
-                messageInput.value = ""; // Limpiar campo
-            }
-        });
-    </script>
 </body>
 
 </html>
