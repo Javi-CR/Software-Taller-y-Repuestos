@@ -64,7 +64,8 @@ CREATE PROCEDURE CrearUsuario
     @Apellidos NVARCHAR(50),
     @Correo NVARCHAR(100),
     @Contrasenna NVARCHAR(100),
-    @RolID INT
+    @RolID INT,
+    @Estado BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -76,8 +77,8 @@ BEGIN
     END
 
     -- Insertar el nuevo usuario
-    INSERT INTO Usuarios (Nombre, Apellidos, Correo, Contrasenna, RolID, FechaIngreso)
-    VALUES (@Nombre, @Apellidos, @Correo, @Contrasenna, @RolID, GETDATE());
+    INSERT INTO Usuarios (Nombre, Apellidos, Correo, Contrasenna, RolID, FechaIngreso, Estado)
+    VALUES (@Nombre, @Apellidos, @Correo, @Contrasenna, @RolID, GETDATE(), @Estado);
     
     -- Confirmación de éxito
     SELECT SCOPE_IDENTITY() AS UsuarioId;
@@ -116,7 +117,8 @@ CREATE PROCEDURE RegistrarUsuarioGoogle
     @Apellidos NVARCHAR(100),
     @Correo NVARCHAR(100),
     @Imagen NVARCHAR(MAX),
-    @RolID INT
+    @RolID INT,
+    @Estado BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -124,8 +126,8 @@ BEGIN
     -- Solo insertar si el usuario no existe
     IF NOT EXISTS (SELECT 1 FROM Usuarios WHERE Correo = @Correo)
     BEGIN
-        INSERT INTO Usuarios (Nombre, Apellidos, Correo, Imagen, RolID)
-        VALUES (@Nombre, @Apellidos, @Correo, @Imagen, @RolID);
+        INSERT INTO Usuarios (Nombre, Apellidos, Correo, Imagen, RolID, Estado)
+        VALUES (@Nombre, @Apellidos, @Correo, @Imagen, @RolID, @Estado);
     END
 END
 

@@ -57,7 +57,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                     
                     // Definir el ID del rol predeterminado.
                     int rolID = 2;
-
+                    bool Activado = true;
                     // Hashear la contraseña usando BCrypt.
                     string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasenna);
 
@@ -70,7 +70,8 @@ namespace Software_Taller_y_Repuestos.Controllers
                             usuario.Apellidos,
                             usuario.Correo,
                             Contrasenna = hashedPassword,
-                            RolID = rolID
+                            RolID = rolID,
+                            Estado = Activado
                         },
                         commandType: CommandType.StoredProcedure);
 
@@ -232,8 +233,9 @@ namespace Software_Taller_y_Repuestos.Controllers
                             Apellidos = lastName,
                             Correo = email,
                             Imagen = relativePath, // Guardar la ruta relativa
-                            RolID = 2 // Rol predeterminado
-                        },
+                            RolID = 2, // Rol predeterminado
+                            Estado = true
+                },
                         commandType: CommandType.StoredProcedure
                     );
 

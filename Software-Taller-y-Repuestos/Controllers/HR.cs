@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Software_Taller_y_Repuestos.Models;
+using Dapper;
+using System.Data;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
@@ -199,6 +202,82 @@ namespace Software_Taller_y_Repuestos.Controllers
             {
                 TempData["ErrorMessage"] = "Ocurrió un error al guardar el horario: " + ex.Message;
                 return RedirectToAction("GestionHorarios", new { usuarioId = horario.UsuarioId });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult AsignarEmpleados()
+        {
+         
+            return View();
+
+        }
+
+        [HttpPost]
+        public IActionResult AsignarEmpleados(CuentaUsuario usuario)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Si el modelo no es válido, se regresa a la vista con los mensajes de error.
+                return View(usuario);
+            }
+
+            try
+            {
+                using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
+                {
+
+                    // Definir el ID del rol predeterminado.
+                    int rolID = 3;
+                    bool Activado = true;
+
+                    // Hashear la contraseña usando BCrypt.
+                    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasenna);
+
+                    // Ejecutar el procedimiento almacenado "CrearUsuario".
+                    var result = connection.Execute(
+                        "CrearUsuario",
+                        new
+                        {
+                            usuario.Nombre,
+                            usuario.Apellidos,
+                            usuario.Correo,
+                            Contrasenna = hashedPassword,
+                            RolID = rolID,
+                            Estado = Activado
+                        },
+                        commandType: CommandType.StoredProcedure);
+
+                    if (result > 0)
+                    {
+
+                        // En caso de que algo falle sin excepción.
+                        ViewBag.Mensaje = "No se pudo crear la cuenta. Intente de nuevo.";
+                        return View(usuario);
+
+                    }
+                    else
+                    {
+                        // Si la cuenta se creó correctamente.
+                        ViewBag.Mensaje = "Cuenta creada exitosamente.";
+                        //return RedirectToAction("Index");
+                        return View(usuario);
+
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 50001) // Error personalizado lanzado por el procedimiento almacenado.
+                {
+                    ViewBag.Mensaje = ex.Message;
+                }
+                else
+                {
+                    ViewBag.Mensaje = "Ocurrió un error inesperado al crear la cuenta.";
+                }
+
+                return View(usuario);
             }
         }
 
