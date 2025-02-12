@@ -1,0 +1,39 @@
+﻿@model List<Software_Taller_y_Repuestos.Models.Producto>
+
+@{
+    ViewData["Title"] = "Auditoría de Inventario";
+}
+
+<div class="container mt-5 pt-5">
+    <div class="section-title mb-4">
+        <h2 class="text-center">Auditoría de Inventario</h2>
+    </div>
+
+    <form asp-action="Auditoria" method="post">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Stock Actual</th>
+                    <th>Nuevo Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                        <tr>
+                            <td>@Model[i].Nombre</td>
+                            <td>@Model[i].Categoria?.Nombre</td>
+                            <td>@Model[i].Cantidad</td>
+                            <td>
+                                <input type="number" name="productos[@i].Cantidad" value="@Model[i].Cantidad" class="form-control" />
+                                <input type="hidden" name="productos[@i].ProductoId" value="@Model[i].ProductoId" />
+                            </td>
+                        </tr>
+                }
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Guardar Auditoría</button>
+    </form>
+</div>

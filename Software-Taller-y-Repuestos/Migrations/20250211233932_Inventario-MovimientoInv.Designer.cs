@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Software_Taller_y_Repuestos.Models;
 
@@ -11,9 +12,11 @@ using Software_Taller_y_Repuestos.Models;
 namespace Software_Taller_y_Repuestos.Migrations
 {
     [DbContext(typeof(TallerRepuestosDbContext))]
-    partial class TallerRepuestosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250211233932_Inventario-MovimientoInv")]
+    partial class InventarioMovimientoInv
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -217,6 +220,30 @@ namespace Software_Taller_y_Repuestos.Migrations
                     b.ToTable("Horarios");
                 });
 
+            modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Inventario", b =>
+                {
+                    b.Property<int>("InventarioId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventarioId"));
+
+                    b.Property<int>("CantidadDisponible")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaUltimaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("InventarioId");
+
+                    b.HasIndex("ProductoId");
+
+                    b.ToTable("Inventarios");
+                });
+
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.ModelosAuto", b =>
                 {
                     b.Property<int>("ModeloId")
@@ -237,6 +264,38 @@ namespace Software_Taller_y_Repuestos.Migrations
                     b.HasKey("ModeloId");
 
                     b.ToTable("ModelosAutos");
+                });
+
+            modelBuilder.Entity("Software_Taller_y_Repuestos.Models.MovimientoInventario", b =>
+                {
+                    b.Property<int>("MovimientoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MovimientoId"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaMovimiento")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("InventarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TipoMovimiento")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MovimientoId");
+
+                    b.HasIndex("InventarioId");
+
+                    b.ToTable("MovimientosInventario");
                 });
 
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.PagosEmpleado", b =>
@@ -283,9 +342,6 @@ namespace Software_Taller_y_Repuestos.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductoId"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
 
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
@@ -499,6 +555,28 @@ namespace Software_Taller_y_Repuestos.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Inventario", b =>
+                {
+                    b.HasOne("Software_Taller_y_Repuestos.Models.Producto", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("Software_Taller_y_Repuestos.Models.MovimientoInventario", b =>
+                {
+                    b.HasOne("Software_Taller_y_Repuestos.Models.Inventario", "Inventario")
+                        .WithMany("Movimientos")
+                        .HasForeignKey("InventarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Inventario");
+                });
+
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.PagosEmpleado", b =>
                 {
                     b.HasOne("Software_Taller_y_Repuestos.Models.Usuario", "Usuario")
@@ -548,6 +626,11 @@ namespace Software_Taller_y_Repuestos.Migrations
                     b.Navigation("DetalleFacturas");
 
                     b.Navigation("Productos");
+                });
+
+            modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Inventario", b =>
+                {
+                    b.Navigation("Movimientos");
                 });
 
             modelBuilder.Entity("Software_Taller_y_Repuestos.Models.Producto", b =>

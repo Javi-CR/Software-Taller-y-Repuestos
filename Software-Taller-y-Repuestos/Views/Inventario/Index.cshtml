@@ -1,0 +1,87 @@
+﻿@model List<Software_Taller_y_Repuestos.Models.Producto>
+
+@{
+    ViewData["Title"] = "Inventario";
+    int pageNumber = (int)ViewData["PageNumber"];
+    int totalPages = (int)ViewData["TotalPages"];
+}
+
+<div class="container mt-5 pt-5">
+    <div class="section-title mb-4">
+        <h2 class="text-center">Inventario de Productos</h2>
+    </div>
+
+    <!-- Notificación de stock bajo -->
+    @if (TempData["StockBajo"] != null)
+    {
+        <div class="alert alert-warning">
+            @Html.Raw(TempData["StockBajo"])
+        </div>
+    }
+
+    <!-- Mensajes de éxito -->
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Message"]
+        </div>
+    }
+
+    <!-- Cuadrícula de productos -->
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100" style="display: flex; flex-direction: column;">
+                    <img src="@item.Imagen" class="card-img-top" alt="@item.Nombre" style="object-fit: cover; height: 200px;" />
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">@item.Nombre</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Categoría: @item.Categoria?.Nombre</li>
+                            <li class="list-group-item">Stock: @item.Cantidad</li>
+                            <li class="list-group-item">Precio: @item.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</li>
+                            <li class="list-group-item">Estado: @(item.Activo ? "Activo" : "Inactivo")</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100" role="group">
+                            <a asp-action="RegistrarSalida" asp-route-productoId="@item.ProductoId" class="btn btn-primary">Registrar Salida</a>
+                            <a asp-action="Auditoria" asp-route-productoId="@item.ProductoId" class="btn btn-dark">Ajustar Stock</a>
+
+                            <form method="post" asp-action="CambiarEstado">
+                                <input type="hidden" name="id" value="@item.ProductoId" />
+                                <input type="hidden" name="activo" value="@(item.Activo ? 0 : 1)" />
+                                <button type="submit" class="btn @(item.Activo ? "btn-danger" : "btn-success")">
+                                    @(item.Activo ? "Desactivar" : "Activar")
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Controles de paginación -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <!-- Botón "Anterior" -->
+            <li class="page-item @(pageNumber == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = pageNumber - 1 })">Anterior</a>
+            </li>
+
+            <!-- Números de página -->
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == pageNumber ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                </li>
+            }
+
+            <!-- Botón "Siguiente" -->
+            <li class="page-item @(pageNumber == totalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = pageNumber + 1 })">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+</div>

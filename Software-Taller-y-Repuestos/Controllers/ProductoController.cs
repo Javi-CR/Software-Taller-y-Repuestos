@@ -27,7 +27,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
         // GET: Producto/Index
         [Authorize(Roles = "Admin,Empleado,Cliente")]
-        public async Task<IActionResult> Index(string searchString, string sortOrder)
+        public async Task<IActionResult> Index(string searchString, string sortOrder, int? page)
         {
             _logger.LogInformation("Accediendo a la lista de productos.");
 
@@ -35,8 +35,11 @@ namespace Software_Taller_y_Repuestos.Controllers
             ViewData["CurrentFilter"] = searchString;
             ViewData["SortOrder"] = sortOrder;
 
-            // Consulta inicial
-            var productos = _context.Productos.Include(p => p.Categoria).AsQueryable();
+            // Consulta inicial (solo productos activos)
+            var productos = _context.Productos
+                .Include(p => p.Categoria)
+                .Where(p => p.Activo) // Solo productos activos
+                .AsQueryable();
 
             // Filtrar por nombre
             if (!string.IsNullOrEmpty(searchString))
@@ -53,9 +56,26 @@ namespace Software_Taller_y_Repuestos.Controllers
                 _ => productos.OrderBy(p => p.Nombre),
             };
 
-            return View(await productos.ToListAsync());
-        }
+            // Configurar la paginación
+            int pageSize = 15; // Número de elementos por página
+            int pageNumber = (page ?? 1); // Número de página actual (si no se especifica, es 1)
 
+            // Obtener los productos para la página actual
+            var productosPaginados = await productos
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Calcular el número total de páginas
+            int totalProductos = await productos.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalProductos / (double)pageSize);
+
+            // Pasar los datos a la vista
+            ViewData["PageNumber"] = pageNumber;
+            ViewData["TotalPages"] = totalPages;
+
+            return View(productosPaginados);
+        }
 
         // GET: Producto/Details/5
         [Authorize(Roles = "Admin,Empleado,Cliente")]
@@ -69,7 +89,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
             var producto = await _context.Productos
                 .Include(p => p.Categoria)
-                .FirstOrDefaultAsync(m => m.ProductoId == id);
+                .FirstOrDefaultAsync(m => m.ProductoId == id && m.Activo); // Solo productos activos
 
             if (producto == null)
             {
@@ -91,7 +111,7 @@ namespace Software_Taller_y_Repuestos.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([Bind("Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca")] Producto producto, IFormFile imagen)
+        public async Task<IActionResult> Create([Bind("Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Activo")] Producto producto, IFormFile imagen)
         {
             if (ModelState.IsValid)
             {
@@ -111,6 +131,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                     producto.Imagen = $"/images/{newFileName}";
                 }
 
+                producto.Activo = true; // el producto está activo
                 _context.Add(producto);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -118,7 +139,6 @@ namespace Software_Taller_y_Repuestos.Controllers
             ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
             return View(producto);
         }
-
 
         // GET: Producto/Edit/5
         [Authorize(Roles = "Admin")]
@@ -141,11 +161,10 @@ namespace Software_Taller_y_Repuestos.Controllers
             return View(producto);
         }
 
-        // POST: Producto/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductoId,Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Imagen")] Producto producto, IFormFile imagen)
+        public async Task<IActionResult> Edit(int id, [Bind("ProductoId,Nombre,Codigo,CategoriaId,Descripcion,Cantidad,PrecioCompra,PrecioVenta,Marca,Imagen,Activo")] Producto producto, IFormFile imagen)
         {
             if (id != producto.ProductoId)
             {
@@ -202,54 +221,25 @@ namespace Software_Taller_y_Repuestos.Controllers
             return View(producto);
         }
 
-
-        // GET: Producto/Delete/5
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                _logger.LogWarning("ID nulo en Delete.");
-                return NotFound();
-            }
-
-            var producto = await _context.Productos
-                .Include(p => p.Categoria)
-                .FirstOrDefaultAsync(m => m.ProductoId == id);
-
-            if (producto == null)
-            {
-                _logger.LogWarning($"Producto con ID {id} no encontrado.");
-                return NotFound();
-            }
-
-            return View(producto);
-        }
-
-        [HttpPost, ActionName("Delete")]
+        // Desactivar producto (en lugar de eliminar)
+        [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Desactivar(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
-            if (producto != null)
+            if (producto == null)
             {
-                // Eliminar la imagen asociada si existe
-                if (!string.IsNullOrEmpty(producto.Imagen))
-                {
-                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", producto.Imagen.TrimStart('/'));
-                    if (System.IO.File.Exists(path))
-                    {
-                        System.IO.File.Delete(path);
-                    }
-                }
-
-                _context.Productos.Remove(producto);
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
+
+            producto.Activo = false; // Desactivar el producto
+            _context.Update(producto);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Producto desactivado correctamente.";
             return RedirectToAction(nameof(Index));
         }
-
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -257,7 +247,6 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             return View();
         }
-
 
         // POST: Producto/Upload
         [HttpPost]
@@ -348,6 +337,5 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             return _context.Productos.Any(e => e.ProductoId == id);
         }
-
     }
 }
