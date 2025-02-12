@@ -138,6 +138,18 @@ namespace Software_Taller_y_Repuestos.Controllers
                     return RedirectToAction("ProcesoPago");
                 }
 
+                // Verificar stock antes de procesar la venta
+                foreach (var item in carrito)
+                {
+                    var producto = await _context.Productos.FindAsync(item.Producto.ProductoId);
+
+                    if (producto == null || !producto.Activo || producto.Cantidad < item.Cantidad)
+                    {
+                        TempData["Message"] = $"No hay suficiente stock para el producto {item.Producto.Nombre}.";
+                        return RedirectToAction("Index");
+                    }
+                }
+
                 // Guardar el archivo recibido
                 string imagenPath;
                 var fileName = Path.GetFileName(recibo.FileName);
@@ -173,7 +185,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                 _context.Facturas.Add(factura);
                 await _context.SaveChangesAsync();
 
-                // Crear detalles de factura
+                // Crear detalles de factura y actualizar el stock
                 foreach (var item in carrito)
                 {
                     var detalleFactura = new DetalleFactura
@@ -187,6 +199,11 @@ namespace Software_Taller_y_Repuestos.Controllers
                     };
 
                     _context.DetalleFacturas.Add(detalleFactura);
+
+                    // Actualizar el stock
+                    var producto = await _context.Productos.FindAsync(item.Producto.ProductoId);
+                    producto.Cantidad -= item.Cantidad;
+                    _context.Update(producto);
                 }
 
                 await _context.SaveChangesAsync();
@@ -216,6 +233,18 @@ namespace Software_Taller_y_Repuestos.Controllers
                 {
                     TempData["Message"] = "El carrito está vacío.";
                     return RedirectToAction("Index");
+                }
+
+                // Verificar stock antes de procesar la venta
+                foreach (var item in carrito)
+                {
+                    var producto = await _context.Productos.FindAsync(item.Producto.ProductoId);
+
+                    if (producto == null || !producto.Activo || producto.Cantidad < item.Cantidad)
+                    {
+                        TempData["Message"] = $"No hay suficiente stock para el producto {item.Producto.Nombre}.";
+                        return RedirectToAction("Index");
+                    }
                 }
 
                 // Obtener el ID del usuario autenticado desde los claims
@@ -254,6 +283,11 @@ namespace Software_Taller_y_Repuestos.Controllers
                     };
 
                     _context.DetalleFacturas.Add(detalleFactura);
+
+                    // Actualizar el stock
+                    var producto = await _context.Productos.FindAsync(item.Producto.ProductoId);
+                    producto.Cantidad -= item.Cantidad;
+                    _context.Update(producto);
                 }
 
                 await _context.SaveChangesAsync();
