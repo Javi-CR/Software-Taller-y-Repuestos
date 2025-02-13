@@ -10,7 +10,9 @@
             <ol>
                 <li><a href="@Url.Action("Empleados","HR")" style="color: white;">Empleados Disponibles</a></li>
                 <li><a href="@Url.Action("AgregarEmpleados","HR")" style="color: white;">Agregar empleados por usuario Cliente</a></li>
-                <li><a href="@Url.Action("AsignarEmpleados", "HR")">Agregar empleados</a></li>
+                <li><a href="@Url.Action("AsignarEmpleados", "HR")">Registrar empleados</a></li>
+                <li><a href="@Url.Action("Inactivos", "HR")" style="color: white;">Empleados Inactivos</a></li>
+
             </ol>
         </div>
     </nav>
@@ -42,7 +44,7 @@
                 <div class="php-email-form">
 
                     <!-- Formulario -->
-                    <form asp-action="Register" asp-controller="HR">
+                    <form asp-action="AsignarEmpleados" asp-controller="HR">
 
                         <div class="form-group">
                             <label for="Nombre">Nombre</label>
@@ -57,13 +59,13 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="Correo">Correo</label>
+                            <label for="Correo">Agrega un correo</label>
                             <input type="email" asp-for="Correo" class="form-control" />
                             <span asp-validation-for="Correo" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
-                            <label for="Contrasenna">Contraseña</label>
+                            <label for="Contrasenna">Crea una contraseña</label>
                             <input type="password" asp-for="Contrasenna" class="form-control" />
                             <span asp-validation-for="Contrasenna" class="text-danger"></span>
                         </div>

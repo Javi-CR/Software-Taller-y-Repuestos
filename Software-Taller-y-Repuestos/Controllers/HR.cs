@@ -27,14 +27,15 @@ namespace Software_Taller_y_Repuestos.Controllers
 
         public IActionResult Empleados()
         {
-            // Obtén todos los usuarios con el rol de "Empleado"
+            // Obtén todos los usuarios con el rol de "Empleado" y  estado sea true
             var empleados = _context.Usuarios
                               .Include(u => u.Rol)
-                              .Where(u => u.Rol.NombreRol == "Empleado")
+                              .Where(u => u.Rol.NombreRol == "Empleado" && u.Estado == true) // Filtra por estado true
                               .ToList();
 
             return View(empleados);
         }
+
 
 
         [HttpGet]
@@ -64,16 +65,16 @@ namespace Software_Taller_y_Repuestos.Controllers
 
 
         [HttpPost]
-        public IActionResult AsignarRolCliente(int usuarioId)
+        public IActionResult SuspenderUsuario(int usuarioId)
         {
             // Busca al usuario por su ID
             var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioId == usuarioId);
 
            
-            usuario.RolId = 2; // Asigna el rol que quiera
+            usuario.Estado = false; // Suspende Usuario
             _context.SaveChanges();
 
-            return RedirectToAction("AgregarEmpleados");
+            return RedirectToAction("Inactivos");
 
         }
 
@@ -259,7 +260,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                     else
                     {
                         // Si la cuenta se creó correctamente.
-                        ViewBag.Mensaje = "Cuenta creada exitosamente.";
+                        ViewBag.Mensaje = "Empleado creado exitosamente.";
                         //return RedirectToAction("Index");
                         return View(usuario);
 
@@ -281,7 +282,31 @@ namespace Software_Taller_y_Repuestos.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult Inactivos()
+        {
+            // Obtén todos los usuarios con el rol de "Empleado" y  estado sea true
+            var empleados = _context.Usuarios
+                              .Include(u => u.Rol)
+                              .Where(u => u.Rol.NombreRol == "Empleado" && u.Estado == false)
+                              .ToList();
 
+            return View(empleados);
+        }
+
+        [HttpPost]
+        public IActionResult ActivarUsuario(int usuarioId)
+        {
+            // Busca al usuario por su ID
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioId == usuarioId);
+
+
+            usuario.Estado = true; // Activar Usuario
+            _context.SaveChanges();
+
+            return RedirectToAction("Empleados");
+
+        }
 
     }
 }

@@ -143,6 +143,12 @@ namespace Software_Taller_y_Repuestos.Controllers
                         return View(model);
                     }
 
+                    if (usuario.Estado == false)
+                    {
+                        ViewBag.Mensaje = "Este Usuario no esta disponible";
+                        return View(model);
+                    }
+
                     // Crear claims
                     var claims = new List<Claim>
                     {
@@ -235,7 +241,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                             Imagen = relativePath, // Guardar la ruta relativa
                             RolID = 2, // Rol predeterminado
                             Estado = true
-                },
+                        },
                         commandType: CommandType.StoredProcedure
                     );
 
@@ -248,6 +254,12 @@ namespace Software_Taller_y_Repuestos.Controllers
                 {
                     ViewBag.Mensaje = "No se pudo autenticar al usuario.";
                     return RedirectToAction("Login");
+                }
+
+                if (usuario.Estado == false)
+                {
+                    ViewBag.Mensaje = "Este Usuario no esta disponible";
+                    return RedirectToAction("errorLogin");
                 }
 
                 // Crear claims
@@ -277,6 +289,11 @@ namespace Software_Taller_y_Repuestos.Controllers
         }
 
 
+        [HttpGet]
+        public IActionResult errorLogin()
+        {
+            return View();
+        }
 
 
         public async Task<IActionResult> Logout()
