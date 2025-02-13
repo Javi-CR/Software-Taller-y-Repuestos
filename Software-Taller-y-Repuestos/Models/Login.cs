@@ -13,6 +13,8 @@ namespace Software_Taller_y_Repuestos.Models
         public string NombreRol { get; set; } = string.Empty;
         public string Contrasenna { get; set; } = string.Empty;
 
+        public bool Estado { get; set; }
+
 
     }
 }

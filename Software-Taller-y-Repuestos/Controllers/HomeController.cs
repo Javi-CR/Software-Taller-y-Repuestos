@@ -57,7 +57,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                     
                     // Definir el ID del rol predeterminado.
                     int rolID = 2;
-
+                    bool Activado = true;
                     // Hashear la contraseña usando BCrypt.
                     string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasenna);
 
@@ -70,7 +70,8 @@ namespace Software_Taller_y_Repuestos.Controllers
                             usuario.Apellidos,
                             usuario.Correo,
                             Contrasenna = hashedPassword,
-                            RolID = rolID
+                            RolID = rolID,
+                            Estado = Activado
                         },
                         commandType: CommandType.StoredProcedure);
 
@@ -139,6 +140,12 @@ namespace Software_Taller_y_Repuestos.Controllers
                     if (!BCrypt.Net.BCrypt.Verify(model.Contrasenna, usuario.Contrasenna))
                     {
                         ViewBag.Mensaje = "La contraseña es incorrecta.";
+                        return View(model);
+                    }
+
+                    if (usuario.Estado == false)
+                    {
+                        ViewBag.Mensaje = "Este Usuario no esta disponible";
                         return View(model);
                     }
 
@@ -232,7 +239,8 @@ namespace Software_Taller_y_Repuestos.Controllers
                             Apellidos = lastName,
                             Correo = email,
                             Imagen = relativePath, // Guardar la ruta relativa
-                            RolID = 2 // Rol predeterminado
+                            RolID = 2, // Rol predeterminado
+                            Estado = true
                         },
                         commandType: CommandType.StoredProcedure
                     );
@@ -246,6 +254,12 @@ namespace Software_Taller_y_Repuestos.Controllers
                 {
                     ViewBag.Mensaje = "No se pudo autenticar al usuario.";
                     return RedirectToAction("Login");
+                }
+
+                if (usuario.Estado == false)
+                {
+                    ViewBag.Mensaje = "Este Usuario no esta disponible";
+                    return RedirectToAction("errorLogin");
                 }
 
                 // Crear claims
@@ -275,6 +289,11 @@ namespace Software_Taller_y_Repuestos.Controllers
         }
 
 
+        [HttpGet]
+        public IActionResult errorLogin()
+        {
+            return View();
+        }
 
 
         public async Task<IActionResult> Logout()

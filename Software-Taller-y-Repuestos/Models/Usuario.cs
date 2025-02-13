@@ -26,6 +26,7 @@ public partial class Usuario
     public decimal? SalarioBase { get; set; }
     public string? Imagen { get; set; }
 
+    public bool Estado { get; set; }
 
     public virtual ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 

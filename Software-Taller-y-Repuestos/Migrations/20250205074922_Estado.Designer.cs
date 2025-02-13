@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Software_Taller_y_Repuestos.Models;
 
@@ -11,9 +12,11 @@ using Software_Taller_y_Repuestos.Models;
 namespace Software_Taller_y_Repuestos.Migrations
 {
     [DbContext(typeof(TallerRepuestosDbContext))]
-    partial class TallerRepuestosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250205074922_Estado")]
+    partial class Estado
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -283,9 +286,6 @@ namespace Software_Taller_y_Repuestos.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductoId"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
 
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
