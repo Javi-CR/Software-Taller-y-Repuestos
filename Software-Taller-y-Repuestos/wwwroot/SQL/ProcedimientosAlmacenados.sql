@@ -1,8 +1,4 @@
-USE [master]
-GO
 
-USE [TallerRepuestosDB]
-GO
 
 CREATE PROCEDURE [dbo].[ConsultarPerfilUsuario]
     @UsuarioID INT
@@ -147,6 +143,8 @@ VALUES
     NULL, NULL, 1, GETDATE(), NULL, NULL, 'Admin', 1);
 GO
 
+
+
 CREATE PROCEDURE [dbo].[ObtenerFacturaPorUsuario]
     @UsuarioId INT
 AS
@@ -201,4 +199,38 @@ BEGIN
     FROM dbo.DetalleFacturas df
     WHERE df.FacturaId = @FacturaId;
 END
+GO
+
+
+INSERT INTO [TallerRepuestosDB].[dbo].[Categorias] ([Nombre], [Descripcion])
+VALUES
+('Lubricantes', 'Aceites y lubricantes para vehículos y maquinaria, incluyendo aceites de motor y otros sistemas.'),
+('Filtros', 'Filtros de aire, aceite, combustible y habitáculo para vehículos.'),
+('Frenos', 'Pastillas, discos y componentes del sistema de frenos de vehículos.'),
+('Encendido', 'Componentes del sistema de encendido, como bujías y bobinas.'),
+('Accesorios Eléctricos', 'Componentes eléctricos como cables, fusibles, alternadores, y otros accesorios eléctricos.'),
+('Suspensión', 'Amortiguadores, resortes, y otros componentes para sistemas de suspensión de vehículos.'),
+('Motor', 'Repuestos y componentes para motores de vehículos, incluyendo piezas principales y accesorios del motor.'),
+('Neumáticos', 'Neumáticos y llantas de diferentes tamaños y modelos.'),
+('Baterías', 'Baterías para vehículos y maquinaria, incluyendo baterías de arranque.'),
+('Herramientas', 'Herramientas manuales y eléctricas para reparaciones y mantenimiento de vehículos.'),
+('Repuestos de Carrocería', 'Piezas de carrocería como espejos, defensas, parachoques y paneles.'),
+('Radiadores y Enfriamiento', 'Radiadores, mangueras y componentes del sistema de enfriamiento de vehículos.'),
+('Transmisión', 'Componentes del sistema de transmisión, incluyendo embragues y cajas de cambios.'),
+('Sistemas de Dirección', 'Componentes del sistema de dirección, como bombas de dirección y barras de dirección.'),
+('Iluminación', 'Luces y focos para vehículos y maquinaria industrial, incluyendo faros, bombillos y luces de señalización.'),
+('Climatización', 'Componentes del sistema de aire acondicionado y calefacción para vehículos.'),
+('Escapes y Catalizadores', 'Sistemas de escape, tubos de escape y catalizadores para vehículos.'),
+('Accesorios para Automóviles', 'Accesorios varios como alfombrillas, asientos, tapicería y otros artículos para automóviles.'),
+('Plásticos y Molduras', 'Piezas plásticas para interiores y exteriores de vehículos.'),
+('Cinturones de Seguridad', 'Cinturones de seguridad y componentes del sistema de seguridad vehicular.'),
+('Bujías y Componentes de Encendido', 'Bujías, bobinas y otros componentes relacionados con el sistema de encendido de vehículos.'),
+('Repuestos para Sistemas de Suspensión', 'Componentes para suspensión y dirección, como amortiguadores y resortes.'),
+('Repuestos para Vehículos Comerciales', 'Repuestos y componentes para camiones, autobuses y vehículos comerciales.'),
+('Aceites y Fluidos', 'Aceites para motor, fluidos de frenos, de transmisión, y otros líquidos automotrices.'),
+('Repuestos de Transmisión Automática', 'Componentes del sistema de transmisión automática, como fluidos y partes internas.'),
+('Sistemas de Frenos Hidráulicos', 'Componentes específicos para sistemas de frenos hidráulicos de vehículos.'),
+('Filtros de Combustible', 'Filtros específicos para el sistema de combustible de vehículos.'),
+('Componentes Eléctricos y Electrónicos', 'Componentes como alternadores, motores eléctricos, y sensores electrónicos de vehículos.'),
+('Cables y Conectores', 'Cables, conectores y otros componentes para el sistema eléctrico de vehículos.');
 GO
