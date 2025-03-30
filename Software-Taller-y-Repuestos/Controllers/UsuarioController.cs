@@ -81,7 +81,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
             using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
             {
-                var usuario = connection.QueryFirstOrDefault<Usuario>(
+                var usuario = connection.QueryFirstOrDefault<UsuarioPerfil>(
                     "ConsultarPerfilUsuario",
                     new { UsuarioID = usuarioId },
                     commandType: System.Data.CommandType.StoredProcedure);
@@ -96,7 +96,7 @@ namespace Software_Taller_y_Repuestos.Controllers
         }
 
         [HttpPost]
-        public IActionResult EditarPerfil(Usuario model, IFormFile Imagen)
+        public async Task<IActionResult> EditarPerfil(UsuarioPerfil model, IFormFile Imagen)
         {
             try
             {
@@ -116,7 +116,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                 // Obtener datos del usuario desde la base de datos
                 using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
                 {
-                    var usuario = connection.QueryFirstOrDefault<Usuario>(
+                    var usuario = connection.QueryFirstOrDefault<UsuarioPerfil>(
                         "ConsultarPerfilUsuario",
                         new { UsuarioID = usuarioId },
                         commandType: CommandType.StoredProcedure);
@@ -124,7 +124,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                     if (usuario == null)
                     {
                         ViewBag.ErrorMessage = "Usuario no encontrado.";
-                        return View(model ?? new Usuario()); // Devuelve un modelo inicializado
+                        return View(model ?? new UsuarioPerfil()); // Devuelve un modelo inicializado
                     }
 
                     imagenAnterior = usuario.Imagen;
@@ -198,14 +198,15 @@ namespace Software_Taller_y_Repuestos.Controllers
                 // Actualizar el perfil en la base de datos
                 using (var connection = new SqlConnection(_conf.GetSection("ConnectionStrings:DefaultConnection").Value))
                 {
-                    var result = connection.Execute("ActualizarPerfilUsuario", parametros, commandType: CommandType.StoredProcedure);
+                    var result = connection.ExecuteScalar<int>("ActualizarPerfilUsuario", parametros, commandType: CommandType.StoredProcedure);
 
-                    if (result > 0)
+                    if (result == 0)
                     {
-                        // Si el nombre cambió, cerrar sesión
+                        // Si el nombre cambió, agregar un mensaje a ViewBag
                         if (!string.Equals(username, model.Nombre, StringComparison.OrdinalIgnoreCase))
                         {
-                            return RedirectToAction("Logout", "Home");
+                            ViewBag.NameChangedMessage = "Tu nombre ha cambiado, se cerrará sesión en 3 segundos";
+                            return View(model);
                         }
 
                         return RedirectToAction("Perfil", "Usuario");
@@ -221,15 +222,9 @@ namespace Software_Taller_y_Repuestos.Controllers
             {
                 // Manejar errores inesperados
                 ViewBag.ErrorMessage = $"Ocurrió un error inesperado, Vuelva a intentarlo más tarde";
-                return View(model ?? new Usuario()); // Asegurar que el modelo no sea null
+                return View(model ?? new UsuarioPerfil()); // Asegurar que el modelo no sea null
             }
         }
-
-
-
-
-
-
 
 
     }

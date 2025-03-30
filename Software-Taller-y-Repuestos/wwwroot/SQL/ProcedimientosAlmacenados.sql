@@ -32,6 +32,10 @@ CREATE PROCEDURE [dbo].[ActualizarPerfilUsuario]
 AS
 BEGIN
     SET NOCOUNT ON;
+    DECLARE @Result INT;
+
+    -- Inicializar la variable @Result
+    SET @Result = 0;
 
     -- Verificar si el usuario existe
     IF EXISTS (SELECT 1 FROM dbo.Usuarios WHERE UsuarioID = @UsuarioId)
@@ -47,14 +51,21 @@ BEGIN
                             ELSE Imagen 
                         END
         WHERE UsuarioID = @UsuarioId;
+
+        -- Si la actualización se realizó, establecer @Result como 1
+        SET @Result = 1;
     END
     ELSE
     BEGIN
         -- Mensaje en caso de que no exista el usuario
         RAISERROR('El usuario especificado no existe.', 16, 1);
     END
+
+    -- Devolver el valor de @Result
+    RETURN @Result;
 END
 GO
+
 
 CREATE PROCEDURE [dbo].[CrearUsuario]
     @Nombre NVARCHAR(50),
