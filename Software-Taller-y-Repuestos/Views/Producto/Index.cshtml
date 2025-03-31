@@ -1,108 +1,448 @@
 ﻿@model List<Software_Taller_y_Repuestos.Models.Producto>
 
 @{
-    ViewData["Title"] = "Lista de Productos";
+    ViewData["Title"] = "Catálogo de Productos";
     int pageNumber = (int)ViewData["PageNumber"];
     int totalPages = (int)ViewData["TotalPages"];
 }
 
-<div class="container mt-5 pt-5">
-    <div class="section-title mb-4">
-        <h2 class="text-center">Nuestros Productos</h2>
-    </div>
+<section id="profile-section" class="py-5">
+    <div class="container">
+        <div class="product-catalog">
+            <div class="catalog-header">
+                <h1>Nuestros Productos</h1>
+                <p class="lead text-muted">Descubre nuestra selección de productos de alta calidad</p>
+            </div>
 
-    <!-- Barra de navegación y búsqueda -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Productos</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="@Url.Action("Index", new { sortOrder = "name" })">Ordenar por Nombre</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="@Url.Action("Index", new { sortOrder = "price" })">Ordenar por Precio</a>
-                    </li>
-                </ul>
-                <form class="d-flex" method="get" asp-action="Index">
-                    <input class="form-control me-2" type="search" name="searchString" placeholder="Buscar productos" value="@ViewData["CurrentFilter"]" />
-                    <button class="btn btn-outline-success" type="submit">Buscar</button>
+            <!-- Búsqueda -->
+            <div class="search-box">
+                <form method="get" asp-action="Index">
+                    <div class="input-group">
+                        <input type="text" class="form-control search-input" name="searchString" placeholder="¿Qué estás buscando?" value="@ViewData["CurrentFilter"]">
+                        <button class="btn btn-primary btn-sm" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
                 </form>
             </div>
-        </div>
-    </nav>
 
-    <!-- Botones de administración -->
-    <div class="mb-4 text-center">
-        @if (User.IsInRole("Admin"))
-        {
-            <a asp-action="Create" class="btn btn-success mr-2">Agregar un producto</a>
-        }
-    </div>
-
-    <!-- Cuadrícula de productos -->
-    <div class="row">
-        @foreach (var item in Model)
-        {
-            <div class="col-md-4 mb-4">
-                <div class="card h-100" style="display: flex; flex-direction: column;">
-                    <img src="@item.Imagen" class="card-img-top" alt="@item.Nombre" style="object-fit: cover; height: 200px;" />
-                    <div class="card-body">
-                        <h5 class="card-title text-dark">@item.Nombre</h5>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">Categoría: @item.Categoria?.Nombre</li>
-                            <li class="list-group-item">Precio: @item.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</li>
-                        </ul>
-                    </div>
-                    <div class="card-footer bg-transparent">
-                        <div class="btn-group w-100" role="group">
-                            <a asp-action="Details" asp-route-id="@item.ProductoId" class="btn btn-info">Detalles</a>
-
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <a asp-action="Edit" asp-route-id="@item.ProductoId" class="btn btn-warning">Editar</a>
-                            }
-
-                            <form method="post" asp-controller="Carrito" asp-action="AgregarAlCarrito" asp-route-productoId="@item.ProductoId">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-cart"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-
-    <!-- Controles de paginación -->
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            <!-- Botón "Anterior" -->
-            <li class="page-item @(pageNumber == 1 ? "disabled" : "")">
-                <a class="page-link" href="@Url.Action("Index", new { page = pageNumber - 1, searchString = ViewData["CurrentFilter"], sortOrder = ViewData["SortOrder"] })">Anterior</a>
-            </li>
-
-            <!-- Números de página -->
-            @for (int i = 1; i <= totalPages; i++)
+            <!-- Botón Admin -->
+            @if (User.IsInRole("Admin"))
             {
-                <li class="page-item @(i == pageNumber ? "active" : "")">
-                    <a class="page-link" href="@Url.Action("Index", new { page = i, searchString = ViewData["CurrentFilter"], sortOrder = ViewData["SortOrder"] })">@i</a>
-                </li>
+                <div class="admin-controls">
+                    <a asp-action="Create" class="btn btn-success btn-lg">
+                        <i class="bi bi-plus-circle"></i> Agregar Productos
+                    </a>
+                </div>
             }
 
-            <!-- Botón "Siguiente" -->
-            <li class="page-item @(pageNumber == totalPages ? "disabled" : "")">
-                <a class="page-link" href="@Url.Action("Index", new { page = pageNumber + 1, searchString = ViewData["CurrentFilter"], sortOrder = ViewData["SortOrder"] })">Siguiente</a>
-            </li>
-        </ul>
-    </nav>
-</div>
+            <!-- Productos -->
+            <div class="products-grid">
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <div class="product-card">
+                            <div class="product-image">
+
+
+                                @if (string.IsNullOrEmpty(@item.Imagen))
+                                {
+                                    
+                                    <img src="~/assets/img/default.png" alt="@item.Nombre" loading="lazy" />
+
+                                }
+                                else
+                                {
+
+                                    <img src="@item.Imagen" alt="@item.Nombre" loading="lazy" />
+                                  
+                                }
+
+                                <img src="@item.Imagen" alt="@item.Nombre" loading="lazy" />
+                                <div class="quick-actions">
+                                    <form method="post" asp-controller="Carrito" asp-action="AgregarAlCarrito" asp-route-productoId="@item.ProductoId">
+                                        <button type="submit" class="btn-add-cart" title="Añadir al carrito">
+                                            <i class="bi bi-cart-plus"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">@item.Nombre</h3>
+                                <span class="product-category">@item.Categoria?.Nombre</span>
+                                <div class="product-price">@item.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</div>
+
+                                <div class="product-actions">
+                                    <a asp-action="Details" asp-route-id="@item.ProductoId" class="btn btn-info btn-sm">Ver detalles</a>
+
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.ProductoId" class="btn btn-warning btn-sm">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-products">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <h3>No se encontraron productos</h3>
+                        <p>Intenta con otros términos de búsqueda o revisa más tarde.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 }
+
+<style>
+    :root {
+        --primary-color:rgb(255, 255, 255);
+        --secondary-color:rgb(202, 202, 202);
+        --accent-color: #e74c3c;
+        --light-color: #f8f9fa;
+        --dark-color:rgb(0, 0, 0);
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --info-color: #17a2b8;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 280px;
+        margin-bottom: 2rem;
+    }
+
+    .search-box .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .search-input {
+        padding: 2rem 2rem;
+        font-size: 1.25rem;
+    }
+
+    .container {
+        padding-top: 80px; /* Ajusta este valor según el espacio que quieras reducir */
+        padding-bottom: 80px; /* Mantén el padding-bottom para asegurar que haya espacio abajo */
+    }
+
+    /* Estilos generales */
+    .product-catalog {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .catalog-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+        .catalog-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+    /* Filtros y búsqueda */
+    .filter-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        gap: 1rem;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 280px;
+    }
+
+        .search-box .input-group {
+            box-shadow: var(--shadow);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .search-box .form-control {
+            border-radius: 50px 0 0 50px;
+            border: none;
+            padding: 1.5rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .search-box .btn {
+            border-radius: 0 50px 50px 0;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+        }
+
+    .sort-options .dropdown-toggle {
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        background-color: white;
+        border: 1px solid #ddd;
+    }
+
+    .sort-options .dropdown-menu {
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        border: none;
+        padding: 0.5rem;
+    }
+
+    .sort-options .dropdown-item {
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem 0;
+    }
+
+        .sort-options .dropdown-item:hover {
+            background-color: var(--light-color);
+        }
+
+    /* Botón Admin */
+    .admin-controls {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+        .admin-controls .btn {
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+        }
+
+    /* Grid de productos */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .product-card {
+        background-color: #1e1e1e;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+    .product-image {
+        position: relative;
+        overflow: hidden;
+        height: 200px;
+    }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+    .product-card:hover .product-image img {
+        transform: scale(1.05);
+    }
+
+    .quick-actions {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: var(--transition);
+    }
+
+    .product-card:hover .quick-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .btn-add-cart, .btn-view {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
+        color: var(--dark-color);
+        border: none;
+        box-shadow: var(--shadow);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+        .btn-add-cart:hover {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+    .product-info {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .product-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--secondary-color);
+    }
+
+    .product-category {
+        color:rgb(201, 201, 201);
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--light-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .product-actions {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+        .product-actions .btn {
+            border-radius: 50px;
+            flex: 1;
+            padding: 0.5rem 1rem;
+        }
+
+    /* Mensaje de no hay productos */
+    .no-products {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+        background-color: var(--light-color);
+        border-radius: 20px;
+    }
+
+        .no-products i {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+    /* Paginación */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .pagination {
+        border-radius: 50px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+
+        .pagination .page-item:first-child .page-link {
+            border-top-left-radius: 50px;
+            border-bottom-left-radius: 50px;
+        }
+
+        .pagination .page-item:last-child .page-link {
+            border-top-right-radius: 50px;
+            border-bottom-right-radius: 50px;
+        }
+
+        .pagination .page-link {
+            color: var(--dark-color);
+            border: none;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .pagination .page-item:not(.active) .page-link:hover {
+            background-color: var(--light-color);
+        }
+
+    /* Responsividad */
+    @@media (max-width: 768px) {
+        .filter-container
+
+    {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box, .sort-options {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.5rem;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .catalog-header h1
+
+    {
+        font-size: 2rem;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pagination .page-link {
+        padding: 0.5rem 0.75rem;
+    }
+
+    }</style>
