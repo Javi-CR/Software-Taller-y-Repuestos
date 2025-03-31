@@ -22,9 +22,15 @@
                         <button class="btn btn-primary btn-sm" type="submit">
                             <i class="bi bi-search"></i>
                         </button>
+                        <!-- Botón de refrescar sin el searchString -->
+                        <a class="btn btn-secondary btn-sm" href="@Url.Action("Index", "Producto")">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </a>
                     </div>
                 </form>
             </div>
+
+
 
             <!-- Botón Admin -->
             @if (User.IsInRole("Admin"))
@@ -359,7 +365,7 @@
         grid-column: 1 / -1;
         text-align: center;
         padding: 3rem;
-        background-color: var(--light-color);
+        background-color: #1e1e1e;
         border-radius: 20px;
     }
 
