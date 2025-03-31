@@ -1,47 +1,230 @@
 ﻿@model Software_Taller_y_Repuestos.Models.Producto
-
 @{
-    ViewData["Title"] = "Detalles del Producto";
+    ViewData["Title"] = "Detalle del Producto";
 }
 
-<div class="container my-5">
-    <div class="section-title mb-4">
-        <h2 class="text-center">Detalles del Producto</h2>
-    </div>
 
-    <div class="card mb-3 mx-auto" style="max-width: 720px;">
-        <div class="row g-0">
-            <!-- Imagen del producto -->
-            <div class="col-md-4">
-                <img src="@Model.Imagen" class="img-fluid rounded-start" alt="@Model.Nombre">
+<section id="profile-section" class="py-5">
+    <div class="container">
+
+
+        <div class="container my-5">
+            <div class="product-header mb-5">
+                <h2 class="display-5 text-center fw-bold">Detalle del Producto</h2>
+                <div class="text-center">
+                    <div class="separator-line mx-auto"></div>
+                </div>
             </div>
 
-            <!-- Detalles del producto -->
-            <div class="col-md-8">
-                <div class="card-body">
+            <div class="product-card shadow rounded-4 overflow-hidden mx-auto">
+                <div class="row g-0">
+                    <!-- Imagen del producto -->
+                    <div class="col-md-5 product-image-container">
+                        @if (!string.IsNullOrEmpty(Model.Imagen))
+                        {
+                            <img src="@Model.Imagen" class="product-image" alt="@Model.Nombre">
+                        }
+                        else
+                        {
+                            <div class="no-image-placeholder d-flex align-items-center justify-content-center text-center">
+                                <i class="bi bi-image fs-1 mb-2"></i>
+                                <p>Imagen no disponible</p>
+                            </div>
+                        }
+                    </div>
 
-                    <h5 class="card-title text-dark">@Model.Nombre</h5>
-                    <p class="card-text text-dark">@Model.Descripcion</p>
-                    <p class="card-text text-dark"><strong>Código:</strong> @Model.Codigo</p>
-                    <p class="card-text text-dark"><strong>Categoría:</strong> @Model.Categoria?.Nombre</p>
-                    <p class="card-text text-dark"><strong>Cantidad en Stock:</strong> @Model.Cantidad</p>
-                    <p class="card-text text-dark">
-                        <strong>Precio de Venta:</strong>
-                        @Model.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))
-                    </p>
+                    <!-- Detalles del producto -->
+                    <div class="col-md-7">
+                        <div class="product-details p-4">
+                            <h3 class="product-title mb-3">@Model.Nombre</h3>
 
+                            <div class="product-code-category mb-3">
+                                <span class="badge bg-light text-dark me-2">Código: @Model.Codigo</span>
+                                <span class="badge bg-secondary">@(Model.Categoria?.Nombre ?? "Sin categoría")</span>
+                            </div>
+
+                            <div class="product-description mb-4">
+                                <h5 class="detail-section-title">Descripción</h5>
+                                <p>@Model.Descripcion</p>
+                            </div>
+
+                            <div class="product-info row">
+                                <div class="col-md-6 mb-3">
+                                    <h5 class="detail-section-title">Disponibilidad</h5>
+                                    <div class="availability-indicator d-flex align-items-center">
+                                        @if (Model.Cantidad > 10)
+                                        {
+                                            <span class="stock-dot bg-success me-2"></span>
+                                            <span>En stock (@Model.Cantidad unidades)</span>
+                                        }
+                                        else if (Model.Cantidad > 0)
+                                        {
+                                            <span class="stock-dot bg-warning me-2"></span>
+                                            <span>Pocas unidades (@Model.Cantidad)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="stock-dot bg-danger me-2"></span>
+                                            <span>Agotado</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <h5 class="detail-section-title">Precio</h5>
+                                    <div class="product-price">
+                                        @Model.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <div class="product-actions mt-4 d-flex flex-wrap">
+                                <a asp-action="Index" class="btn btn-outline-secondary me-2 mb-2">
+                                    <i class="bi bi-arrow-left me-1"></i> Volver
+                                </a>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@Model.ProductoId" class="btn btn-primary me-2 mb-2">
+                                        <i class="bi bi-pencil-square me-1"></i> Editar
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+
     </div>
+</section>
 
-    <!-- Botones de acción -->
-    <div class="text-center">
-        <a asp-action="Index" class="btn btn-secondary me-2">Volver</a>
 
-        @if (User.IsInRole("Admin"))
-        {
-            <a asp-action="Edit" asp-route-id="@Model.ProductoId" class="btn btn-warning me-2">Editar</a>
+<style>
+
+
+    .container {
+        padding-top: 40px;
+        padding-bottom:40px;
+    }
+    /* Estilos personalizados para mejorar la apariencia */
+    .product-header {
+        position: relative;
+    }
+
+    .separator-line {
+        width: 60px;
+        height: 4px;
+        background-color: #cda45e;
+        margin-top: 15px;
+        border-radius: 2px;
+    }
+
+    .product-card {
+        max-width: 900px;
+        border: none;
+    }
+
+        .product-card:hover {
+            transform: none;
         }
-    </div>
-</div>
+
+    .product-image-container {
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+        overflow: hidden;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+
+        .product-image:hover {
+            transform: scale(1.05);
+        }
+
+    .no-image-placeholder {
+        flex-direction: column;
+        height: 100%;
+        color: #6c757d;
+    }
+
+    .product-details {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-title {
+        color:rgb(255, 255, 255);
+        font-weight: 600;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 12px;
+    }
+
+    .detail-section-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color:rgb(255, 255, 255);
+        margin-bottom: 8px;
+    }
+
+    .product-description {
+        color:rgb(190, 190, 190);
+    }
+
+    .product-price {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #cda45e;
+    }
+
+    .stock-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .availability-indicator {
+        font-weight: 500;
+    }
+
+    .product-actions {
+        margin-top: auto;
+    }
+
+    .btn-primary {
+        background-color: #cda45e;
+        border-color: #cda45e;
+    }
+
+        .btn-primary:hover {
+            background-color: rgb(44, 44, 44);
+            border-color:rgb(44, 44, 44);
+        }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    @@media (max-width: 767.98px) {
+        .product-image-container
+
+    {
+        min-height: 200px;
+    }
+
+    .product-details {
+        padding: 15px;
+    }
+
+    }</style>

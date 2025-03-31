@@ -1,87 +1,300 @@
 ﻿@model List<Software_Taller_y_Repuestos.Models.Producto>
-
 @{
     ViewData["Title"] = "Inventario";
     int pageNumber = (int)ViewData["PageNumber"];
     int totalPages = (int)ViewData["TotalPages"];
 }
 
-<div class="container mt-5 pt-5">
-    <div class="section-title mb-4">
-        <h2 class="text-center">Inventario de Productos</h2>
-    </div>
 
-    <!-- Notificación de stock bajo -->
-    @if (TempData["StockBajo"] != null)
-    {
-        <div class="alert alert-warning">
-            @Html.Raw(TempData["StockBajo"])
-        </div>
-    }
 
-    <!-- Mensajes de éxito -->
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success">
-            @TempData["Message"]
-        </div>
-    }
+<section id="profile-section" class="py-5">
+    <div class="container">
 
-    <!-- Cuadrícula de productos -->
-    <div class="row">
-        @foreach (var item in Model)
-        {
-            <div class="col-md-4 mb-4">
-                <div class="card h-100" style="display: flex; flex-direction: column;">
-                    <img src="@item.Imagen" class="card-img-top" alt="@item.Nombre" style="object-fit: cover; height: 200px;" />
-                    <div class="card-body">
-                        <h5 class="card-title text-dark">@item.Nombre</h5>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">Categoría: @item.Categoria?.Nombre</li>
-                            <li class="list-group-item">Stock: @item.Cantidad</li>
-                            <li class="list-group-item">Precio: @item.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</li>
-                            <li class="list-group-item">Estado: @(item.Activo ? "Activo" : "Inactivo")</li>
-                        </ul>
-                    </div>
-                    <div class="card-footer bg-transparent">
-                        <div class="btn-group w-100" role="group">
-                            <a asp-action="RegistrarSalida" asp-route-productoId="@item.ProductoId" class="btn btn-primary">Registrar Salida</a>
-                            <a asp-action="Auditoria" asp-route-productoId="@item.ProductoId" class="btn btn-dark">Ajustar Stock</a>
 
-                            <form method="post" asp-action="CambiarEstado">
-                                <input type="hidden" name="id" value="@item.ProductoId" />
-                                <input type="hidden" name="activo" value="@(item.Activo ? 0 : 1)" />
-                                <button type="submit" class="btn @(item.Activo ? "btn-danger" : "btn-success")">
-                                    @(item.Activo ? "Desactivar" : "Activar")
-                                </button>
-                            </form>
+
+        <div class="container-fluid py-5">
+            <!-- Encabezado con estilo -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="text-center">
+                        <h1 class="display-4 fw-bold text-primary">Inventario de Productos</h1>
+                        <div class="d-inline-block position-relative">
+                            <div class="bg-primary mx-auto" style="height: 4px; width: 100px;"></div>
                         </div>
                     </div>
                 </div>
             </div>
-        }
-    </div>
 
-    <!-- Controles de paginación -->
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            <!-- Botón "Anterior" -->
-            <li class="page-item @(pageNumber == 1 ? "disabled" : "")">
-                <a class="page-link" href="@Url.Action("Index", new { page = pageNumber - 1 })">Anterior</a>
-            </li>
+            <!-- Área de filtros y búsqueda -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Buscar productos...">
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="@Url.Action("Create", "Producto")" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-2"></i>Nuevo Producto
+                    </a>
+                </div>
+            </div>
 
-            <!-- Números de página -->
-            @for (int i = 1; i <= totalPages; i++)
+
+
+            @if (TempData["Message"] != null)
             {
-                <li class="page-item @(i == pageNumber ? "active" : "")">
-                    <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
-                </li>
+                <div class="alert alert-success shadow-sm border-start border-success border-4 d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill me-2 fs-4"></i>
+                    <div>@TempData["Message"]</div>
+                </div>
             }
 
-            <!-- Botón "Siguiente" -->
-            <li class="page-item @(pageNumber == totalPages ? "disabled" : "")">
-                <a class="page-link" href="@Url.Action("Index", new { page = pageNumber + 1 })">Siguiente</a>
-            </li>
-        </ul>
-    </nav>
-</div>
+            <!-- Cuadrícula de productos con diseño mejorado -->
+            <div class="row g-4" id="productList">
+                @foreach (var item in Model)
+                {
+                    <div class="col-md-6 col-lg-4 col-xl-3 mb-4 product-card">
+                        <div class="card h-100 shadow-sm hover-scale">
+                            <div class="position-relative">
+
+                                
+                                @if (string.IsNullOrEmpty(@item.Imagen))
+                                {
+                                    <img src="~/assets/img/def.png" alt="@item.Nombre" style="width: 100%; height: 180px; object-fit: cover;">
+
+                                }
+                                else
+                                {
+                                    <img src="@item.Imagen" class="card-img-top" alt="@item.Nombre" style="width: 100%; height: 180px; object-fit: cover;">
+
+                                }
+
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge bg-@(item.Cantidad > 10 ? "success" : "warning") rounded-pill">
+                                        Stock: @item.Cantidad
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold text-primary">@item.Nombre</h5>
+                                <p class="card-text mb-0 text-muted small">
+                                    <i class="bi bi-tag-fill me-1"></i>@item.Categoria?.Nombre
+                                </p>
+                                <p class="card-text mb-2 fw-bold fs-5 text-dark">
+                                    @item.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))
+                                </p>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="me-2">Estado:</span>
+                                    <span class="badge bg-@(item.Activo ? "success" : "secondary") rounded-pill">
+                                        @(item.Activo ? "Activo" : "Inactivo")
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-top-0 p-3">
+                                <div class="d-flex flex-column gap-2">
+                                    <a asp-action="RegistrarSalida" asp-route-productoId="@item.ProductoId"
+                                       class="btn btn-primary btn-sm d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-cart-dash me-2"></i>Registrar Salida
+                                    </a>
+                                    <a asp-action="Auditoria" asp-route-productoId="@item.ProductoId"
+                                        class="btn btn-success btn-sm d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-pencil-square me-2"></i>Ajustar Stock
+                                    </a>
+                                    <form method="post" asp-action="CambiarEstado" class="w-100">
+                                        <input type="hidden" name="id" value="@item.ProductoId" />
+                                        <input type="hidden" name="activo" value="@(item.Activo ? 0 : 1)" />
+                                        <button type="submit"
+                                                class="btn @(item.Activo ? "btn-outline-danger" : "btn-outline-success") btn-sm w-100 d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-@(item.Activo ? "toggle-off" : "toggle-on") me-2"></i>
+                                            @(item.Activo ? "Desactivar" : "Activar")
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Mensaje si no hay productos -->
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <h4 class="mt-3">No se encontraron productos</h4>
+                    <p class="text-muted">No hay productos disponibles en el inventario.</p>
+                </div>
+            }
+
+            <!-- Paginación mejorada -->
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(pageNumber == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = 1 })" aria-label="Primera página">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item @(pageNumber == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = pageNumber - 1 })" aria-label="Anterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    @{
+                        int startPage = Math.Max(1, pageNumber - 2);
+                        int endPage = Math.Min(totalPages, startPage + 4);
+
+                        if (startPage > 1)
+                        {
+                            <li class="page-item">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+
+                        for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == pageNumber ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                            </li>
+                        }
+
+                        if (endPage < totalPages)
+                        {
+                            <li class="page-item">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+                    }
+
+                    <li class="page-item @(pageNumber == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = pageNumber + 1 })" aria-label="Siguiente">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item @(pageNumber == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = totalPages })" aria-label="Última página">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+
+
+    </div>
+</section>
+
+<!-- Estilos CSS adicionales -->
+<style>
+
+    .input-group-text {
+ 
+        color: #fff;
+ 
+    }
+
+    .container {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+
+    .text-primary {
+        color:rgb(255, 255, 255) !important;
+    }
+
+    .text-dark {
+        color:rgb(255, 255, 255) !important;
+    }
+
+    .btn-outline-dark:hover {
+        color: #fff;
+        background-color: #cda45e;
+        border-color: #cda45e;
+    }
+
+    /* Efecto de escala al pasar el mouse sobre las tarjetas */
+    .hover-scale {
+        transition: transform 0.3s ease;
+    }
+
+        .hover-scale:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+
+    /* Estilos para los botones de paginación */
+    .page-item.active .page-link {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+
+    .page-link {
+        color: var(--bs-primary);
+    }
+
+    /* Estilos para las cards */
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.1);
+        background-color: #1e1e1e;
+    }
+
+    .bg-white {
+        background-color: #1e1e1e !important;
+    }
+
+    /* Estilos para el encabezado */
+    .display-4 {
+        font-weight: 600;
+    }
+
+    /* Animación para las alertas */
+    .alert {
+        animation: fadeIn 0.5s ease;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    
+
+    }</style>
+
+<!-- Script para la funcionalidad de búsqueda en tiempo real -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const productList = document.getElementById('productList');
+        const productCards = document.querySelectorAll('.product-card');
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+
+            productCards.forEach(card => {
+                const productName = card.querySelector('.card-title').textContent.toLowerCase();
+                const categoryName = card.querySelector('.text-muted').textContent.toLowerCase();
+
+                if (productName.includes(searchTerm) || categoryName.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
