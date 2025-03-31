@@ -1,23 +1,94 @@
 ﻿@model Software_Taller_y_Repuestos.Models.Producto
-
 @{
     ViewData["Title"] = "Registrar Salida";
 }
 
-<div class="container mt-5 pt-5">
-    <div class="section-title mb-4">
-        <h2 class="text-center">Registrar Salida de Inventario</h2>
-    </div>
 
-    <form asp-action="RegistrarSalida" method="post">
-        <div class="form-group">
-            <label>Producto</label>
-            <select asp-for="ProductoId" class="form-control" asp-items="ViewBag.ProductoId"></select>
+<section id="profile-section" class="py-5">
+    <div class="container">
+
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card shadow-sm border-0 rounded-lg bg-dark text-white">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="text-center font-weight-bold my-2">
+                                <i class="fas fa-boxes-packing me-2"></i>Registrar Salida de Inventario
+                            </h3>
+                        </div>
+                        <div class="card-body p-4">
+                            <form asp-action="RegistrarSalida" method="post">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-white" asp-for="ProductoId">Producto</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-box"></i>
+                                        </span>
+                                        <select asp-for="ProductoId" class="form-select" asp-items="ViewBag.ProductoId">
+                                            <option value="">-- Seleccione un producto --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-white" for="cantidad">Cantidad</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-hashtag"></i>
+                                        </span>
+                                        <input type="number" id="cantidad" class="form-control" name="cantidad" min="1" required placeholder="Cantidad a retirar" />
+                                    </div>
+                                </div>
+                                <div class="d-grid gap-2 mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-save me-2"></i>Registrar Salida
+                                    </button>
+                                    <a asp-action="Index" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Volver
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer text-center py-3">
+                            <div class="small text-muted">Complete todos los campos para registrar la salida</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label>Cantidad</label>
-            <input type="number" class="form-control" name="cantidad" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Registrar</button>
-    </form>
-</div>
+
+
+    </div>
+</section>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Agregar validación del lado del cliente
+            $("form").submit(function(e) {
+                var cantidad = parseInt($("#cantidad").val());
+                if (cantidad <= 0) {
+                    e.preventDefault();
+                    alert("La cantidad debe ser mayor a cero");
+                    return false;
+                }
+            });
+
+            // Mejorar el select con búsqueda
+            $("select").select2({
+                placeholder: "Buscar y seleccionar producto",
+                allowClear: true
+            });
+        });
+    </script>
+}
+<!-- Estilos CSS adicionales -->
+<style>
+
+   
+    .container {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+
+</style>

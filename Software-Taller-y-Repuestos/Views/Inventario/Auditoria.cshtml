@@ -1,39 +1,167 @@
 ﻿@model List<Software_Taller_y_Repuestos.Models.Producto>
-
 @{
     ViewData["Title"] = "Auditoría de Inventario";
 }
 
-<div class="container mt-5 pt-5">
-    <div class="section-title mb-4">
-        <h2 class="text-center">Auditoría de Inventario</h2>
-    </div>
 
-    <form asp-action="Auditoria" method="post">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Categoría</th>
-                    <th>Stock Actual</th>
-                    <th>Nuevo Stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < Model.Count; i++)
-                {
-                        <tr>
-                            <td>@Model[i].Nombre</td>
-                            <td>@Model[i].Categoria?.Nombre</td>
-                            <td>@Model[i].Cantidad</td>
-                            <td>
-                                <input type="number" name="productos[@i].Cantidad" value="@Model[i].Cantidad" class="form-control" />
-                                <input type="hidden" name="productos[@i].ProductoId" value="@Model[i].ProductoId" />
-                            </td>
-                        </tr>
-                }
-            </tbody>
-        </table>
-        <button type="submit" class="btn btn-primary">Guardar Auditoría</button>
-    </form>
-</div>
+<section id="profile-section" class="py-5">
+    <div class="container">
+
+
+
+        <div class="container mt-5 pt-3">
+            <div class="card shadow-lg border-0 bg-dark text-white">
+                <div class="card-header bg-dark text-white py-3">
+                    <h2 class="text-center mb-0">Auditoría de Inventario</h2>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Auditoria" method="post">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-custom">
+                                <thead>
+                                    <tr>
+                                        <th class="align-middle">Producto</th>
+                                        <th class="align-middle">Categoría</th>
+                                        <th class="align-middle text-center">Stock Actual</th>
+                                        <th class="align-middle text-center">Nuevo Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.Count; i++)
+                                    {
+                                        <tr>
+                                            <td class="align-middle fw-semibold">@Model[i].Nombre</td>
+                                            <td class="align-middle">
+                                                <span class="badge" style="background-color: #cda45e; color: #1a1814;">
+                                                    @Model[i].Categoria?.Nombre
+                                                </span>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <span class="badge" style="background-color: #1e1e1e;">
+                                                    @Model[i].Cantidad
+                                                </span>
+                                            </td>
+                                            <td class="align-middle">
+                                                <div class="input-group">
+                                                    <span class="input-group-text" style="background-color: #212529; color: white; border: 1px solid #1e1e1e;">
+                                                        <i class="bi bi-box-seam"></i>
+                                                    </span>
+                                                    <input type="number" name="productos[@i].Cantidad" value="@Model[i].Cantidad"
+                                                           class="form-control text-center" min="0"
+                                                           style="background-color: #0c0b09; color: white; border: 1px solid #1e1e1e;" />
+                                                    <input type="hidden" name="productos[@i].ProductoId" value="@Model[i].ProductoId" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-save me-2"></i> Guardar Auditoría
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</section>
+
+
+<style>
+    .container {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: #343a40; /* Fondo oscuro para la tarjeta */
+    }
+
+    .card-header {
+        border-bottom: 0;
+    }
+
+    .card-body {
+        background-color: #1e1e1e;
+    }
+
+    .btn-primary {
+        background-color: #cda45e !important;
+        border-color: #b89450 !important;
+        color: #1a1814 !important;
+        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .btn-primary:hover {
+            background-color: #b89450 !important;
+            border-color: #a38345 !important;
+            color: white !important;
+        }
+
+    .btn-outline-primary {
+        color: #cda45e !important;
+        border-color: #cda45e !important;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: #cda45e !important;
+            color: #1a1814 !important;
+        }
+
+    .form-control, .form-select {
+        background-color: #0c0b09 !important;
+        color: white !important;
+        border: 1px solid #1e1e1e;
+    }
+
+    .form-floating label {
+        color: white !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #cda45e;
+        box-shadow: none;
+    }
+
+    .input-group-text {
+        background-color: #212529;
+        color: white;
+        border: 1px solid #1e1e1e;
+    }
+
+    .text-danger {
+        font-size: 14px;
+    }
+
+    #imagenHelp img {
+        max-height: 150px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+
+    /* Estilos personalizados para la tabla */
+    .table-custom {
+        background-color: #1e1e1e;
+        color: white;
+    }
+
+        .table-custom thead th {
+            background-color: #1e1e1e;
+            color: white;
+            border-bottom: 2px solid #cda45e;
+        }
+
+        .table-custom tbody tr {
+            background-color: #1e1e1e;
+        }
+</style>
