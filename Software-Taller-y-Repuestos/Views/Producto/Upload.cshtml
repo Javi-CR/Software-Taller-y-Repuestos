@@ -2,14 +2,12 @@
 @{
     ViewData["Title"] = "Subir Productos";
 }
-
 <style>
-
     .container {
         padding-top: 60px;
         padding-bottom: 60px;
     }
-    
+
     body {
         background-color: #121212;
         color: white;
@@ -35,42 +33,57 @@
         border: 2px dashed #ccc;
         padding: 30px;
         border-radius: 8px;
-        background-color:rgb(26, 24, 24);
+        background-color: rgb(26, 24, 24);
         text-align: center;
         margin-bottom: 25px;
         transition: all 0.3s ease;
+        cursor: pointer;
     }
 
-    .file-upload-area:hover {
-        border-color:rgb(255, 255, 255);
-        background-color: #f0f7ff;
-    }
+        .file-upload-area:hover {
+            border-color: rgb(255, 255, 255);
+            background-color: #2a2a2a;
+        }
 
-    .file-upload-area label {
-        display: block;
-        margin-bottom: 15px;
+        .file-upload-area.drag-over {
+            border-color: #007bff;
+            background-color: #2d3748;
+        }
+
+        .file-upload-area label {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #e0e0e0;
+        }
+
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+
+    .drop-message {
         font-size: 16px;
-        color: #555;
+        color: #e0e0e0;
+        margin-bottom: 15px;
     }
 
-    .file-upload-area input[type="file"] {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        background-color: white;
+    .file-name {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #4CAF50;
+        font-weight: 500;
+        display: none;
     }
 
     .format-info {
         font-size: 13px;
-        color: #666;
+        color: #aaa;
         margin-top: 10px;
     }
 
-    .format-info i {
-        margin-right: 5px;
-    }
+        .format-info i {
+            margin-right: 5px;
+        }
 
     .action-buttons {
         display: flex;
@@ -85,9 +98,9 @@
         transition: all 0.2s;
     }
 
-    .btn-upload:hover {
-        transform: translateY(-2px);
-    }
+        .btn-upload:hover {
+            transform: translateY(-2px);
+        }
 
     .error-container {
         margin-top: 20px;
@@ -95,58 +108,407 @@
         padding: 15px;
     }
 
-    .error-container p {
-        margin-bottom: 8px;
-    }
-
+        .error-container p {
+            margin-bottom: 8px;
+        }
     /* Animación para mostrar errores */
     @@keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .alert {
         animation: fadeIn 0.4s ease-in-out;
     }
-</style>
 
+    /* Estilos para el botón de instrucciones */
+    .btn-instructions {
+        padding: 10px 24px;
+        font-weight: 500;
+        transition: all 0.2s;
+        background-color: #17a2b8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+        .btn-instructions:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+        }
+
+        .btn-instructions i {
+            margin-right: 8px;
+        }
+
+    /* Estilos para el modal de instrucciones */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .modal-content {
+        background-color: #2a2a2a;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-content {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #444;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: white;
+        margin: 0;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: #ccc;
+        font-size: 1.8rem;
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 0;
+        line-height: 1;
+    }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-image {
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+        .modal-image:hover {
+            transform: scale(1.02);
+        }
+
+    .instruction-list {
+        padding-left: 20px;
+    }
+
+        .instruction-list li {
+            margin-bottom: 10px;
+            color: #e0e0e0;
+        }
+
+    .instruction-note {
+        background-color: #333;
+        border-left: 4px solid #007bff;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 4px;
+    }
+
+    /* Estilos para el lightbox de la imagen */
+    .image-lightbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .image-lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .lightbox-content {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+    }
+
+    .lightbox-image {
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        color: white;
+        font-size: 2rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 2001;
+    }
+
+    .lightbox-caption {
+        position: absolute;
+        bottom: -30px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        color: white;
+        font-size: 14px;
+    }
+</style>
 
 <section id="profile-section" class="py-5">
     <div class="container">
-
         <div class="upload-container">
             <h1 class="page-title">@ViewData["Title"]</h1>
-
-            <form asp-action="Upload" method="post" enctype="multipart/form-data">
-                <div class="file-upload-area">
-                    <label for="file">
-                        <i class="fas fa-file-upload"></i> Selecciona tu archivo
-                    </label>
+            <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                <div class="file-upload-area" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                    <div class="drop-message">
+                        <strong>Arrastra y suelta</strong> tu archivo aquí o <strong>haz clic</strong> para seleccionarlo
+                    </div>
                     <input type="file" class="form-control" id="file" name="file" required />
+                    <div class="file-name" id="fileName"></div>
                     <div class="format-info">
                         <i class="fas fa-info-circle"></i> Formatos permitidos: CSV o Excel (.xlsx)
                     </div>
                 </div>
-
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-primary btn-upload">
                         <i class="fas fa-upload"></i> Subir Archivo
                     </button>
-                    <a asp-action="Index" class="btn btn-secondary btn-upload">
+
+                    <button type="button" id="showInstructions" class="btn-instructions">
+                        <i class="fas fa-question-circle"></i> Instrucciones
+                    </button>
+
+                    <a asp-action="Create" class="btn btn-secondary btn-upload">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                 </div>
             </form>
-
-
             @if (ViewBag.ErrorMessage != null)
             {
                 <div class="alert alert-danger mt-4 error-container">
-                <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
+                    <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
                 </div>
             }
         </div>
-
-
     </div>
 </section>
+
+<!-- Modal de instrucciones -->
+<div id="instructionsModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fas fa-info-circle"></i> Instrucciones para subir productos</h3>
+            <button id="closeModal" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <img src="~/assets/img/instrucciones.png" alt="Instrucciones de ejemplo" class="modal-image" id="instructionImage">
+
+            <h4>Cómo subir tu archivo correctamente:</h4>
+            <ol class="instruction-list">
+                <li>Prepara tu archivo en formato <strong>CSV</strong> o <strong>Excel (.xlsx)</strong> asegurándote que cumpla con la estructura requerida.</li>
+                <li>Los encabezados de columna deben coincidir exactamente con los nombres de los campos en el sistema.</li>
+                <li>La primera fila debe contener los nombres de las columnas.</li>
+                <li>Asegúrate de que todos los datos obligatorios estén completos para evitar errores.</li>
+                <li>Puedes arrastrar y soltar tu archivo directamente en la zona indicada o hacer clic para seleccionarlo manualmente.</li>
+                <li>Una vez seleccionado, haz clic en "Subir Archivo" para procesarlo.</li>
+            </ol>
+
+            <div class="instruction-note">
+                <strong>Nota importante:</strong> Debe insertar las imagenes por separado editando un producto en específico después de subirlos, es obligatorio que todos los productos tengan un código único.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lightbox para ampliar la imagen -->
+<div id="imageLightbox" class="image-lightbox">
+    <div class="lightbox-content">
+        <button id="closeLightbox" class="lightbox-close">&times;</button>
+        <img id="lightboxImage" src="" alt="Imagen ampliada" class="lightbox-image">
+        <div class="lightbox-caption">Haga clic en cualquier lugar o presione ESC para cerrar</div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const showInstructionsBtn = document.getElementById('showInstructions');
+        const closeModalBtn = document.getElementById('closeModal');
+        const instructionsModal = document.getElementById('instructionsModal');
+        const instructionImage = document.getElementById('instructionImage');
+        const imageLightbox = document.getElementById('imageLightbox');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const closeLightbox = document.getElementById('closeLightbox');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('file');
+        const fileName = document.getElementById('fileName');
+
+        // Abrir modal de instrucciones
+        showInstructionsBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevenir el envío del formulario si está dentro de uno
+            instructionsModal.classList.add('active');
+        });
+
+        // Cerrar modal al hacer clic en X
+        closeModalBtn.addEventListener('click', function() {
+            instructionsModal.classList.remove('active');
+        });
+
+        // Cerrar modal al hacer clic fuera del contenido
+        instructionsModal.addEventListener('click', function(e) {
+            if (e.target === instructionsModal) {
+                instructionsModal.classList.remove('active');
+            }
+        });
+
+        // Abrir lightbox al hacer clic en la imagen
+        instructionImage.addEventListener('click', function() {
+            // Obtener la ruta de la imagen
+            const imgSrc = this.getAttribute('src');
+            // Establecer la imagen en el lightbox
+            lightboxImage.setAttribute('src', imgSrc);
+            // Mostrar el lightbox
+            imageLightbox.classList.add('active');
+        });
+
+        // Cerrar lightbox al hacer clic en X
+        closeLightbox.addEventListener('click', function() {
+            imageLightbox.classList.remove('active');
+        });
+
+        // Cerrar lightbox al hacer clic en cualquier lugar
+        imageLightbox.addEventListener('click', function(e) {
+            if (e.target === imageLightbox || e.target === lightboxImage) {
+                imageLightbox.classList.remove('active');
+            }
+        });
+
+        // Cerrar modal y lightbox con tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (imageLightbox.classList.contains('active')) {
+                    imageLightbox.classList.remove('active');
+                }
+                if (instructionsModal.classList.contains('active')) {
+                    instructionsModal.classList.remove('active');
+                }
+            }
+        });
+
+        // Funcionalidad de drag and drop
+        dropZone.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function() {
+            updateFileName(this.files);
+        });
+
+        // Prevenir comportamiento por defecto para el drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        // Resaltar la zona de drop cuando se arrastra un archivo sobre ella
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        // Manejar el evento de drop
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight() {
+            dropZone.classList.add('drag-over');
+        }
+
+        function unhighlight() {
+            dropZone.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            updateFileName(files);
+        }
+
+        function updateFileName(files) {
+            if (files.length > 0) {
+                fileName.textContent = "Archivo seleccionado: " + files[0].name;
+                fileName.style.display = 'block';
+            } else {
+                fileName.textContent = "";
+                fileName.style.display = 'none';
+            }
+        }
+    });
+</script>
