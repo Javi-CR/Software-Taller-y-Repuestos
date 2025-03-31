@@ -91,9 +91,15 @@
                                     <i class="bi bi-image"></i>
                                 </label>
                             </div>
-                            <div id="imagenHelp" class="form-text text-white">Seleccione una imagen para el producto</div>
+                            <div class="form-text text-white">Seleccione una imagen para el producto</div>
                             <span asp-validation-for="Imagen" class="text-danger"></span>
+
+                            <!-- Contenedor para la vista previa de la imagen -->
+                            <div id="imagenPreviewContainer" class="mt-3 text-center d-none">
+                                <img id="imagenPreview" class="img-thumbnail" style="max-height: 150px;">
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -115,19 +121,22 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         document.getElementById('inputImagen').addEventListener('change', function(e) {
+            let previewContainer = document.getElementById('imagenPreviewContainer');
+            let previewImage = document.getElementById('imagenPreview');
+
             if (this.files && this.files[0]) {
-                let previewContainer = document.getElementById('imagenHelp');
-                previewContainer.innerHTML = '';
-
-                let img = document.createElement('img');
-                img.classList.add('img-thumbnail', 'mt-2');
-                img.style.maxHeight = '150px';
-                img.src = URL.createObjectURL(this.files[0]);
-
-                previewContainer.appendChild(img);
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.remove('d-none');
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                previewContainer.classList.add('d-none');
             }
         });
     </script>
+
 }
 
 
@@ -217,10 +226,12 @@
         font-size: 14px;
     }
 
-    /* Imagen de vista previa */
-    #imagenHelp img {
-        max-height: 150px;
+    #imagenPreview {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+        object-fit: contain; /* Mantiene la proporción sin recortar */
         border-radius: 8px;
-        margin-top: 10px;
+        border: 2px solid #cda45e;
     }
 </style>
