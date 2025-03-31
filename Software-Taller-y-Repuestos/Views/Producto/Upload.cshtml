@@ -1,41 +1,152 @@
 ﻿@model IEnumerable<Software_Taller_y_Repuestos.Models.Producto>
-
 @{
     ViewData["Title"] = "Subir Productos";
 }
 
 <style>
-    .content-container {
-        margin-top: 150px; /* espacio desde el header */
+
+    .container {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+    
+    body {
+        background-color: #121212;
+        color: white;
+    }
+
+    .upload-container {
+        max-width: 700px;
+        margin: 120px auto 40px;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        background-color: #1e1e1e;
+    }
+
+    .page-title {
+        color: rgb(255, 255, 255);
+        margin-bottom: 25px;
+        font-weight: 600;
         text-align: center;
     }
 
-    .form-container {
-        margin-top: 20px; /* Espacio entre el título y el formulario */
+    .file-upload-area {
+        border: 2px dashed #ccc;
+        padding: 30px;
+        border-radius: 8px;
+        background-color:rgb(26, 24, 24);
+        text-align: center;
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+    }
+
+    .file-upload-area:hover {
+        border-color:rgb(255, 255, 255);
+        background-color: #f0f7ff;
+    }
+
+    .file-upload-area label {
+        display: block;
+        margin-bottom: 15px;
+        font-size: 16px;
+        color: #555;
+    }
+
+    .file-upload-area input[type="file"] {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: white;
+    }
+
+    .format-info {
+        font-size: 13px;
+        color: #666;
+        margin-top: 10px;
+    }
+
+    .format-info i {
+        margin-right: 5px;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn-upload {
+        padding: 10px 24px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-upload:hover {
+        transform: translateY(-2px);
+    }
+
+    .error-container {
+        margin-top: 20px;
+        border-radius: 6px;
+        padding: 15px;
+    }
+
+    .error-container p {
+        margin-bottom: 8px;
+    }
+
+    /* Animación para mostrar errores */
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert {
+        animation: fadeIn 0.4s ease-in-out;
     }
 </style>
 
-<div class="content-container">
-    <h1>@ViewData["Title"]</h1>
 
-    <div class="form-container">
-        <form asp-action="Upload" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="file">Seleccionar archivo (CSV o Excel):</label>
-                <input type="file" class="form-control" id="file" name="file" required />
-            </div>
-            <button type="submit" class="btn btn-primary">Subir</button>
-            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-        </form>
-    </div>
+<section id="profile-section" class="py-5">
+    <div class="container">
 
-    @if (!ViewData.ModelState.IsValid)
-    {
-        <div class="alert alert-danger mt-3">
-            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        <div class="upload-container">
+            <h1 class="page-title">@ViewData["Title"]</h1>
+
+            <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                <div class="file-upload-area">
+                    <label for="file">
+                        <i class="fas fa-file-upload"></i> Selecciona tu archivo
+                    </label>
+                    <input type="file" class="form-control" id="file" name="file" required />
+                    <div class="format-info">
+                        <i class="fas fa-info-circle"></i> Formatos permitidos: CSV o Excel (.xlsx)
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary btn-upload">
+                        <i class="fas fa-upload"></i> Subir Archivo
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary btn-upload">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+
+
+            @if (ViewBag.ErrorMessage != null)
             {
-                <p>@error.ErrorMessage</p>
+                <div class="alert alert-danger mt-4 error-container">
+                <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
+                </div>
             }
         </div>
-    }
-</div>
+
+
+    </div>
+</section>

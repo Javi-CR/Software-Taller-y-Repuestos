@@ -255,14 +255,17 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                ModelState.AddModelError("", "Por favor, seleccione un archivo.");
-                return RedirectToAction(nameof(Index));
+                ViewBag.ErrorMessage = "Por favor, seleccione un archivo.";
+                return View();
+               
             }
 
             if (!file.FileName.EndsWith(".csv") && !file.FileName.EndsWith(".xlsx"))
             {
-                ModelState.AddModelError("", "Formato no válido. Solo archivos CSV o Excel.");
-                return RedirectToAction(nameof(Index));
+         
+                ViewBag.ErrorMessage = "Formato no válido. Solo archivos CSV o Excel.";
+                return View();
+
             }
 
             var productos = await ProcesarArchivo(file);

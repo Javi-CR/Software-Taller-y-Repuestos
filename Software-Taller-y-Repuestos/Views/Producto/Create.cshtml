@@ -5,12 +5,17 @@
 
 <section id="profile-section" class="py-5">
     <div class="container">
-
-
         <div class="container my-5 py-4 rounded shadow-sm bg-dark text-white" data-aos="fade-up">
             <div class="section-title mb-4">
-                <h2 class="text-center text-light fw-bold">Agregar Producto</h2>
+                <h2 class="text-center text-light fw-bold">Agregar Productos</h2>
                 <hr class="mx-auto" style="width: 50px; height: 3px; background-color: #cda45e; border: none; margin-top: 10px; opacity: 1">
+            </div>
+
+            <!-- Botón simple fuera del formulario -->
+            <div class="text-end px-4 mb-3">
+                <a asp-action="Upload" class="btn btn-outline-primary">
+                    <i class="bi bi-file-earmark-arrow-up me-2"></i>Subir Archivo
+                </a>
             </div>
 
             <form asp-action="Create" enctype="multipart/form-data" class="px-4">
@@ -85,13 +90,13 @@
                             <span asp-validation-for="Marca" class="text-danger"></span>
                         </div>
 
-                        <!-- Imagen -->
+                        <!-- Imagen con icono actualizado -->
                         <div class="mb-3">
                             <label for="Imagen" class="form-label text-white">Imagen del Producto</label>
                             <div class="input-group">
                                 <input type="file" class="form-control bg-dark text-white" asp-for="Imagen" id="inputImagen" />
                                 <label class="input-group-text bg-dark text-white" for="inputImagen">
-                                    <i class="bi bi-upload"></i>
+                                    <i class="bi bi-image"></i>
                                 </label>
                             </div>
                             <div id="imagenHelp" class="form-text text-white">Seleccione una imagen para el producto</div>
@@ -111,9 +116,6 @@
                 </div>
             </form>
         </div>
-
-
-
     </div>
 </section>
 
@@ -151,11 +153,10 @@
 
 
 <style>
-
     /* Elimina las flechas en los campos numéricos */
 
     /* Para navegadores WebKit (Chrome, Safari, Edge) */
-    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
@@ -180,7 +181,7 @@
     /* Cambia el color del botón principal */
     .btn-primary {
         background-color: #cda45e !important;
-        border-color: #b89450 !important;s
+        border-color: #b89450 !important;
         color: #1a1814 !important;
         font-weight: bold;
         transition: all 0.3s ease-in-out;
@@ -192,6 +193,18 @@
             color: white !important;
         }
 
+    /* Estilos para el botón outline-primary */
+    .btn-outline-primary {
+        color: #cda45e !important;
+        border-color: #cda45e !important;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: #cda45e !important;
+            color: #1a1814 !important;
+        }
+
     /* Estilos para los inputs y selects */
     .form-control, .form-select {
         background-color: #0c0b09 !important; /* Fondo oscuro */
@@ -199,7 +212,7 @@
         border: 1px solid #6c757d; /* Bordes grises */
     }
 
-    
+
 
     /* Color de los labels */
     .form-floating label {
