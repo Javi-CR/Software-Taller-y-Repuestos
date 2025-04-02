@@ -4,13 +4,508 @@
     ViewData["Title"] = "Inactivos";
 }
 
+<!-- Estilos CSS modo oscuro -->
+<style>
+    :root {
+        --bg-dark: #121212;
+        --bg-card: #1e1e1e;
+        --bg-hover: #2a2a2a;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --accent-blue: #b0b0b0;
+        --accent-red: #ea4335;
+        --accent-green: #34a853;
+        --accent-yellow: #fbbc05;
+        --border-radius: 12px;
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    body {
+        background-color: var(--bg-dark);
+        color: var(--text-primary);
+    }
+
+    .dark-section {
+        background-color: var(--bg-dark);
+        padding: 30px 0;
+    }
+
+    /* Navegación */
+    .dark-nav {
+        background-color: rgba(30, 30, 30, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        margin-bottom: 30px;
+        padding: 10px;
+    }
+
+    .dark-nav-items {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .nav-item {
+        position: relative;
+    }
+
+    .nav-link {
+        color: var(--text-secondary);
+        padding: 10px 20px;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: var(--transition);
+    }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+            .nav-link.active::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 20px;
+                height: 3px;
+                background-color: var(--accent-blue);
+                border-radius: 3px;
+            }
+
+    /* Contenido principal */
+    .dark-title {
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 40px;
+        text-align: center;
+        letter-spacing: 1px;
+    }
+
+        .dark-title span {
+            color: var(--accent-blue);
+        }
+
+    /* Cards de empleados */
+    .dark-card {
+        background-color: var(--bg-card);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transition: var(--transition);
+        height: 100%;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+        .dark-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+    .card-img-container {
+        position: relative;
+        overflow: hidden;
+        height: 200px;
+        cursor: pointer; /* Indicador de que es clickeable */
+    }
+
+    .employee-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: var(--transition);
+    }
+
+    .dark-card:hover .employee-img {
+        transform: scale(1.05);
+    }
+
+    .img-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        padding: 20px;
+    }
+
+    .employee-name {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 20px 0;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        color: var(--text-secondary);
+    }
+
+    .info-icon {
+        background-color: rgba(255, 255, 255, 0.1);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        font-size: 14px;
+    }
+
+    .email-icon {
+        color: var(--accent-red);
+    }
+
+    .phone-icon {
+        color: var(--accent-green);
+    }
+
+    .location-icon {
+        color: var(--accent-yellow);
+    }
+
+    .salary-icon {
+        color: var(--accent-blue);
+    }
+
+    .info-text {
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .highlight {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    /* Botones */
+    .btn-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .dark-btn {
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+        .dark-btn i {
+            margin-right: 5px;
+        }
+
+    .btn-danger {
+        background-color: rgba(234, 67, 53, 0.2);
+        color: var(--accent-red);
+    }
+
+        .btn-danger:hover {
+            background-color: rgba(234, 67, 53, 0.3);
+        }
+
+    .btn-success {
+        background-color: rgba(52, 168, 83, 0.2);
+        color: var(--accent-green);
+    }
+
+        .btn-success:hover {
+            background-color: rgba(52, 168, 83, 0.3);
+        }
+
+    .btn-primary {
+        background-color: rgba(66, 133, 244, 0.2);
+        color: var(--accent-blue);
+    }
+
+        .btn-primary:hover {
+            background-color: rgba(66, 133, 244, 0.3);
+        }
+
+    /* Estado vacío */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        border-radius: var(--border-radius);
+        background-color: var(--bg-card);
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .empty-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+        display: inline-block;
+        color: var(--accent-blue);
+        opacity: 0.8;
+    }
+
+    .empty-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .empty-text {
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+    }
+
+    .empty-btn {
+        background-color: var(--accent-blue);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        transition: var(--transition);
+    }
+
+        .empty-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+        }
+
+        .empty-btn i {
+            margin-right: 8px;
+        }
+
+    /* Alerta */
+    .dark-alert {
+        background-color: rgba(251, 188, 5, 0.1);
+        border-left: 4px solid var(--accent-yellow);
+        color: var(--text-primary);
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    /* Animaciones */
+    @@keyframes fadeUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .animate-card {
+        animation: fadeUp 0.6s ease-out forwards;
+        opacity: 0;
+    }
+
+    /* Responsividad */
+    @@media (max-width: 768px) {
+        .nav-link
+
+    {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .btn-group {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    /* Diálogo de confirmación */
+    .confirmation-dialog {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+
+        .confirmation-dialog.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .dialog-content {
+        background-color: var(--bg-card);
+        border-radius: var(--border-radius);
+        width: 90%;
+        max-width: 400px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        transform: translateY(20px);
+        transition: transform 0.3s ease-out;
+    }
+
+    .confirmation-dialog.active .dialog-content {
+        transform: translateY(0);
+    }
+
+    .dialog-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .dialog-message {
+        color: var(--text-secondary);
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+
+    .dialog-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .dialog-btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .dialog-btn-cancel {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--text-secondary);
+    }
+
+        .dialog-btn-cancel:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+    .dialog-btn-confirm {
+        background-color: rgba(52, 168, 83, 0.8);
+        color: white;
+    }
+
+        .dialog-btn-confirm:hover {
+            background-color: var(--accent-green);
+        }
+
+    /* Modal para vista de imagen completa */
+    .image-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+
+        .image-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .modal-image-container {
+        position: relative;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+    }
+
+    .modal-image {
+        display: block;
+        max-width: 100%;
+        max-height: 90vh;
+        margin: 0 auto;
+        border-radius: 8px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .close-modal {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        color: white;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+
+        .close-modal:hover {
+            opacity: 1;
+        }
+
+    .modal-caption {
+        position: absolute;
+        bottom: -40px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        color: white;
+        font-weight: 500;
+    }
+
+    a:hover {
+        color: #000;
+        text-decoration: none;
+    }
+</style>
+
 <!-- Segundo Navbar -->
 <div>
     <nav class="breadcrumbs">
         <div class="container">
             <ol>
                 <li><a href="@Url.Action("Empleados", "HR")" style="color: white;">Empleados Disponibles</a></li>
-                <li><a href="@Url.Action("AgregarEmpleados", "HR")" style="color: white;">Agregar empleados por usuario Cliente</a></li>
                 <li><a href="@Url.Action("AsignarEmpleados", "HR")" style="color: white;">Registrar empleados</a></li>
                 <li><a href="@Url.Action("Inactivos", "HR")">Empleados Inactivos</a></li>
             </ol>
@@ -18,52 +513,70 @@
     </nav>
 </div>
 
-<!-- Sección de empleados -->
-<section id="empleados" class="contact section-bg d-flex align-items-center">
-
-    @if (ViewBag.ErrorMessage != null)
-    {
-        <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
-    }
-
+<!-- Sección de empleados inactivos -->
+<section class="dark-section">
     <div class="container">
-        <h2 class="text-center mb-4">Lista de Empleados Inactivos</h2>
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="dark-alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>@ViewBag.ErrorMessage
+            </div>
+        }
+
+        <h2 class="dark-title">Gestión de <span>Empleados Inactivos</span></h2>
 
         @if (!Model.Any())
         {
-            <!-- Mensaje cuando no hay empleados -->
-            <div class="d-flex flex-column justify-content-center align-items-center" style="height: 50vh; text-align: center;">
-                <div class="d-flex justify-content-center align-items-center">
-                    <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center" style="width: 120px; height: 120px; font-size: 50px;">
-                        <i class="bi bi-person-x"></i>
-                    </div>
-                </div>
-                <h4 class="mt-3">No hay empleados Inactivos</h4>
-                <p class="text-muted">Parece que aún no tienes empleados inactivos en tu lista.</p>
-                
+            <!-- Estado vacío mejorado -->
+            <div class="empty-state">
+                <i class="bi bi-person-x empty-icon"></i>
+                <h3 class="empty-title">Sin empleados inactivos</h3>
+                <p class="empty-text">No se ha encontrado ningún empleado inactivo en el sistema.</p>
+                <a href="@Url.Action("Empleados", "HR")" class="empty-btn">
+                    <i class="bi bi-person-lines-fill"></i>Ver empleados activos
+                </a>
             </div>
         }
         else
         {
-            <div class="row">
-                @foreach (var empleado in Model)
+            <div class="row g-4">
+                @for (int i = 0; i < Model.Count; i++)
                 {
-                    <div class="col-md-4 col-sm-6 mb-4">
-                        <div class="card shadow-sm" style="background-color: black; color: white; border-radius: 8px;">
-                            <img src="@Url.Content(empleado.Imagen ?? "~/assets/img/default.png")" alt="Foto de @empleado.Nombre" class="card-img-top" style="height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
-                            <div class="card-body">
-                                <h5 class="card-title text-truncate">@empleado.Nombre @empleado.Apellidos</h5>
-                                <p class="card-text">
-                                    <strong>Correo:</strong> @empleado.Correo <br />
-                                    <strong>Teléfono:</strong> @(empleado.Telefono ?? "N/A") <br />
-                                    <strong>Dirección:</strong> @(empleado.Direccion ?? "N/A") <br />
-                                    <strong>Salario Base:</strong> @(empleado.SalarioBase?.ToString("C", new System.Globalization.CultureInfo("es-CR")) ?? "N/A")
-                                </p>
-                                <div class="d-flex justify-content-between">
-                                    <form asp-action="ActivarUsuario" method="post" class="d-inline-block">
-                                        <input type="hidden" name="usuarioId" value="@empleado.UsuarioId" />
-                                        <button type="submit" class="btn btn-success btn-sm">Activar Empleado</button>
-                                    </form>
+                    var empleado = Model[i];
+                    var delay = (i % 9) * 0.1;
+
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="dark-card animate-card" style="animation-delay: @delay@("s")">
+                            <div class="card-img-container" onclick="openImageModal('@Url.Content(empleado.Imagen ?? "~/assets/img/default.png")', '@empleado.Nombre @empleado.Apellidos')">
+                                <img src="@Url.Content(empleado.Imagen ?? "~/assets/img/default.png")" alt="Foto de @empleado.Nombre" class="employee-img">
+                                <div class="img-overlay">
+                                    <h5 class="employee-name">@empleado.Nombre @empleado.Apellidos</h5>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <ul class="info-list">
+                                    <li class="info-item">
+                                        <span class="info-icon email-icon"><i class="bi bi-envelope"></i></span>
+                                        <span class="info-text" title="@empleado.Correo">@empleado.Correo</span>
+                                    </li>
+                                    <li class="info-item">
+                                        <span class="info-icon phone-icon"><i class="bi bi-telephone"></i></span>
+                                        <span class="info-text">@(empleado.Telefono ?? "No registrado")</span>
+                                    </li>
+                                    <li class="info-item">
+                                        <span class="info-icon location-icon"><i class="bi bi-geo-alt"></i></span>
+                                        <span class="info-text" title="@empleado.Direccion">@(empleado.Direccion ?? "No registrada")</span>
+                                    </li>
+                                    <li class="info-item">
+                                        <span class="info-icon salary-icon"><i class="bi bi-cash-coin"></i></span>
+                                        <span class="info-text highlight">@(empleado.SalarioBase?.ToString("C", new System.Globalization.CultureInfo("es-CR")) ?? "Salario no asignado")</span>
+                                    </li>
+                                </ul>
+
+                                <div class="btn-group">
+                                    <button type="button" class="dark-btn btn-success" onclick="showConfirmationDialog('@empleado.UsuarioId', '@empleado.Nombre @empleado.Apellidos')">
+                                        <i class="bi bi-check-circle"></i>Activar
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -73,3 +586,83 @@
         }
     </div>
 </section>
+
+<!-- Modal para vista de imagen completa -->
+<div id="imageModal" class="image-modal">
+    <div class="modal-image-container">
+        <button class="close-modal" onclick="closeImageModal()"><i class="bi bi-x-lg"></i></button>
+        <img id="fullImage" src="" class="modal-image" alt="Imagen ampliada">
+        <div id="imageCaption" class="modal-caption"></div>
+    </div>
+</div>
+
+<!-- Diálogo de confirmación para activar empleado -->
+<div id="confirmationDialog" class="confirmation-dialog">
+    <div class="dialog-content">
+        <h3 class="dialog-title">Confirmar activación</h3>
+        <p class="dialog-message">¿Está seguro que desea activar al empleado <span id="employeeName"></span>?</p>
+        <div class="dialog-buttons">
+            <button class="dialog-btn dialog-btn-cancel" onclick="closeConfirmationDialog()">Cancelar</button>
+            <button id="confirmActivateBtn" class="dialog-btn dialog-btn-confirm">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario oculto para enviar la activación -->
+<form id="activateForm" asp-action="ActivarUsuario" method="post" style="display: none;">
+    <input type="hidden" id="usuarioIdInput" name="usuarioId" value="" />
+</form>
+
+<!-- Script para manejar la vista de imágenes y confirmación -->
+<script>
+    // Función para abrir el modal de imagen
+    function openImageModal(src, caption) {
+        document.getElementById('fullImage').src = src;
+        document.getElementById('imageCaption').textContent = caption;
+        document.getElementById('imageModal').classList.add('active');
+    }
+
+    // Función para cerrar el modal de imagen
+    function closeImageModal() {
+        document.getElementById('imageModal').classList.remove('active');
+    }
+
+    // Función para mostrar el diálogo de confirmación
+    function showConfirmationDialog(usuarioId, nombreCompleto) {
+        document.getElementById('employeeName').textContent = nombreCompleto;
+        document.getElementById('usuarioIdInput').value = usuarioId;
+        document.getElementById('confirmationDialog').classList.add('active');
+
+        // Asignar el evento de clic al botón de confirmar
+        document.getElementById('confirmActivateBtn').onclick = function() {
+            document.getElementById('activateForm').submit();
+        };
+    }
+
+    // Función para cerrar el diálogo de confirmación
+    function closeConfirmationDialog() {
+        document.getElementById('confirmationDialog').classList.remove('active');
+    }
+
+    // Cerrar modales al hacer clic fuera de ellos
+    window.addEventListener('click', function(event) {
+        const imageModal = document.getElementById('imageModal');
+        const confirmationDialog = document.getElementById('confirmationDialog');
+
+        if (event.target === imageModal) {
+            closeImageModal();
+        }
+
+        if (event.target === confirmationDialog) {
+            closeConfirmationDialog();
+        }
+    });
+
+    // Cerrar modales con ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeImageModal();
+            closeConfirmationDialog();
+        }
+    });
+</script>

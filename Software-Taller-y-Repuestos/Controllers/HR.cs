@@ -74,7 +74,7 @@ namespace Software_Taller_y_Repuestos.Controllers
             usuario.Estado = false; // Suspende Usuario
             _context.SaveChanges();
 
-            return RedirectToAction("Inactivos");
+            return RedirectToAction("Empleados");
 
         }
 
@@ -91,15 +91,32 @@ namespace Software_Taller_y_Repuestos.Controllers
                 return RedirectToAction("Empleados");
             }
 
-            // Carga el usuario en la vista
-            return View(usuario);
+            // Convertir Usuario a EditEmpleado
+            var editEmpleado = new EditEmpleado
+            {
+                UsuarioId = usuario.UsuarioId,
+                Telefono = usuario.Telefono,
+                Direccion = usuario.Direccion,
+                SalarioBase = usuario.SalarioBase
+            };
+
+            // Carga el objeto correcto en la vista
+            return View(editEmpleado);
+
 
         }
 
         [HttpPost]
-        public IActionResult EditarInformacion(Usuario usuario, int usuarioId)
+        public IActionResult EditarInformacion(EditEmpleado usuario, int usuarioId)
         {
-            
+
+            if (!ModelState.IsValid)
+            {
+                // Si el modelo no es válido, se regresa a la vista con los mensajes de error.
+                return View(usuario);
+            }
+
+
             if (usuario.UsuarioId == 0)
             {
                 usuario.UsuarioId = usuarioId;
@@ -304,7 +321,7 @@ namespace Software_Taller_y_Repuestos.Controllers
             usuario.Estado = true; // Activar Usuario
             _context.SaveChanges();
 
-            return RedirectToAction("Empleados");
+            return RedirectToAction("Inactivos");
 
         }
 
