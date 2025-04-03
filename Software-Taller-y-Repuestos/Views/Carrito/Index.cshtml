@@ -11,19 +11,19 @@
 
 <section id="profile-section" class="py-5">
     <div class="container">
-
-
         <div class="container mt-5 pt-4">
             <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <div class="card shadow-sm border-0 rounded-3 mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h2 class="h4 mb-0 text-center py-2"><i class="fas fa-shopping-cart me-2"></i>Carrito de Compras</h2>
+                <div class="col-lg-9 mx-auto">
+                    <div class="card border-0 rounded-4 mb-4 shadow-lg">
+                        <div class="card-header bg-dark-accent text-white rounded-top-4">
+                            <h2 class="h4 mb-0 text-center py-3">
+                                <i class="fas fa-shopping-cart me-2 pulse-icon"></i>Mi Carrito
+                            </h2>
                         </div>
 
                         @if (!string.IsNullOrEmpty(message))
                         {
-                            <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                            <div class="alert custom-alert alert-dismissible fade show m-3" role="alert">
                                 <i class="fas fa-check-circle me-2"></i> @message
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
@@ -32,61 +32,60 @@
                         <div class="card-body p-0">
                             @if (Model.Count == 0)
                             {
-                                <div class="text-center py-5">
-                                    <i class="fas fa-shopping-basket fa-4x text-muted mb-3"></i>
-                                    <h3 class="text-muted">Su carrito está vacío</h3>
-                                    <p class="mb-4">Añada productos para comenzar su compra.</p>
-                                    <a href="@Url.Action("Index", "Producto")" class="btn btn-primary">
-                                        <i class="fas fa-store me-2"></i>Ir a Productos
+                                <div class="text-center py-5 empty-cart">
+                                    <i class="fas fa-shopping-basket fa-4x mb-4 text-gold"></i>
+                                    <h3 class="text-light mb-3">Su carrito está vacío</h3>
+                                    <p class="text-muted mb-4">Añada productos para comenzar su compra.</p>
+                                    <a href="@Url.Action("Index", "Producto")" class="btn btn-gold btn-lg">
+                                        <i class="fas fa-store me-2"></i>Explorar Productos
                                     </a>
                                 </div>
                             }
                             else
                             {
                                 <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th class="ps-4">Producto</th>
-                                                <th class="text-center">Cantidad</th>
-                                                <th class="text-end">Precio Unitario</th>
-                                                <th class="text-end">Subtotal</th>
-                                                <th class="text-center">Acciones</th>
+                                    <table class="table table-dark table-hover mb-0">
+                                        <thead>
+                                            <tr class="text-gold">
+                                                <th class="ps-4 py-3">Producto</th>
+                                                <th class="text-center py-3">Cantidad</th>
+                                                <th class="text-end py-3">Precio</th>
+                                                <th class="text-end py-3">Subtotal</th>
+                                                <th class="text-center py-3">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach (var item in Model)
                                             {
-                                                <tr>
+                                                <tr class="product-row">
                                                     <td class="ps-4 align-middle">
                                                         <div class="d-flex align-items-center">
-
-                                                            <span class="fw-medium">@item.Producto.Nombre</span>
+                                                            <span class="fw-medium text-light">@item.Producto.Nombre</span>
                                                         </div>
                                                     </td>
                                                     <td class="text-center align-middle">
                                                         <form method="post" action="@Url.Action("ModificarCantidad")" class="d-flex justify-content-center quantity-form">
-                                                            <div class="input-group" style="width: 120px;">
-                                                                <button type="button" class="btn btn-outline-secondary quantity-btn" onclick="decreaseQuantity(this)">
+                                                            <div class="input-group quantity-control">
+                                                                <button type="button" class="btn btn-dark-accent quantity-btn" onclick="decreaseQuantity(this)">
                                                                     <i class="fas fa-minus"></i>
                                                                 </button>
                                                                 <input type="number" name="cantidad" value="@item.Cantidad" min="1" class="form-control text-center quantity-input">
-                                                                <button type="button" class="btn btn-outline-secondary quantity-btn" onclick="increaseQuantity(this)">
+                                                                <button type="button" class="btn btn-dark-accent quantity-btn" onclick="increaseQuantity(this)">
                                                                     <i class="fas fa-plus"></i>
                                                                 </button>
                                                                 <input type="hidden" name="productoId" value="@item.Producto.ProductoId">
                                                             </div>
-                                                            <button type="submit" class="btn btn-sm btn-warning ms-2 update-btn">
+                                                            <button type="submit" class="btn btn-sm btn-gold ms-2 update-btn" title="Actualizar cantidad">
                                                                 <i class="fas fa-sync-alt"></i>
                                                             </button>
                                                         </form>
                                                     </td>
-                                                    <td class="text-end align-middle">@item.Producto.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
-                                                    <td class="text-end align-middle fw-bold">@item.Subtotal.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
+                                                    <td class="text-end align-middle text-light">@item.Producto.PrecioVenta.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
+                                                    <td class="text-end align-middle fw-bold text-gold">@item.Subtotal.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
                                                     <td class="text-center align-middle">
                                                         <form method="post" asp-action="EliminarDelCarrito" class="d-inline">
                                                             <input type="hidden" name="productoId" value="@item.Producto.ProductoId">
-                                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                            <button type="submit" class="btn btn-outline-danger btn-sm btn-hover-effect" title="Eliminar del carrito">
                                                                 <i class="fas fa-trash-alt"></i>
                                                             </button>
                                                         </form>
@@ -103,38 +102,38 @@
                     @if (Model.Count > 0)
                     {
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="d-flex flex-column flex-sm-row gap-2">
-                                    <form method="post" asp-action="VaciarCarrito" class="d-inline">
-                                        <button type="submit" class="btn btn-outline-danger">
-                                            <i class="fas fa-trash me-1"></i> Vaciar Carrito
+                            <div class="col-md-6 mb-4">
+                                <div class="d-grid gap-3 d-md-flex">
+                                    <form method="post" asp-action="VaciarCarrito" class="d-inline w-100">
+                                        <button type="submit" class="btn btn-outline-danger btn-lg btn-block w-100">
+                                            <i class="fas fa-trash me-2"></i> Vaciar Carrito
                                         </button>
                                     </form>
-                                    <a href="@Url.Action("Index", "Producto")" class="btn btn-outline-primary">
-                                        <i class="fas fa-arrow-left me-1"></i> Seguir Comprando
+                                    <a href="@Url.Action("Index", "Producto")" class="btn btn-outline-light btn-lg w-100">
+                                        <i class="fas fa-arrow-left me-2"></i> Seguir Comprando
                                     </a>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-                                <div class="card shadow-sm border-0 rounded-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-3">Resumen del pedido</h5>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span>Subtotal:</span>
-                                            <span>@subtotal.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</span>
+                                <div class="card border-0 rounded-4 shadow-lg summary-card">
+                                    <div class="card-body p-4">
+                                        <h5 class="card-title mb-4 text-gold">Resumen del Pedido</h5>
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span class="text-light">Subtotal:</span>
+                                            <span class="text-light">@subtotal.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</span>
                                         </div>
                                         <div class="d-flex justify-content-between mb-3">
-                                            <span>IVA (13%):</span>
-                                            <span>@iva.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</span>
+                                            <span class="text-light">IVA (13%):</span>
+                                            <span class="text-light">@iva.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</span>
                                         </div>
-                                        <hr>
-                                        <div class="d-flex justify-content-between mb-3">
-                                            <span class="fw-bold">Total:</span>
-                                            <span class="fw-bold fs-5 text-primary">@total.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</span>
+                                        <hr class="border-secondary">
+                                        <div class="d-flex justify-content-between mb-4">
+                                            <span class="fw-bold text-gold">TOTAL:</span>
+                                            <span class="fw-bold fs-4 text-gold">@total.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</span>
                                         </div>
-                                        <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalPago">
-                                            <i class="fas fa-credit-card me-1"></i> Proceder a Pagar
+                                        <button type="button" class="btn btn-gold btn-lg w-100 btn-hover-effect" data-bs-toggle="modal" data-bs-target="#modalPago">
+                                            <i class="fas fa-credit-card me-2"></i> Proceder al Pago
                                         </button>
                                     </div>
                                 </div>
@@ -148,34 +147,34 @@
         <!-- Modal para seleccionar tipo de pago -->
         <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="modalPagoLabel"><i class="fas fa-money-bill-wave me-2"></i>Seleccionar Método de Pago</h5>
+                <div class="modal-content border-0">
+                    <div class="modal-header bg-dark-accent text-white border-0">
+                        <h5 class="modal-title" id="modalPagoLabel"><i class="fas fa-money-bill-wave me-2"></i>Método de Pago</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <div class="modal-body">
                         <div class="payment-options mb-4">
                             <div class="btn-group w-100" role="group" aria-label="Payment options">
-                                <button type="button" class="btn btn-outline-primary payment-option active" id="btnPagoPresencialModal">
+                                <button type="button" class="btn btn-payment active" id="btnPagoPresencialModal">
                                     <i class="fas fa-store me-2"></i>Pago Presencial
                                 </button>
-                                <button type="button" class="btn btn-outline-primary payment-option" id="btnPagoSinpe">
+                                <button type="button" class="btn btn-payment" id="btnPagoSinpe">
                                     <i class="fas fa-mobile-alt me-2"></i>Pago con SINPE
                                 </button>
                             </div>
                         </div>
 
                         <div id="contenidoPagoPresencial" class="payment-content active">
-                            <div class="card border-0 bg-light">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
-                                    <h5>Dirección de nuestra tienda:</h5>
-                                    <p class="mb-4">Del cementerio de Desamparados 200 sur, 300 oeste y 100 sur, San José, Desamparados, 10301</p>
-                                    <div class="qr-container mx-auto mb-3" style="max-width: 200px;">
-                                        <img src="~/assets/img/QR.png" class="img-fluid border p-2 bg-white rounded" alt="QR code" />
+                            <div class="card border-0 bg-dark-secondary">
+                                <div class="card-body text-center p-4">
+                                    <i class="fas fa-map-marker-alt fa-3x text-gold mb-3"></i>
+                                    <h5 class="text-light mb-3">Dirección de nuestra tienda:</h5>
+                                    <p class="mb-4 text-light">Del cementerio de Desamparados 200 sur, 300 oeste y 100 sur, San José, Desamparados, 10301</p>
+                                    <div class="qr-container mx-auto mb-4" style="max-width: 200px;">
+                                        <img src="~/assets/img/QR.png" class="img-fluid border-gold p-2 bg-dark rounded" alt="QR code" />
                                     </div>
                                     <form method="post" action="@Url.Action("PagoPresencial", "Carrito")">
-                                        <button type="submit" class="btn btn-primary">
+                                        <button type="submit" class="btn btn-gold btn-lg">
                                             <i class="fas fa-receipt me-2"></i>Guardar Factura
                                         </button>
                                     </form>
@@ -184,24 +183,30 @@
                         </div>
 
                         <div id="contenidoPagoSinpe" class="payment-content">
-                            <div class="card border-0 bg-light">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-phone fa-3x text-primary mb-3"></i>
-                                    <h5>Realice el pago mediante SINPE Móvil:</h5>
+                            <div class="card border-0 bg-dark-secondary">
+                                <div class="card-body text-center p-4">
+                                    <i class="fas fa-phone fa-3x text-gold mb-3"></i>
+                                    <h5 class="text-light mb-3">Realice el pago mediante SINPE Móvil:</h5>
                                     <p class="number-display fs-4 fw-bold mb-4">+506 8840-7277</p>
-                                    <form asp-action="PagoSinpe" asp-controller="Carrito" enctype="multipart/form-data" method="post">
-                                        <div class="mb-3">
-                                            <label for="recibo" class="form-label">Adjunte comprobante de pago:</label>
+                                    <form asp-action="PagoSinpe" asp-controller="Carrito" enctype="multipart/form-data" method="post" class="needs-validation" novalidate id="sinpeForm">
+                                        <div class="mb-4">
+                                            <label for="recibo" class="form-label text-light">Adjunte comprobante de pago: <span class="text-danger">*</span></label>
                                             <div class="file-upload-wrapper">
-                                                <div class="file-upload-message p-3 text-center border rounded bg-white mb-2" id="fileMessage">
-                                                    <i class="fas fa-cloud-upload-alt text-primary fa-2x mb-2"></i>
-                                                    <p class="mb-0">Arrastre su comprobante aquí o haga click para seleccionar</p>
+                                                <div class="file-upload-message p-4 text-center border border-gold rounded mb-2" id="fileMessage">
+                                                    <i class="fas fa-cloud-upload-alt text-gold fa-2x mb-2"></i>
+                                                    <p class="mb-0 text-light">Arrastre su comprobante aquí o haga click para seleccionar</p>
                                                 </div>
-                                                <input type="file" id="recibo" name="recibo" accept=".png,.jpg,.jpeg" class="form-control file-upload-input" />
+                                                <input type="file" id="recibo" name="recibo" accept=".png,.jpg,.jpeg" class="form-control file-upload-input bg-dark text-light" required aria-describedby="fileHelp" />
+                                                <div class="invalid-feedback text-danger">
+                                                    Por favor adjunte el comprobante de pago SINPE
+                                                </div>
+                                                <small id="fileHelp" class="form-text text-light mt-2">
+                                                    <i class="fas fa-info-circle me-1"></i> Formatos permitidos: JPG, JPEG, PNG
+                                                </small>
                                             </div>
                                         </div>
                                         <div class="d-grid gap-2">
-                                            <button type="submit" class="btn btn-primary">
+                                            <button type="submit" class="btn btn-gold btn-lg" id="btnSubmitSinpe">
                                                 <i class="fas fa-paper-plane me-2"></i>Enviar Comprobante
                                             </button>
                                         </div>
@@ -213,108 +218,379 @@
                 </div>
             </div>
         </div>
-
-
     </div>
 </section>
-
-
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
 <style>
-
-    .bg-primary {
-        background-color: #cda45e !important;
+    /* Colores principales */
+    :root {
+        --dark-bg: #121212;
+        --dark-secondary: #1e1e1e;
+        --dark-accent: #272727;
+        --gold: #cda45e;
+        --gold-hover: #d4b06e;
+        --danger: #ff5555;
+        --text-light: #f8f9fa;
+        --text-muted: #adb5bd;
+        --border-color: #333;
     }
 
-    .btn-primary {
-        color: #fff;
-        background-color: #000;
-        border-color: #cda45e;
-        text-decoration: none; /* Evitar subrayado */
+    /* Elimina las flechas en los campos numéricos */
+
+    /* Para navegadores WebKit (Chrome, Safari, Edge) */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
 
-        .btn-primary:active,
-        .btn-primary:focus {
-            background-color: #cda45e; /* Color de fondo cuando se selecciona */
-            border-color: #fff; /* Color del borde cuando se selecciona */
-            outline: none; /* Eliminar el contorno por defecto de los navegadores al estar en foco */
-        }
+    /* Para Firefox */
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    body {
+        background-color: var(--dark-bg);
+        color: var(--text-light);
+    }
+
+    .card {
+        background-color: var(--dark-secondary);
+        border: none;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
 
     .card-body {
-        background-color: #040404 !important;
+        background-color: var(--dark-secondary) !important;
     }
 
-    .modal-body {
-        background-color: #040404 !important;
-    }
-    
-    /* Estilos para la tabla de carrito */
-    .table th {
-        font-weight: 600;
-        color: #495057;
+    .card-header {
+        border-bottom: none;
     }
 
-    .quantity-form {
-        white-space: nowrap;
+    .bg-dark-accent {
+        background-color: var(--dark-accent) !important;
+    }
+
+    .bg-dark-secondary {
+        background-color: var(--dark-secondary) !important;
+    }
+
+    .text-gold {
+        color: var(--gold) !important;
+    }
+
+    .border-gold {
+        border: 2px solid var(--gold) !important;
+    }
+
+    /* Botones */
+    .btn-gold {
+        color: var(--text-light);
+        background-color: var(--gold);
+        border-color: var(--gold);
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+        .btn-gold:hover, .btn-gold:focus {
+            background-color: var(--gold-hover);
+            border-color: var(--gold-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(205, 164, 94, 0.3);
+        }
+
+    .btn-dark-accent {
+        background-color: var(--dark-accent);
+        color: var(--text-light);
+        border-color: var(--border-color);
+    }
+
+        .btn-dark-accent:hover {
+            background-color: var(--dark-secondary);
+            color: var(--gold);
+        }
+
+    .btn-outline-danger {
+        color: var(--danger);
+        border-color: var(--danger);
+    }
+
+        .btn-outline-danger:hover {
+            background-color: var(--danger);
+            color: var(--text-light);
+        }
+
+    .btn-outline-light {
+        color: var(--text-light);
+        border-color: var(--text-light);
+    }
+
+        .btn-outline-light:hover {
+            background-color: var(--text-light);
+            color: var(--dark-bg);
+        }
+
+    .btn-hover-effect:hover {
+        transform: translateY(-2px);
+        transition: transform 0.3s ease;
+    }
+
+    /* Tabla */
+    .table-dark {
+        background-color: var(--dark-secondary);
+        color: var(--text-light);
+    }
+
+        .table-dark th {
+            background-color: var(--dark-accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table-dark td {
+            border-color: var(--border-color);
+        }
+
+    .product-row:hover {
+        background-color: rgba(205, 164, 94, 0.1) !important;
+    }
+
+    /* Formularios */
+    .form-control {
+        background-color: var(--dark-accent);
+        border-color: var(--border-color);
+        color: var(--text-light);
+    }
+
+        .form-control:focus {
+            background-color: var(--dark-accent);
+            border-color: var(--gold);
+            color: var(--text-light);
+            box-shadow: 0 0 0 0.25rem rgba(205, 164, 94, 0.25);
+        }
+
+        /* Validación de formularios */
+        .form-control.is-invalid {
+            border-color: var(--danger);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ff5555'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ff5555' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+    .invalid-feedback {
+        color: var(--danger);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Control de cantidad */
+    .quantity-control {
+        width: 120px;
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
     .quantity-input {
-        font-weight: 500;
+        background-color: var(--dark-accent);
+        color: var(--text-light);
+        border-color: var(--border-color);
+        font-weight: 600;
     }
 
     .quantity-btn {
-        padding: 0.375rem 0.5rem;
+        width: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .update-btn {
-        padding: 0.375rem 0.5rem;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        padding: 0;
     }
 
-    /* Estilos para las opciones de pago */
+    /* Opciones de pago */
     .payment-options {
         margin-bottom: 1.5rem;
     }
 
     .payment-content {
         display: none;
+        animation: fadeIn 0.3s ease;
     }
 
         .payment-content.active {
             display: block;
         }
 
-    .payment-option.active {
-        background-color: #cda45e;
-        color: white;
+    .btn-payment {
+        padding: 0.75rem 1rem;
+        background-color: var(--dark-accent);
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
     }
 
+        .btn-payment:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .btn-payment:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .btn-payment.active {
+            background-color: var(--gold);
+            color: var(--text-light);
+            border-color: var(--gold);
+        }
+
+    /* Número SINPE */
     .number-display {
-        padding: 0.75rem;
-        background-color: #000;
-        border-radius: 0.25rem;
-        border: 1px dashed #cda45e;
+        padding: 1rem;
+        background-color: var(--dark-accent);
+        border-radius: 8px;
+        border: 1px dashed var(--gold);
+        color: var(--gold);
     }
 
-    /* Estilos para carga de archivos */
-    .file-upload-wrapper {
-        position: relative;
+    /* Subida de archivos */
+    .file-upload-message {
+        background-color: var(--dark-accent);
+        border: 1px dashed var(--gold);
+        transition: all 0.3s ease;
+        border-radius: 8px;
     }
 
     .file-upload-input {
         cursor: pointer;
     }
 
-    .file-upload-message {
-        color: #6c757d;
-        transition: all 0.2s ease;
+        /* Campo file con mensaje de error */
+        .file-upload-input.is-invalid + .invalid-feedback {
+            display: block;
+        }
+
+    .file-upload-wrapper {
+        position: relative;
     }
 
-    .file-upload-input:focus + .file-upload-message {
-        border-color: #cda45e;
+    /* Añadir indicador de campo obligatorio */
+    .text-danger {
+        color: var(--danger) !important;
     }
-</style>
+
+    /* Alert personalizado */
+    .custom-alert {
+        background-color: rgba(25, 135, 84, 0.2);
+        color: #75b798;
+        border-color: rgba(25, 135, 84, 0.3);
+        border-radius: 8px;
+    }
+
+    /* Animaciones */
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+    }
+
+    .pulse-icon {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%
+
+    {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+    }
+
+    /* Efecto shake para validación */
+    @@keyframes shake {
+        0%, 100%
+
+    {
+        transform: translateX(0);
+    }
+
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+
+    }
+
+    .shake {
+        animation: shake 0.6s;
+    }
+
+    /* Estilos para carrito vacío */
+    .empty-cart {
+        padding: 4rem 2rem;
+    }
+
+    /* Resumen del pedido */
+    .summary-card {
+        background: linear-gradient(145deg, #212121, #1a1a1a);
+    }
+
+    hr.border-secondary {
+        border-color: var(--border-color);
+        opacity: 0.5;
+    }
+
+    /* Modal */
+    .modal-content {
+        background-color: var(--dark-secondary);
+        border-radius: 12px;
+    }
+
+    .modal-body {
+        background-color: var(--dark-secondary) !important;
+    }
+
+    /* Media queries para responsividad */
+    @@media (max-width: 768px) {
+        .quantity-form
+
+    {
+        justify-content: center;
+    }
+
+    }</style>
 
 <script>
     // Funciones para incrementar y decrementar cantidades
@@ -330,9 +606,10 @@
         }
     }
 
-    // Cambio de métodos de pago
+    // Script para validación de formularios y cambio de métodos de pago
     document.addEventListener('DOMContentLoaded', function() {
-        const paymentOptions = document.querySelectorAll('.payment-option');
+        // Cambio de métodos de pago
+        const paymentOptions = document.querySelectorAll('.btn-payment');
         const paymentContents = document.querySelectorAll('.payment-content');
 
         paymentOptions.forEach(option => {
@@ -357,15 +634,44 @@
         // Actualizar el mensaje del input file al seleccionar un archivo
         const fileInput = document.getElementById('recibo');
         const fileMessage = document.getElementById('fileMessage');
+        const sinpeForm = document.getElementById('sinpeForm');
 
         if(fileInput && fileMessage) {
             fileInput.addEventListener('change', function() {
+                // Eliminar clases de validación cuando cambia el archivo
+                fileInput.classList.remove('is-invalid');
+
                 if (fileInput.files.length > 0) {
                     const fileName = fileInput.files[0].name;
-                    fileMessage.innerHTML = `<i class="fas fa-file-image text-success fa-2x mb-2"></i><p class="mb-0">${fileName}</p>`;
+                    fileMessage.innerHTML = `<i class="fas fa-file-image text-success fa-2x mb-2"></i><p class="mb-0 text-light">${fileName}</p>`;
+                    fileMessage.style.borderColor = 'var(--gold)';
                 } else {
-                    fileMessage.innerHTML = `<i class="fas fa-cloud-upload-alt text-primary fa-2x mb-2"></i><p class="mb-0">Arrastre su comprobante aquí o haga click para seleccionar</p>`;
+                    fileMessage.innerHTML = `<i class="fas fa-cloud-upload-alt text-gold fa-2x mb-2"></i><p class="mb-0 text-light">Arrastre su comprobante aquí o haga click para seleccionar</p>`;
                 }
+            });
+        }
+
+        // Validación del formulario SINPE
+        if (sinpeForm) {
+            sinpeForm.addEventListener('submit', function(event) {
+                if (!sinpeForm.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    // Efecto visual para errores
+                    if (!fileInput.validity.valid) {
+                        fileInput.classList.add('is-invalid');
+                        fileMessage.style.borderColor = 'var(--danger)';
+                        fileMessage.classList.add('shake');
+
+                        // Remover la animación shake después de completarse
+                        setTimeout(() => {
+                            fileMessage.classList.remove('shake');
+                        }, 600);
+                    }
+                }
+
+                sinpeForm.classList.add('was-validated');
             });
         }
     });
