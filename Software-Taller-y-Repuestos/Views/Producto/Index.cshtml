@@ -102,6 +102,57 @@
                     </div>
                 }
             </div>
+
+            <!-- Paginación -->
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @((int)ViewData["PageNumber"] == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { searchString = ViewData["CurrentFilter"], sortOrder = ViewData["SortOrder"], page = 1 })" aria-label="Primera página">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item @((int)ViewData["PageNumber"] == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { searchString = ViewData["CurrentFilter"], sortOrder = ViewData["SortOrder"], page = (int)ViewData["PageNumber"] - 1 })" aria-label="Anterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    @{
+                        int startPage = Math.Max(1, (int)ViewData["PageNumber"] - 2);
+                        int endPage = Math.Min((int)ViewData["TotalPages"], startPage + 4);
+
+                        if (startPage > 1)
+                        {
+                            <li class="page-item"><span class="page-link">...</span></li>
+                        }
+
+                        for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == (int)ViewData["PageNumber"] ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { searchString = ViewData["CurrentFilter"], sortOrder = ViewData["SortOrder"], page = i })">@i</a>
+                            </li>
+                        }
+
+                        if (endPage < (int)ViewData["TotalPages"])
+                        {
+                            <li class="page-item"><span class="page-link">...</span></li>
+                        }
+                    }
+
+                    <li class="page-item @((int)ViewData["PageNumber"] == (int)ViewData["TotalPages"] ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { searchString = ViewData["CurrentFilter"], sortOrder = ViewData["SortOrder"], page = (int)ViewData["PageNumber"] + 1 })" aria-label="Siguiente">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item @((int)ViewData["PageNumber"] == (int)ViewData["TotalPages"] ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { searchString = ViewData["CurrentFilter"], sortOrder = ViewData["SortOrder"], page = (int)ViewData["TotalPages"] })" aria-label="Última página">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+
         </div>
     </div>
 </section>
@@ -375,45 +426,7 @@
             margin-bottom: 1rem;
         }
 
-    /* Paginación */
-    .pagination-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 2rem;
-    }
-
-    .pagination {
-        border-radius: 50px;
-        overflow: hidden;
-        box-shadow: var(--shadow);
-    }
-
-        .pagination .page-item:first-child .page-link {
-            border-top-left-radius: 50px;
-            border-bottom-left-radius: 50px;
-        }
-
-        .pagination .page-item:last-child .page-link {
-            border-top-right-radius: 50px;
-            border-bottom-right-radius: 50px;
-        }
-
-        .pagination .page-link {
-            color: var(--dark-color);
-            border: none;
-            padding: 0.75rem 1rem;
-            font-weight: 500;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-        }
-
-        .pagination .page-item:not(.active) .page-link:hover {
-            background-color: var(--light-color);
-        }
+    
 
     /* Responsividad */
     @@media (max-width: 768px) {
