@@ -125,6 +125,24 @@
         </div>
 
 
+        <!-- Toast de notificación tras cambio exitoso -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+            <div id="estadoActualizadoToast" class="toast bg-dark text-light" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-secondary text-light">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    <strong class="me-auto">Estado actualizado</strong>
+                    <small class="text-muted">Ahora</small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                </div>
+                <div class="toast-body">
+                    <div class="d-flex align-items-center">
+                        <div>El estado de la factura <span id="toastFacturaId" class="fw-bold"></span> ha sido cambiado a <span id="toastEstadoNuevo" class="fw-bold"></span> correctamente.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
 
     </div>
 </section>
@@ -142,6 +160,66 @@
         };
     }
 }
+
+
+<!-- Script para manejar la notificación post-cambio -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Función para mostrar la notificación después del cambio
+        function mostrarNotificacionCambio(facturaId, nuevoEstado) {
+            // Actualizar el contenido del toast
+            document.getElementById('toastFacturaId').textContent = facturaId;
+
+            const estadoElement = document.getElementById('toastEstadoNuevo');
+            estadoElement.textContent = nuevoEstado;
+
+            // Aplicar estilo según el estado
+            estadoElement.className = 'fw-bold';
+            if (nuevoEstado === 'Aprobado') {
+                estadoElement.classList.add('text-success');
+            } else if (nuevoEstado === 'En revisión') {
+                estadoElement.classList.add('text-warning');
+            } else if (nuevoEstado === 'Rechazado') {
+                estadoElement.classList.add('text-danger');
+            }
+
+            // Mostrar el toast
+            const toastElement = document.getElementById('estadoActualizadoToast');
+            const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 6000 });
+            toast.show();
+        }
+
+        // Interceptar el envío del formulario para mostrar notificación después
+        const statusForms = document.querySelectorAll('.status-form');
+
+        statusForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                // No prevenir el envío aquí para permitir que se procese normalmente
+
+                const facturaId = form.querySelector('input[name="id"]').value;
+                const selectElement = form.querySelector('.status-select');
+                const nuevoEstado = selectElement.options[selectElement.selectedIndex].text;
+
+                // Almacenar temporalmente los datos del formulario en sessionStorage
+                sessionStorage.setItem('ultimaFacturaId', facturaId);
+                sessionStorage.setItem('ultimoEstado', nuevoEstado);
+            });
+        });
+
+        // Verificar si hay datos almacenados de un envío reciente (al cargar la página después del post)
+        if (sessionStorage.getItem('ultimaFacturaId') && sessionStorage.getItem('ultimoEstado')) {
+            const facturaId = sessionStorage.getItem('ultimaFacturaId');
+            const nuevoEstado = sessionStorage.getItem('ultimoEstado');
+
+            // Mostrar la notificación
+            mostrarNotificacionCambio(facturaId, nuevoEstado);
+
+            // Limpiar los datos almacenados
+            sessionStorage.removeItem('ultimaFacturaId');
+            sessionStorage.removeItem('ultimoEstado');
+        }
+    });
+</script>
 
 
 <style>
