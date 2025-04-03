@@ -36,7 +36,7 @@ public class AdminFacturaController : Controller
     [HttpPost]
     public async Task<IActionResult> CambiarEstado(int id, string nuevoEstado)
     {
-        if (string.IsNullOrEmpty(nuevoEstado) || (nuevoEstado != "En revisión" && nuevoEstado != "Aprobado"))
+        if (string.IsNullOrEmpty(nuevoEstado) || (nuevoEstado != "En revisión" && nuevoEstado != "Aprobado" && nuevoEstado != "Rechazado"))
         {
             TempData["Error"] = "Estado inválido.";
             return RedirectToAction("Index");

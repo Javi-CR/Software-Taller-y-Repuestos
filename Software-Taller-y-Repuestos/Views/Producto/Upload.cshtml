@@ -329,24 +329,42 @@
                         <i class="fas fa-info-circle"></i> Formatos permitidos: CSV o Excel (.xlsx)
                     </div>
                 </div>
-                <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary btn-upload">
-                        <i class="fas fa-upload"></i> Subir Archivo
-                    </button>
+                <div class="container mt-4">
+                    <div class="row row-cols-1 row-cols-md-4 g-3">
+                        <!-- Cargar -->
+                        <div class="col">
+                            <button type="submit" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-upload me-2"></i>
+                                Cargar
+                            </button>
+                        </div>
 
-                    <button type="button" id="showInstructions" class="btn-instructions">
-                        <i class="fas fa-question-circle"></i> Instrucciones
-                    </button>
+                        <!-- Guía -->
+                        <div class="col">
+                            <button type="button" id="showInstructions" class="btn btn-info w-100 py-2 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-question-circle me-2"></i>
+                                Guía
+                            </button>
+                        </div>
 
-                    <a asp-action="Create" class="btn btn-secondary btn-upload">
-                        <i class="fas fa-times"></i> Cancelar
+                        <!-- Cancelar -->
+                        <div class="col">
+                            <a asp-action="Create" class="btn btn-outline-danger w-100 py-2 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-times-circle me-2"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                    <a href="@Url.Action("DescargarPlantilla", "Producto")" class="btn btn-success">
+                        <i class="fas fa-download"></i> Plantilla
                     </a>
                 </div>
             </form>
             @if (ViewBag.ErrorMessage != null)
             {
                 <div class="alert alert-danger mt-4 error-container">
-                    <div class="alert alert-secondary text-center">@ViewBag.ErrorMessage</div>
+                    <div class="alert alert-secondary text-center">
+                        @Html.Raw(ViewBag.ErrorMessage) <!-- Muestra múltiples errores en líneas separadas -->
+                    </div>
                 </div>
             }
         </div>

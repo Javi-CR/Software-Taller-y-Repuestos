@@ -10,6 +10,7 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Software_Taller_y_Repuestos.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Data.SqlClient;
 
 namespace Software_Taller_y_Repuestos.Controllers
 {
@@ -57,8 +58,8 @@ namespace Software_Taller_y_Repuestos.Controllers
             };
 
             // Configurar la paginación
-            int pageSize = 15; // Número de elementos por página
-            int pageNumber = (page ?? 1); // Número de página actual (si no se especifica, es 1)
+            int pageSize = 12; // Mismo número de elementos que en Inventario
+            int pageNumber = page ?? 1; // Página actual
 
             // Obtener los productos para la página actual
             var productosPaginados = await productos
@@ -76,6 +77,7 @@ namespace Software_Taller_y_Repuestos.Controllers
 
             return View(productosPaginados);
         }
+
 
         // GET: Producto/Details/5
         [Authorize(Roles = "Admin,Empleado,Cliente")]
@@ -115,30 +117,51 @@ namespace Software_Taller_y_Repuestos.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Subir imagen si se proporciona
-                if (imagen != null && imagen.Length > 0)
+                try
                 {
-                    var fileName = Path.GetFileNameWithoutExtension(imagen.FileName);
-                    var extension = Path.GetExtension(imagen.FileName);
-                    var newFileName = $"{fileName}_{Guid.NewGuid()}{extension}";
-                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", newFileName);
-
-                    using (var stream = new FileStream(path, FileMode.Create))
+                    // Si se proporciona una imagen, la subimos
+                    if (imagen != null && imagen.Length > 0)
                     {
-                        await imagen.CopyToAsync(stream);
+                        var fileName = Path.GetFileNameWithoutExtension(imagen.FileName);
+                        var extension = Path.GetExtension(imagen.FileName);
+                        var newFileName = $"{fileName}_{Guid.NewGuid()}{extension}";
+                        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", newFileName);
+
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            await imagen.CopyToAsync(stream);
+                        }
+
+                        producto.Imagen = $"/images/{newFileName}";
+                    }
+                    else
+                    {
+                        // Si no se sube imagen, asignar una por defecto
+                        producto.Imagen = "wwwroot/images/Prueba.jpeg"; 
                     }
 
-                    producto.Imagen = $"/images/{newFileName}";
+                    producto.Activo = true; // el producto está activo
+                    _context.Add(producto);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-
-                producto.Activo = true; // el producto está activo
-                _context.Add(producto);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                catch (DbUpdateException ex)
+                {
+                    if (ex.InnerException is SqlException sqlEx && sqlEx.Number == 2601) // Código 2601 = Clave duplicada
+                    {
+                        ModelState.AddModelError("Codigo", "Ya existe un producto con este código.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Ocurrió un error al guardar los cambios. Inténtalo de nuevo.");
+                    }
+                }
             }
+
             ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", producto.CategoriaId);
             return View(producto);
         }
+
 
         // GET: Producto/Edit/5
         [Authorize(Roles = "Admin")]
@@ -221,6 +244,41 @@ namespace Software_Taller_y_Repuestos.Controllers
             return View(producto);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AgregarCategoria([FromBody] Categoria nuevaCategoria)
+        {
+            try
+            {
+                if (nuevaCategoria == null || string.IsNullOrWhiteSpace(nuevaCategoria.Nombre))
+                {
+                    return BadRequest(new { success = false, error = "El nombre de la categoría es obligatorio." });
+                }
+
+                string nombreNormalizado = nuevaCategoria.Nombre.Trim().ToLower();
+
+                // Verificar si ya existe la categoría
+                bool existeCategoria = await _context.Categorias
+                    .AnyAsync(c => c.Nombre.ToLower() == nombreNormalizado);
+
+                if (existeCategoria)
+                {
+                    return BadRequest(new { success = false, error = "La categoría ya existe." });
+                }
+
+                var categoria = new Categoria { Nombre = nuevaCategoria.Nombre.Trim() };
+                _context.Categorias.Add(categoria);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, id = categoria.CategoriaId, nombre = categoria.Nombre });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, error = "Ocurrió un error en el servidor." });
+            }
+        }
+
+
+
         // Desactivar producto (en lugar de eliminar)
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -257,18 +315,16 @@ namespace Software_Taller_y_Repuestos.Controllers
             {
                 ViewBag.ErrorMessage = "Por favor, seleccione un archivo.";
                 return View();
-               
             }
 
             if (!file.FileName.EndsWith(".csv") && !file.FileName.EndsWith(".xlsx"))
             {
-         
                 ViewBag.ErrorMessage = "Formato no válido. Solo archivos CSV o Excel.";
                 return View();
-
             }
 
             var productos = await ProcesarArchivo(file);
+            var errores = new List<string>();
 
             if (productos.Count > 0)
             {
@@ -285,10 +341,21 @@ namespace Software_Taller_y_Repuestos.Controllers
 
                     producto.CategoriaId = categoria.CategoriaId;
 
-                    if (!_context.Productos.Any(p => p.Codigo == producto.Codigo))
+                    // Verificar si el código ya existe en la base de datos
+                    var productoExistente = await _context.Productos.FirstOrDefaultAsync(p => p.Codigo == producto.Codigo);
+                    if (productoExistente != null)
                     {
-                        _context.Productos.Add(producto);
+                        errores.Add($"El código '{producto.Codigo}' ya está en uso por el producto '{productoExistente.Nombre}'.");
+                        continue; // No agregamos este producto si el código ya existe
                     }
+
+                    _context.Productos.Add(producto);
+                }
+
+                if (errores.Any())
+                {
+                    ViewBag.ErrorMessage = string.Join("<br>", errores);
+                    return View();
                 }
 
                 await _context.SaveChangesAsync();
@@ -335,6 +402,31 @@ namespace Software_Taller_y_Repuestos.Controllers
 
             return productos;
         }
+
+        public IActionResult DescargarPlantilla()
+        {
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            var filePath = Path.Combine(uploadsPath, "plantilla-vacia.xlsx");
+
+            // Verificar que el archivo existe antes de intentar leerlo
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound("El archivo de la plantilla no fue encontrado en el servidor.");
+            }
+
+            try
+            {
+                var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                var fileName = "Plantilla_Productos.xlsx";
+
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ocurrió un error al procesar la descarga: {ex.Message}");
+            }
+        }
+
 
         private bool ProductoExists(int id)
         {

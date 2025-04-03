@@ -19,10 +19,14 @@ public partial class Usuario
 
     public string Contrasenna { get; set; } = string.Empty;
 
+
     public string? Telefono { get; set; }
+
     public string? Direccion { get; set; }
     public int RolId { get; set; }
     public DateTime? FechaIngreso { get; set; }
+
+
     public decimal? SalarioBase { get; set; }
     public string? Imagen { get; set; }
 

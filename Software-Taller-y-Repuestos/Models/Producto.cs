@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Software_Taller_y_Repuestos.Models;
 
@@ -13,7 +14,10 @@ public partial class Producto
     public int CategoriaId { get; set; }
     public string? Descripcion { get; set; }
     public int Cantidad { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
     public decimal PrecioCompra { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
     public decimal PrecioVenta { get; set; }
     public string? Marca { get; set; }
     public string? Imagen { get; set; }
