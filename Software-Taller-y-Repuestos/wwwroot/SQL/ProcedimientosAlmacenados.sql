@@ -170,20 +170,26 @@ GO
 CREATE PROCEDURE [dbo].[ObtenerTodasLasFacturas]
 AS
 BEGIN
-    SET NOCOUNT ON;
-
     SELECT 
+        df.DetalleFacturaId,
         f.FacturaId,
-        f.FechaCompra,
-        f.IVA,
-        f.Subtotal,  
-        f.Total,    
+        df.ProductoId,
         df.Cantidad,
+        df.PrecioUnitario,
         df.EstadoPago,
+        df.ImagenFactura,
+        f.FechaCompra,
+        f.Total,
+        u.Correo AS CorreoUsuario,
         p.Nombre AS NombreProducto
-    FROM dbo.Facturas f
-    INNER JOIN dbo.DetalleFacturas df ON f.FacturaId = df.FacturaId
-    INNER JOIN dbo.Productos p ON df.ProductoId = p.ProductoId;
+    FROM 
+        DetalleFacturas df
+    INNER JOIN 
+        Facturas f ON df.FacturaId = f.FacturaId
+    INNER JOIN 
+        Usuarios u ON f.UsuarioId = u.UsuarioId
+    LEFT JOIN 
+        Productos p ON df.ProductoId = p.ProductoId
 END
 GO
 

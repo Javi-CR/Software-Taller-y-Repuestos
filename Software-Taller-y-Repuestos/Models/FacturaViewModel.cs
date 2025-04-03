@@ -8,6 +8,8 @@
         public string EstadoPago { get; set; }
         public DateTime FechaCompra { get; set; }
         public decimal Total { get; set; }
+        public string CorreoUsuario { get; set; }
+        public string ImagenFactura { get; set; } // Agregado el campo de imagen
     }
 
 

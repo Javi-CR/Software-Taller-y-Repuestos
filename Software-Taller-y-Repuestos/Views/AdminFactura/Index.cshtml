@@ -1,22 +1,42 @@
 ﻿@model IEnumerable<FacturaViewModel>
 
-<div class="container mt-5 pt-5">
-    <div class="row gutters-sm">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body" style="background-color: black;">
-                    <h5 class="text-center text-light">Todas las Facturas</h5>
+
+
+<section id="profile-section" class="py-5">
+    <div class="container">
+
+
+
+        <div class="facturas-container">
+            <div class="facturas-header">
+                <h3>Gestión de Facturas</h3>
+                <p class="subtitle">Panel de administración de Facturas</p>
+            </div>
+
+            <div class="card facturas-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Todas las Facturas</h5>
+
+                </div>
+                <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped table-dark">
+                        <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Producto</th>
-                                    <th>Cantidad</th>
-                                    <th>Estado de Pago</th>
-                                    <th>Fecha de Compra</th>
-                                    <th>Total</th>
-                                    <th>Acciones</th>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Producto</th>
+                                    <th scope="col">Cantidad</th>
+                                    <th scope="col">
+                                        <div class="d-flex align-items-center">
+                                            <span>Estado</span>
+                                            <i class="bi bi-filter ms-1"></i>
+                                        </div>
+                                    </th>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col">Usuario</th>
+                                    <th scope="col">Comprobante</th>
+                                    <th scope="col">Total</th>
+                                    <th scope="col">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -27,19 +47,51 @@
                                     {
                                         <tr>
                                             <td>@index</td>
-                                            <td>@factura.NombreProducto</td>
+                                            <td class="product-cell">@factura.NombreProducto</td>
                                             <td>@factura.Cantidad</td>
-                                            <td>@factura.EstadoPago</td>
-                                            <td>@factura.FechaCompra.ToString("dd/MM/yyyy")</td>
-                                            <td>@factura.Total.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
                                             <td>
-                                                <form method="post" asp-action="CambiarEstado" asp-controller="AdminFactura">
+                                                <span class="estado-badge @GetEstadoClass(factura.EstadoPago)">
+                                                    @factura.EstadoPago
+                                                </span>
+                                            </td>
+                                            <td>@factura.FechaCompra.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <div class="user-info">
+                                                    <i class="bi bi-person-circle me-1"></i>
+                                                    <span class="email-text">@factura.CorreoUsuario</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(factura.ImagenFactura))
+                                                {
+                                                    <a href="@factura.ImagenFactura" target="_blank" class="img-preview-link">
+                                                        <img src="@factura.ImagenFactura" alt="Comprobante" class="img-thumbnail factura-thumbnail" />
+                                                        <div class="img-preview-hover">
+                                                            <i class="bi bi-zoom-in"></i>
+                                                        </div>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="no-image-badge">
+                                                        <i class="bi bi-file-earmark-x me-1"></i>Sin imagen
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="precio-cell">@factura.Total.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-CR"))</td>
+                                            <td>
+                                                <form method="post" asp-action="CambiarEstado" asp-controller="AdminFactura" class="status-form">
                                                     <input type="hidden" name="id" value="@factura.FacturaId" />
-                                                    <select name="nuevoEstado" class="form-control form-control-sm">
-                                                        <option value="En revisión">En revisión</option>
-                                                        <option value="Aprobado">Aprobado</option>
-                                                    </select>
-                                                    <button type="submit" class="btn btn-sm btn-primary mt-2">Actualizar</button>
+                                                    <div class="input-group">
+                                                        <select name="nuevoEstado" class="form-select status-select">
+                                                            <option value="En revisión">En revisión</option>
+                                                            <option value="Aprobado">Aprobado</option>
+                                                            <option value="Rechazado">Rechazado</option>
+                                                        </select>
+                                                        <button type="submit" class="btn btn-update">
+                                                            <i class="bi bi-check-circle"></i>
+                                                        </button>
+                                                    </div>
                                                 </form>
                                             </td>
                                         </tr>
@@ -49,14 +101,422 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="7" class="text-center">No se encontraron facturas.</td>
+                                        <td colspan="9" class="text-center empty-table">
+                                            <div class="empty-state">
+                                                <i class="bi bi-file-earmark-x"></i>
+                                                <p>No se encontraron facturas.</p>
+                                            </div>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
                 </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="pagination-info">
+                            Mostrando <span class="fw-bold">@Model.Count()</span> facturas
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
+
+
+
     </div>
-</div>
+</section>
+
+
+@functions {
+    public string GetEstadoClass(string estado)
+    {
+        return estado.ToLower() switch
+        {
+            "aprobado" => "estado-aprobado",
+            "en revisión" => "estado-revision",
+            "rechazado" => "estado-rechazado",
+            _ => "estado-default"
+        };
+    }
+}
+
+
+<style>
+
+    :root {
+        --dark-bg: #121212;
+        --card-bg: #1e1e1e;
+        --card-header: #252525;
+        --card-border: #333;
+        --text-primary: #f5f5f5;
+        --text-secondary: #aaaaaa;
+        --accent-color: #5e72e4;
+        --accent-hover: #4a5cd0;
+        --success-color: #2dce89;
+        --warning-color: #fb6340;
+        --danger-color: #f5365c;
+        --info-color: #11cdef;
+    }
+
+    .container {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+
+    body {
+        background-color: var(--dark-bg);
+        color: var(--text-primary);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Contenedor principal */
+    .facturas-container {
+        padding: 2rem 1rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .facturas-header {
+        margin-bottom: 1.5rem;
+        padding: 0 0.5rem;
+    }
+
+        .facturas-header h3 {
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+    .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Estilos de la tarjeta */
+    .facturas-card {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .card-header {
+        background-color: var(--card-header);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+        .card-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin: 0;
+        }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .card-footer {
+        background-color: var(--card-header);
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--card-border);
+    }
+
+    /* Buscador */
+    .search-box {
+        position: relative;
+        max-width: 300px;
+    }
+
+        .search-box input {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            border-radius: 6px;
+            padding-right: 2.5rem;
+            font-size: 0.875rem;
+            height: 38px;
+        }
+
+            .search-box input:focus {
+                background-color: rgba(255, 255, 255, 0.1);
+                box-shadow: 0 0 0 0.25rem rgba(94, 114, 228, 0.25);
+                border-color: var(--accent-color);
+            }
+
+        .search-box i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+    /* Estilos para la tabla */
+    .table {
+        color: var(--text-primary);
+        margin-bottom: 0;
+    }
+
+        .table thead th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--card-border);
+            vertical-align: middle;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+            .table tbody tr:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: var(--card-border);
+            font-size: 0.875rem;
+        }
+
+    /* Producto */
+    .product-cell {
+        font-weight: 500;
+    }
+
+    /* Estado */
+    .estado-badge {
+        display: inline-block;
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .estado-aprobado {
+        background-color: rgba(45, 206, 137, 0.15);
+        color: var(--success-color);
+    }
+
+    .estado-revision {
+        background-color: rgba(251, 99, 64, 0.15);
+        color: var(--warning-color);
+    }
+
+    .estado-rechazado {
+        background-color: rgba(245, 54, 92, 0.15);
+        color: var(--danger-color);
+    }
+
+    .estado-default {
+        background-color: rgba(17, 205, 239, 0.15);
+        color: var(--info-color);
+    }
+
+    /* Información de usuario */
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+
+        .user-info i {
+            color: var(--text-secondary);
+        }
+
+    .email-text {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    /* Imágenes de factura */
+    .img-preview-link {
+        position: relative;
+        display: inline-block;
+    }
+
+    .factura-thumbnail {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid var(--card-border);
+        background-color: rgba(255, 255, 255, 0.05);
+        transition: all 0.2s;
+    }
+
+    .img-preview-hover {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+        border-radius: 6px;
+    }
+
+        .img-preview-hover i {
+            color: white;
+            font-size: 1.25rem;
+        }
+
+    .img-preview-link:hover .img-preview-hover {
+        opacity: 1;
+    }
+
+    .img-preview-link:hover .factura-thumbnail {
+        transform: scale(1.05);
+    }
+
+    .no-image-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        color: var(--text-secondary);
+    }
+
+    /* Precio */
+    .precio-cell {
+        font-weight: 600;
+        color: var(--success-color);
+    }
+
+    /* Formulario de estado */
+    .status-form {
+        width: 100%;
+    }
+
+    .status-select {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--card-border);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        height: 36px;
+    }
+
+        .status-select:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            border-color: var(--accent-color);
+        }
+
+    .btn-update {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 0.375rem 0.75rem;
+        transition: background-color 0.2s;
+    }
+
+        .btn-update:hover {
+            background-color: var(--accent-hover);
+            color: white;
+        }
+
+    /* Estado vacío */
+    .empty-state {
+        padding: 2rem;
+        text-align: center;
+    }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            color: var(--card-border);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+    /* Paginación */
+    .pagination-info {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .page-link {
+        background-color: transparent;
+        border-color: var(--card-border);
+        color: var(--text-secondary);
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        background-color: transparent;
+        color: #6c757d;
+    }
+
+    .page-link:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        border-color: var(--card-border);
+    }
+
+    /* Media queries */
+    @@media (max-width: 992px) {
+        .table thead th, .table td
+
+    {
+        padding: 0.75rem;
+    }
+
+    .email-text {
+        max-width: 120px;
+    }
+
+    }
+
+    @@media (max-width: 768px) {
+        .search-box
+
+    {
+        width: 100%;
+        max-width: none;
+        margin-top: 1rem;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .factura-thumbnail {
+        width: 50px;
+        height: 50px;
+    }
+
+    }
+</style>
