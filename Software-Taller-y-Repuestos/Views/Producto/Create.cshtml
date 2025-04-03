@@ -29,22 +29,35 @@
                             <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>
 
+                        <!-- Validación de errores -->
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <p>@error.ErrorMessage</p>
+                                }
+                            </div>
+                        }
+
                         <!-- Código -->
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control border-0 border-bottom rounded-0 bg-dark text-white" asp-for="Codigo" placeholder="Código del producto" id="Codigo" />
                             <label asp-for="Codigo" class="text-white">Código</label>
                             <span id="codigo-error" class="text-danger"></span>
                             <span asp-validation-for="Codigo" class="text-danger"></span>
-                        </div>
+                        </div>               
 
                         <!-- Categoría -->
-                        <div class="form-floating mb-3">
-                            <select class="form-select border-0 border-bottom rounded-0 bg-dark text-white" asp-for="CategoriaId" asp-items="ViewBag.CategoriaId">
-                                <option selected>Seleccione una categoría</option>
+                        <div class="form-floating mb-3 d-flex">
+                            <select id="categoriaSelect" class="form-select border-0 border-bottom rounded-0 bg-dark text-white me-2"
+                                    asp-for="CategoriaId" asp-items="ViewBag.CategoriaId">
+                                <option selected disabled>Seleccione una categoría</option>
                             </select>
-                            <label asp-for="CategoriaId" class="text-white">Categoría</label>
-                            <span asp-validation-for="CategoriaId" class="text-danger"></span>
-                        </div>
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevaCategoria">
+                                +
+                            </button>
+                        </div>                        
 
                         <!-- Descripción -->
                         <div class="form-floating mb-3">
@@ -118,7 +131,26 @@
         </div>
     </div>
 </section>
-
+<!-- Modal (Movido fuera de .container) -->
+<div class="modal fade" id="modalNuevaCategoria" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Nueva Categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="nuevaCategoriaNombre" class="form-control bg-light text-dark"
+                       placeholder="Nombre de la categoría" autocomplete="off">
+                <span id="errorCategoria" class="text-danger"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="agregarCategoria()">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -148,6 +180,61 @@
                 previewContainer.appendChild(img);
             }
         });
+    </script>
+    <script>
+                    function agregarCategoria() {
+            var nombreCategoria = document.getElementById("nuevaCategoriaNombre").value.trim();
+            var errorCategoria = document.getElementById("errorCategoria");
+
+            if (nombreCategoria === "") {
+                errorCategoria.textContent = "El nombre de la categoría es obligatorio.";
+                return;
+            }
+
+            fetch('/Producto/AgregarCategoria', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre: nombreCategoria })
+            })
+            .then(response => response.json().then(data => ({ status: response.status, body: data })))
+            .then(({ status, body }) => {
+                if (status === 200 && body.success) {
+                    // Agregar la nueva categoría al select
+                    let select = document.getElementById("categoriaSelect");
+                    let nuevaOpcion = new Option(body.nombre, body.id, true, true);
+                    select.appendChild(nuevaOpcion);
+                    select.value = body.id; // Seleccionar automáticamente la nueva opción
+
+                    // Limpiar el campo de entrada y errores
+                    document.getElementById("nuevaCategoriaNombre").value = "";
+                    errorCategoria.textContent = "";
+
+                    // Cerrar el modal correctamente
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevaCategoria'));
+                    modal.hide();
+
+                    // Regresar al formulario
+                    document.getElementById("profile-section").scrollIntoView({ behavior: "smooth" });
+
+                    // Refrescar la página después de 1 segundo (opcional, si quieres asegurarte)
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    // Mostrar el mensaje de error devuelto por el backend
+                    errorCategoria.textContent = body.error || "Ocurrió un error.";
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                errorCategoria.textContent = "Ocurrió un error en la conexión.";
+                // Si hay un error grave, recargar la página como último recurso
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            });
+        }
+
     </script>
 }
 

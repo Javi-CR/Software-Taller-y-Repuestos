@@ -27,7 +27,7 @@ namespace Software_Taller_y_Repuestos.Controllers
                 .AsQueryable();
 
             // Configurar la paginación
-            int pageSize = 9; // Número de elementos por página
+            int pageSize = 12; // Número de elementos por página
             int pageNumber = (page ?? 1); // Número de página actual (si no se especifica, es 1)
 
             // Obtener los productos para la página actual
